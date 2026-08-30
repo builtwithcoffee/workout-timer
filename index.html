@@ -1,0 +1,2466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Workout Timer</title>
+<meta name="theme-color" content="#131414" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Workout Timer" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<style>
+  :root{
+    --bg:#131414; --card:#1b1d1c; --card2:#232525; --line:#2b2e2d;
+    --text:#f4f4f2; --muted:#8f948f;
+    --accent:#f04e23; --accent-text:#ffffff;
+    --mode-work:#f04e23; --mode-rest:#1668c4;
+    --phase:#131414; --phase-text:#ffffff;
+    --r:16px;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  body{overscroll-behavior:none}
+  button,input{font:inherit;color:inherit}
+  button{cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent}
+  a{color:var(--accent)} a:hover{filter:brightness(1.15)}
+  .hidden{display:none!important}
+  .mono{font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums;letter-spacing:-.04em;font-weight:800}
+
+  /* ---------- home ---------- */
+  .home{min-height:100vh;min-height:-webkit-fill-available;display:flex;flex-direction:column;gap:18px;
+    padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+    max-width:1180px;margin:0 auto;width:100%}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .modes{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:14px}
+  .modes button{min-height:46px;padding:0 18px;border-radius:10px;font-size:15px;font-weight:600;color:var(--muted)}
+  .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-text)}
+  .util{display:flex;gap:8px}
+  .util button{min-height:46px;padding:0 14px;border-radius:12px;background:var(--card);color:var(--muted);font-size:14px;font-weight:600}
+  .util button:hover{background:var(--card2)}
+  .util .iconbtn{width:46px;padding:0;display:grid;place-items:center;color:var(--text)}
+  .util .iconbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .footbtn{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 14px;border-radius:11px;background:var(--card);color:var(--muted);font-size:14px;font-weight:600;flex:none}
+  .footbtn:hover{background:var(--card2);color:var(--text)}
+  .footbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .footbtn[aria-pressed="false"]{color:var(--muted);opacity:.7}
+  .footleft{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+  .panel{display:flex;flex-direction:column;gap:16px;flex:1;min-height:0}
+  .panelhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .title{font-size:clamp(30px,4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1}
+  input.title{background:transparent;border:none;outline:none;width:min(520px,100%);padding:0}
+  .layout{display:grid;grid-template-columns:1fr 296px;gap:18px;align-items:start}
+  .card{background:var(--card);border-radius:var(--r);padding:18px}
+  .card + .card{margin-top:12px}
+  .cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .prepbar{display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .prepbar .chips{justify-content:flex-end;flex:0 0 auto}
+  .colour-details{padding:0}
+  .colour-details summary{display:flex;align-items:center;gap:10px;padding:18px;cursor:pointer;list-style:none}
+  .colour-details summary::-webkit-details-marker{display:none}
+  .colour-details summary::after{content:'▾';margin-left:auto;font-size:18px;line-height:1;color:var(--muted)}
+  .colour-details[open] summary::after{content:'▴'}
+  .colour-details .colour-body{padding:0 18px 18px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:10px}
+  .tile{border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:148px;color:#fff}
+  .tile-top{display:flex;align-items:center;gap:7px}
+  .tile-top .mono{flex:none;color:currentColor;opacity:.75}
+  .tile-top .icon{width:30px;height:30px;font-size:16px}
+  .tile-top .grp{display:flex;align-items:center;gap:4px;margin-left:auto;flex:none}
+  .move{width:30px;height:30px;padding:0;border-radius:8px;background:rgba(0,0,0,.2);font-size:14px;line-height:1;display:grid;place-items:center;flex:none;opacity:.8;color:inherit}
+  .move:hover{background:rgba(0,0,0,.38);opacity:1}
+  .move[disabled]{opacity:.22;cursor:default;background:rgba(0,0,0,.1)}
+  .tile input{background:transparent;border:none;outline:none;font-size:26px;font-weight:800;letter-spacing:-.02em;width:100%;padding:0;color:inherit}
+  .tile-bottom{display:flex;align-items:center;gap:8px;margin-top:auto;flex-wrap:wrap}
+  .icon{width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.24);display:grid;place-items:center;font-size:18px;color:inherit}
+  .icon:hover{background:rgba(0,0,0,.4)}
+  .tile .val{font-family:var(--mono);font-size:18px;flex:1;min-width:0;text-align:center}
+  .flip{width:32px;height:32px;padding:0;border-radius:9px;background:rgba(0,0,0,.24);flex:none;display:grid;place-items:center}
+  .completion{height:32px;padding:0 10px;border-radius:9px;background:rgba(0,0,0,.24);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;flex:none;white-space:nowrap;color:inherit}
+  .tile-top .mode-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .flip:hover,.completion:hover{background:rgba(0,0,0,.4)}
+  .tile-top .remove{width:30px;height:30px;font-size:18px;background:rgba(98,10,28,.62);color:#ffe2e7;opacity:.92;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);margin-left:4px}
+  .tile-top .remove:hover{background:rgba(126,12,36,.92);color:#fff;opacity:1}
+  .tile .manual-controls{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+  .tile .target-wrap{display:flex;flex-direction:column;align-items:stretch;gap:5px}
+  .tile .target-wrap .mono{color:currentColor;opacity:.75}
+  .tile input.target{font-size:18px;background:rgba(0,0,0,.2);border-radius:10px;padding:9px 10px}
+  .sets-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .sets-row .mono{color:currentColor;opacity:.75}
+  .sets-stepper{display:flex;align-items:center;gap:7px}
+  .sets-stepper button{width:34px;height:34px;border-radius:9px;background:rgba(0,0,0,.24);font-size:18px;font-weight:700}
+  .sets-stepper button:hover{background:rgba(0,0,0,.4)}
+  .sets-value{min-width:2.2em;text-align:center;font-family:var(--mono);font-size:17px;font-weight:800}
+  .exercise-tile{min-height:246px}
+  .exercise-fields{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+  .tracking-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.18)}
+  .tracking-choice .mono{color:currentColor;opacity:.78}
+  .tracking-choice select{min-width:118px;border:0;border-radius:8px;background:rgba(0,0,0,.24);color:currentColor;padding:8px 9px;font:inherit;font-size:13px;font-weight:750;outline:none}
+  .linked-rest{margin-top:auto;border-radius:12px;padding:11px 12px;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:8px 10px}
+  .linked-rest .mode-icon{width:34px;height:34px;border-radius:9px;background:rgba(0,0,0,.24);display:grid;place-items:center;flex:none}
+  .linked-rest .mode-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .linked-rest-copy{display:flex;align-items:center;min-width:0;flex:1}
+  .linked-rest-copy .mono{color:currentColor;opacity:.78}
+  .linked-rest .sets-stepper{grid-column:1/-1;justify-content:flex-end}
+  .add-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .add-row .add{min-height:92px}
+  .add{min-height:148px;border-radius:var(--r);border:2px dashed var(--line);color:var(--muted);font-size:17px;font-weight:700}
+  .add:hover{border-color:var(--accent);color:var(--accent)}
+
+  .structured-list{display:flex;flex-direction:column;gap:14px}
+  .block-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .block-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px;border-bottom:1px solid var(--line)}
+  .block-number{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+  .block-title{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .block-mode{flex:none;padding:8px 10px;border-radius:999px;background:var(--card2);font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+  .block-steps{display:flex;flex-direction:column}
+  .block-step{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:start}
+  .block-step:last-child{border-bottom:none}
+  .block-step-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff}
+  .block-step-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .block-step-name{font-size:17px;font-weight:750;line-height:1.25}
+  .block-step-detail{margin-top:4px;color:var(--muted);font-size:14px;line-height:1.4}
+  .block-step-note{margin-top:6px;color:var(--text);opacity:.78;font-size:13px;line-height:1.45}
+  .block-notes{border-top:1px solid var(--line)}
+  .block-notes summary{padding:13px 18px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;list-style:none}
+  .block-notes summary::-webkit-details-marker{display:none}
+  .block-notes summary::after{content:' ▾'}
+  .block-notes[open] summary::after{content:' ▴'}
+  .block-notes ul{margin:0;padding:0 36px 16px 42px;color:var(--muted);font-size:14px;line-height:1.55}
+  .structured-help{padding:14px 16px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:13px;line-height:1.5}
+  .structured-editor{display:flex;flex-direction:column;gap:14px}
+  .edit-block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
+  .edit-block-head,.edit-item-head,.edit-toolbar{display:flex;align-items:center;gap:8px}
+  .edit-block-head .block-number,.edit-item-head .mono{margin:0;flex:1}
+  .edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .edit-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .edit-field.wide{grid-column:1/-1}
+  .edit-field>span{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+  .edit-field input,.edit-field select,.edit-field textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--text);padding:11px 12px;font:inherit;outline:none}
+  .edit-field textarea{min-height:74px;resize:vertical;line-height:1.45}
+  .edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{border-color:var(--accent)}
+  .edit-items{display:flex;flex-direction:column;gap:10px}
+  .edit-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:rgba(255,255,255,.018);display:flex;flex-direction:column;gap:11px}
+  .edit-item.rest-item{border-left:4px solid var(--mode-rest)}
+  .edit-item.exercise-item{border-left:4px solid var(--mode-work)}
+  .set-list{display:flex;flex-direction:column;gap:7px}
+  .set-row{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(110px,.6fr) auto;gap:8px;align-items:end}
+  .set-number{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 0 12px}
+  .small-remove{width:38px;height:42px;border-radius:10px;background:rgba(98,10,28,.62);color:#ffe2e7;font-size:18px}
+  .edit-toolbar{justify-content:flex-end;flex-wrap:wrap}
+  .edit-toolbar .ghost{min-height:44px;padding:0 13px;font-size:13px}
+  .edit-toolbar .remove-action{background:rgba(98,10,28,.62);color:#ffe2e7}
+  .add-compact{min-height:54px;border-radius:12px;border:2px dashed var(--line);color:var(--muted);font-weight:700;padding:0 14px}
+  .add-compact:hover{border-color:var(--accent);color:var(--accent)}
+
+  .stepper{display:flex;align-items:center;gap:8px}
+  .stepper button{width:52px;height:52px;border-radius:12px;background:var(--card2);font-size:22px;font-weight:600}
+  .stepper button:hover{background:#2e3130}
+  .stepper output{flex:1;text-align:center;font-size:30px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips button{min-height:48px;padding:0 16px;border-radius:12px;background:var(--card2);color:var(--muted);font-size:15px;font-weight:700}
+  .chips button[aria-pressed="true"]{background:var(--accent);color:var(--accent-text)}
+  .field{display:flex;flex-direction:column;gap:8px}
+  .field + .field{margin-top:16px}
+
+  .presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .preset{border-radius:var(--r);background:var(--mode-rest);color:#fff;min-height:112px;display:flex;flex-direction:column;justify-content:space-between;padding:14px;text-align:left}
+  .preset:hover{filter:brightness(1.08)}
+  .preset .big{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.03em}
+  .preset .cap{font-family:var(--mono);font-size:10px;letter-spacing:.16em;opacity:.75}
+  .preset .edit{display:flex;align-items:center;gap:6px}
+  .preset .edit .icon{width:34px;height:34px}
+  .preset.editing{min-height:244px;gap:10px}
+  .preset.editing.rest-edit{min-height:132px}
+  .preset .editstack{display:flex;flex-direction:column;gap:10px}
+  .preset .editblock .cap{display:block;margin-bottom:4px}
+  .preset .editval{flex:1;text-align:center;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .start{min-height:64px;padding:0 30px;border-radius:14px;background:var(--accent);color:var(--accent-text);font-size:19px;font-weight:800;letter-spacing:.01em}
+  .start:hover{filter:brightness(1.08)}
+  .ghost{min-height:56px;padding:0 18px;border-radius:12px;background:var(--card2);color:var(--text);font-size:15px;font-weight:700}
+  .ghost:hover{background:#2e3130}
+  .ghost.reset-confirm{background:#7e0c24;color:#fff}
+  .panelhead .ghost{min-height:64px;padding:0 22px;font-size:16px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  .swatches{display:flex;gap:8px;flex-wrap:wrap}
+  .swatch{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
+  .swatch[aria-pressed="true"]{box-shadow:0 0 0 3px var(--text)}
+  .summary{display:flex;align-items:baseline;gap:14px}
+  .summary .num{font-size:44px}
+  .note{font-size:14px;line-height:1.5;color:var(--muted)}
+  .msg{font-size:14px;color:var(--accent);min-height:1.3em}
+  .msg.err{color:#ff8f8f}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  @media(max-width:560px){ .footleft{width:100%} }
+
+  /* ---------- run ---------- */
+  .run{position:fixed;inset:0;background:var(--phase);color:var(--phase-text);display:flex;flex-direction:column;
+    padding:calc(28px + env(safe-area-inset-top)) calc(30px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(30px + env(safe-area-inset-left));
+    transition:background-color .28s ease;z-index:10;overflow:hidden}
+  .wipe{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(0,0,0,.22);pointer-events:none}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .42s ease-out}
+  .runhead{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  .runhead .mono{color:currentColor;opacity:.72;font-size:clamp(11px,1.4vw,14px)}
+  #runLeft{white-space:nowrap;text-align:right}
+  .runbody{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;min-height:0}
+  .steplabel{font-size:clamp(28px,6vmin,64px);font-weight:800;letter-spacing:-.01em;text-transform:uppercase;line-height:1.05;text-wrap:balance}
+  .setstatus{display:flex;align-items:baseline;justify-content:center;gap:.24em;margin-top:clamp(14px,2.4vmin,26px);font-family:var(--mono);font-size:clamp(30px,6.5vmin,76px);font-weight:800;letter-spacing:.05em;line-height:1}
+  .setstatus .current{font-size:1.18em;letter-spacing:-.05em;line-height:.9}
+  .setstatus .word{font-size:.34em;opacity:.72;letter-spacing:.2em}
+  .bigtime{font-size:clamp(96px,26vmin,320px);line-height:.86;margin:.06em 0 0;transition:transform .3s ease-out}
+  .bigtime .cln{display:inline-block;transform:translateY(-.085em)}
+  .bigtime.manual{font-size:clamp(26px,5.5vmin,58px);line-height:1.08;text-transform:none;letter-spacing:-.01em;margin-top:clamp(16px,2.8vmin,30px);padding:.34em .64em;border-radius:14px;background:rgba(0,0,0,.2)}
+  .runnote{margin-top:clamp(10px,1.8vmin,18px);max-width:min(760px,88vw);font-size:clamp(14px,2vmin,20px);line-height:1.35;font-weight:600;opacity:.82;text-wrap:balance}
+  .runprevious{margin-top:clamp(10px,1.7vmin,16px);padding:9px 14px;border-radius:999px;background:rgba(0,0,0,.2);font-family:var(--mono);font-size:clamp(11px,1.8vmin,15px);font-weight:750;letter-spacing:.08em}
+  .next{margin-top:clamp(14px,2.4vmin,26px);display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:999px;padding:11px 22px;max-width:90vw}
+  .next .cap{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.72}
+  .next .txt{font-size:clamp(15px,2.2vmin,22px);font-weight:700}
+  .runctl{position:relative;display:flex;gap:10px}
+  .runctl button{height:clamp(64px,11vmin,92px);border-radius:16px;font-size:clamp(17px,2.6vmin,28px);font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+  .runctl .main{flex:2;background:var(--phase-text);color:var(--phase)}
+  .runctl .alt{flex:1;background:transparent;color:currentColor;box-shadow:inset 0 0 0 3px rgba(255,255,255,.42)}
+  .runctl .alt:hover{background:rgba(255,255,255,.14)}
+  .runctl .end{flex:none;width:clamp(82px,13vw,132px);box-shadow:inset 0 0 0 2px rgba(255,255,255,.2);opacity:.78;font-size:clamp(14px,2vmin,20px);margin-left:clamp(8px,2.4vw,28px)}
+  .runctl .end.confirm{background:rgba(255,255,255,.92);color:var(--phase);opacity:1;box-shadow:none}
+  .runpresets{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-bottom:12px}
+  .runpresets button{min-height:48px;border-radius:11px;background:rgba(0,0,0,.22);color:currentColor;font-family:var(--mono);font-size:clamp(11px,2.6vw,15px);font-weight:800}
+  .runpresets button[aria-pressed="true"]{background:var(--phase-text);color:var(--phase)}
+  .setlogger{position:relative;width:min(680px,100%);margin:0 auto 12px;padding:12px 14px;border-radius:15px;background:rgba(0,0,0,.25);color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .setlogger-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(94px,.65fr) minmax(94px,.65fr);gap:10px;align-items:end}
+  .setlogger-grid.reps-only{grid-template-columns:minmax(0,1fr) minmax(94px,.45fr)}
+  .setlogger-title{font-size:17px;font-weight:850;line-height:1.2}
+  .setlogger-previous{margin-top:5px;font-family:var(--mono);font-size:10px;line-height:1.35;letter-spacing:.08em;opacity:.72}
+  .setlogger label{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;opacity:.96}
+  .setlogger input{width:100%;min-height:44px;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:rgba(0,0,0,.22);color:currentColor;padding:8px 10px;font:800 18px/1 var(--sans);outline:none;font-variant-numeric:tabular-nums}
+  .setlogger input:focus{border-color:currentColor;box-shadow:0 0 0 2px rgba(255,255,255,.18)}
+  .setlogger-saved{grid-column:1/-1;text-align:right;font-family:var(--mono);font-size:9px;letter-spacing:.12em;opacity:.7}
+
+  .done{position:fixed;inset:0;background:#111413;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:11;padding:24px;text-align:center}
+  .done .cap{font-family:var(--mono);font-size:13px;letter-spacing:.3em;color:var(--accent)}
+  .done .bigtime{font-size:clamp(88px,22vmin,240px)}
+  .done .sub{font-size:clamp(16px,2.4vmin,22px);color:var(--muted)}
+  .done .row{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+
+  /* ---------- logging and history ---------- */
+  .log{position:fixed;inset:0;background:var(--bg);z-index:12;overflow:auto;padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
+  .log-shell{width:min(820px,100%);margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .log-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .log-block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .log-block-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line)}
+  .log-block-title{font-size:21px;font-weight:800}
+  .log-score{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .log-exercise{padding:14px 16px;border-bottom:1px solid var(--line)}
+  .log-exercise:last-child{border-bottom:none}
+  .log-exercise-name{font-size:17px;font-weight:750;margin-bottom:9px}
+  .log-set{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(100px,.6fr) minmax(100px,.6fr);gap:8px;align-items:end;margin-top:8px}
+  .log-set-plan{padding:0 0 11px;color:var(--muted);font-size:13px;line-height:1.35}
+  .log-actions{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 22%);padding-top:22px;display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+  .history-list{display:flex;flex-direction:column;gap:10px}
+  .history-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .history-card summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+  .history-card summary::-webkit-details-marker{display:none}
+  .history-name{font-size:18px;font-weight:800;margin-bottom:4px}
+  .history-meta{color:var(--muted);font-size:13px}
+  .history-arrow{color:var(--muted);font-size:18px}
+  .history-card[open] .history-arrow{transform:rotate(180deg)}
+  .history-body{border-top:1px solid var(--line);padding:15px 18px;display:flex;flex-direction:column;gap:12px}
+  .history-block-title{font-weight:800;margin-bottom:5px}
+  .history-result{color:var(--muted);font-size:14px;line-height:1.5}
+  .history-note{padding:11px 12px;border-radius:10px;background:var(--card2);font-size:14px;line-height:1.45}
+
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr}
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .presets{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media(max-width:560px){
+    .tiles{grid-template-columns:1fr}
+    #rPresets.editing-grid,#iPresets.editing-grid{grid-template-columns:1fr}
+    .prepbar{align-items:stretch;flex-direction:column;gap:12px}
+    .prepbar .chips{flex:1 1 auto}
+    .prepbar .chips button{flex:1}
+    .modes{width:100%}
+    .modes button{flex:1;padding:0 4px;font-size:12px}
+    .exercise-fields,.add-row{grid-template-columns:1fr}
+    .edit-grid{grid-template-columns:1fr}
+    .edit-field.wide{grid-column:auto}
+    .set-row{grid-template-columns:auto minmax(0,1fr) auto}
+    .set-row .set-rest{grid-column:2/3}
+    .log-set{grid-template-columns:1fr 1fr}
+    .log-set-plan{grid-column:1/-1;padding-bottom:0}
+    .log-score{grid-template-columns:1fr}
+    .setlogger{padding:11px 12px}
+    .setlogger-grid{grid-template-columns:1fr 84px 84px;gap:7px}
+    .setlogger-title{font-size:15px}
+    .home{gap:14px}
+    .runhead>div{min-width:0;max-width:58%}
+    .runhead .mono{font-size:10px;line-height:1.35;letter-spacing:.14em}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .run,.bigtime,.flash{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="home" id="home">
+  <div class="topbar">
+    <nav class="modes" id="modes" role="tablist" aria-label="Timer modes">
+      <button role="tab" data-mode="workout" aria-selected="true">Workout</button>
+      <button role="tab" data-mode="circuit" aria-selected="false">Circuit</button>
+      <button role="tab" data-mode="rest" aria-selected="false">Rest</button>
+      <button role="tab" data-mode="stopwatch" aria-selected="false">Stopwatch</button>
+      <button role="tab" data-mode="intervals" aria-selected="false">Intervals</button>
+    </nav>
+    <div class="util">
+      <button class="iconbtn" id="fsBtn" type="button" aria-label="Enter fullscreen" title="Fullscreen (F)"></button>
+    </div>
+  </div>
+
+  <!-- WORKOUT -->
+  <section class="panel" id="panel-workout">
+    <div class="panelhead">
+      <input class="title" id="wName" maxlength="80" value="Workout" aria-label="Workout name" />
+      <div class="actions">
+        <button class="ghost hidden" id="wEdit" type="button">Edit workout</button>
+        <button class="start" id="wStart" type="button">Start workout</button>
+      </div>
+    </div>
+    <div class="layout">
+      <div>
+        <div class="tiles" id="wExercises"></div>
+        <div class="msg" id="wMsg" aria-live="polite" style="margin-top:12px"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="field">
+            <span class="mono">Prep</span>
+            <div class="chips" data-field="workout.prep" data-fmt="sec">
+              <button type="button" data-val="0">None</button>
+              <button type="button" data-val="5">5s</button>
+              <button type="button" data-val="10">10s</button>
+              <button type="button" data-val="15">15s</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <span class="mono" id="wTotalLabel">Total</span>
+          <div class="summary"><span class="num" id="wTotal">06:00</span></div>
+          <div class="note" id="wNote"></div>
+        </div>
+        <div class="card">
+          <div class="actions">
+            <button class="ghost" id="wLoad" type="button">Load</button>
+            <button class="ghost" id="wExample" type="button">Lower Body demo</button>
+            <button class="ghost" id="wSave" type="button">Save</button>
+            <button class="ghost" id="wShare" type="button">Share</button>
+            <button class="ghost" id="wReset" type="button">Reset</button>
+            <button class="ghost" id="wHistory" type="button">History</button>
+          </div>
+        </div>
+        <details class="card colour-details">
+          <summary><span class="mono">Workout colours</span></summary>
+          <div class="colour-body">
+            <div class="field">
+              <span class="note">Exercise</span>
+              <div class="swatches" id="wSwWork"></div>
+            </div>
+            <div class="field">
+              <span class="note">Rest</span>
+              <div class="swatches" id="wSwRest"></div>
+            </div>
+            <div class="note" style="margin-top:12px">These colours affect this workout only and are included in saved workout files.</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="panel hidden" id="panel-history">
+    <div class="panelhead">
+      <div class="title">Workout history</div>
+      <button class="ghost" id="hBack" type="button">Back to workout</button>
+    </div>
+    <div class="card prepbar">
+      <div>
+        <span class="mono">Stored on this device</span>
+        <div class="note" style="margin-top:5px">Export and import merge sessions when moving between devices.</div>
+      </div>
+      <div class="actions">
+        <button class="ghost" id="hImport" type="button">Import history</button>
+        <button class="ghost" id="hExport" type="button">Export history</button>
+      </div>
+    </div>
+    <div class="msg" id="hMsg" aria-live="polite"></div>
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <!-- CIRCUIT -->
+  <section class="panel hidden" id="panel-circuit">
+    <div class="panelhead">
+      <input class="title" id="cName" maxlength="80" value="Circuit" aria-label="Circuit name" />
+      <button class="start" id="cStart" type="button">Start circuit</button>
+    </div>
+    <div class="layout">
+      <div>
+        <div class="tiles" id="cTiles"></div>
+        <div class="msg" id="cMsg" aria-live="polite" style="margin-top:12px"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="field">
+            <span class="mono">Circuit rounds</span>
+            <div class="stepper" data-field="circuit.rounds" data-step="1" data-min="1" data-max="100" data-fmt="int">
+              <button type="button" data-dir="-1" aria-label="Fewer circuit rounds">−</button><output></output><button type="button" data-dir="1" aria-label="More circuit rounds">＋</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="mono">Prep</span>
+            <div class="chips" data-field="circuit.prep" data-fmt="sec">
+              <button type="button" data-val="0">None</button>
+              <button type="button" data-val="5">5s</button>
+              <button type="button" data-val="10">10s</button>
+              <button type="button" data-val="15">15s</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <span class="mono">Total</span>
+          <div class="summary"><span class="num" id="cTotal">06:00</span></div>
+          <div class="note" id="cNote"></div>
+        </div>
+        <div class="card">
+          <div class="actions">
+            <button class="ghost" id="cLoad" type="button">Load</button>
+            <button class="ghost" id="cSave" type="button">Save</button>
+            <button class="ghost" id="cShare" type="button">Share</button>
+          </div>
+        </div>
+        <details class="card colour-details">
+          <summary><span class="mono">Circuit colours</span></summary>
+          <div class="colour-body">
+            <div class="field">
+              <span class="note">Station</span>
+              <div class="swatches" id="cSwWork"></div>
+            </div>
+            <div class="field">
+              <span class="note">Rest</span>
+              <div class="swatches" id="cSwRest"></div>
+            </div>
+            <div class="note" style="margin-top:12px">These colours affect this circuit only and are included in saved circuit files.</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- REST -->
+  <section class="panel hidden" id="panel-rest">
+    <div class="panelhead">
+      <div class="title">Rest</div>
+      <button class="ghost" id="rEdit" type="button">Edit presets</button>
+    </div>
+    <div>
+      <span class="mono">Quick presets</span>
+      <div class="note" id="rPresetHelp" style="margin:6px 0 12px">Tap a preset to start resting immediately.</div>
+    </div>
+    <div class="presets" id="rPresets"></div>
+  </section>
+
+  <!-- STOPWATCH -->
+  <section class="panel hidden" id="panel-stopwatch">
+    <div class="panelhead">
+      <div class="title">Stopwatch</div>
+      <button class="start" id="sStart" type="button">Start stopwatch</button>
+    </div>
+    <div>
+      <div class="card prepbar">
+        <div>
+          <span class="mono">Time limit</span>
+          <div class="note" style="margin-top:5px">Counts up from zero; the screen fills toward your limit.</div>
+        </div>
+        <div class="chips" data-field="stopwatch.limit" data-fmt="min">
+          <button type="button" data-val="0">No limit</button>
+          <button type="button" data-val="5">5 min</button>
+          <button type="button" data-val="10">10 min</button>
+          <button type="button" data-val="30">30 min</button>
+          <button type="button" data-val="60">60 min</button>
+        </div>
+      </div>
+      <div class="card prepbar">
+        <div>
+          <span class="mono">Prep</span>
+          <div class="note" style="margin-top:5px">Applied before the stopwatch starts.</div>
+        </div>
+        <div class="chips" data-field="stopwatch.prep" data-fmt="sec">
+          <button type="button" data-val="0">None</button>
+          <button type="button" data-val="5">5s</button>
+          <button type="button" data-val="10">10s</button>
+          <button type="button" data-val="15">15s</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERVALS -->
+  <section class="panel hidden" id="panel-intervals">
+    <div class="panelhead">
+      <div class="title">Intervals</div>
+      <button class="ghost" id="iEdit" type="button">Edit presets</button>
+    </div>
+    <div>
+      <span class="mono">Quick presets</span>
+      <div class="note" id="iPresetHelp" style="margin:6px 0 12px">Tap a preset to begin with the prep selected below.</div>
+    </div>
+    <div class="presets" id="iPresets"></div>
+    <div class="card prepbar">
+      <div>
+        <span class="mono">Prep</span>
+        <div class="note" style="margin-top:5px">Applied before any interval preset starts.</div>
+      </div>
+      <div class="chips" data-field="intervals.prep" data-fmt="sec">
+        <button type="button" data-val="0">None</button>
+        <button type="button" data-val="5">5s</button>
+        <button type="button" data-val="10">10s</button>
+        <button type="button" data-val="15">15s</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div class="footleft">
+      <button class="footbtn" id="soundBtn" type="button" aria-pressed="true"></button>
+      <span class="note">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
+    </div>
+    <span class="mono">Tap anywhere while running to pause</span>
+  </div>
+</div>
+
+<!-- RUN -->
+<div class="run hidden" id="run" aria-live="polite">
+  <div class="wipe" id="wipe"></div>
+  <div class="flash" id="flash"></div>
+  <div class="runhead">
+    <div>
+      <div class="mono" id="runName">WORKOUT</div>
+      <div class="mono" id="runPos">ROUND 1 OF 3 · STEP 1 OF 6</div>
+    </div>
+    <div class="mono" id="runLeft">06:00 LEFT</div>
+  </div>
+  <div class="runbody">
+    <div class="steplabel" id="runLabel">Station 1</div>
+    <div class="setstatus hidden" id="runSet"><span class="word" id="runSetLabel">SET</span><span class="current" id="runSetCurrent">1</span><span class="word" id="runSetOf">OF</span><span id="runSetTotal">3</span></div>
+    <div class="bigtime num" id="runTime">0<span class="cln">:</span>45</div>
+    <div class="runnote hidden" id="runNote"></div>
+    <div class="runprevious hidden" id="runPrevious"></div>
+    <div class="next" id="runNextWrap"><span class="cap">NEXT</span><span class="txt" id="runNext">Rest · 15s</span></div>
+  </div>
+  <div class="setlogger hidden" id="setLogger" aria-live="polite"></div>
+  <div class="runpresets hidden" id="runRestPresets" aria-label="Restart rest timer"></div>
+  <div class="runctl">
+    <button class="main" id="btnPause" type="button">Pause</button>
+    <button class="alt" id="btnSkip" type="button">Skip</button>
+    <button class="alt end" id="btnEnd" type="button">End</button>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="done hidden" id="done">
+  <div class="cap">COMPLETE</div>
+  <div class="bigtime num" id="doneTime">18<span class="cln">:</span>00</div>
+  <div class="sub" id="doneSub">3 rounds · Workout</div>
+  <div class="row">
+    <button class="start hidden" id="doneLog" type="button">Log workout</button>
+    <button class="ghost" id="doneAgain" type="button">Again</button>
+    <button class="ghost" id="doneHome" type="button">Back to setup</button>
+  </div>
+</div>
+
+<!-- POST-WORKOUT LOG -->
+<div class="log hidden" id="log">
+  <div class="log-shell">
+    <div class="log-head">
+      <div><div class="mono">SAVE SESSION</div><div class="title" id="logTitle">Workout</div></div>
+      <label class="edit-field" style="min-width:130px"><span>Weight unit</span><select id="logUnit"><option value="lb">lb</option><option value="kg">kg</option></select></label>
+    </div>
+    <div class="note">Planned reps are filled in when possible. Adjust anything that differed, and leave weight blank for bodyweight exercises.</div>
+    <div id="logBlocks"></div>
+    <label class="edit-field"><span>Workout notes</span><textarea id="logNotes" maxlength="2000" placeholder="Optional notes about this session"></textarea></label>
+    <div class="msg" id="logMsg" aria-live="polite"></div>
+    <div class="log-actions">
+      <button class="ghost" id="logCancel" type="button">Cancel</button>
+      <button class="start" id="logSave" type="button">Save to history</button>
+    </div>
+  </div>
+</div>
+
+<input class="hidden" id="fileInput" type="file" accept=".json,application/json" />
+<input class="hidden" id="historyFileInput" type="file" accept=".json,application/json" />
+
+<script>
+(async () => {
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+
+  const WORK_SWATCHES = ['#f04e23','#d21f3c','#6b3fd4','#1f6f4a','#c96a00','#2f6f8f'];
+  const REST_SWATCHES = ['#1668c4','#38475c','#0f7b6c','#2f4858','#3b3fa0','#4a3b6b'];
+  const APP_ACCENT = '#f04e23';
+  const MODE_WORK = WORK_SWATCHES[0];
+  const MODE_REST = REST_SWATCHES[0];
+  const PREP_BG = '#15181a';
+  const FORMAT = 'workout-timer-plan';
+  const VERSION = 7;
+  const HEX = /^#[0-9a-f]{6}$/i;
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+  const store = {
+    get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (_) { return fallback; } },
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+  };
+
+  const HISTORY_FORMAT = 'workout-timer-history';
+  const HISTORY_VERSION = 1;
+  let historyDbPromise = null;
+  function openHistoryDb() {
+    if (!('indexedDB' in window)) return Promise.reject(new Error('Local workout history is unavailable in this browser.'));
+    if (historyDbPromise) return historyDbPromise;
+    historyDbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open('WorkoutTimerData', 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains('sessions')) {
+          const sessions = db.createObjectStore('sessions', { keyPath: 'id' });
+          sessions.createIndex('completedAt', 'completedAt');
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('Could not open local workout history.'));
+    });
+    return historyDbPromise;
+  }
+  function fallbackHistory() {
+    const value = store.get('workoutTimerHistoryFallbackV1', []);
+    return Array.isArray(value) ? value : [];
+  }
+  async function historyAll() {
+    try {
+      const db = await openHistoryDb();
+      const rows = await new Promise((resolve, reject) => {
+        const request = db.transaction('sessions', 'readonly').objectStore('sessions').getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+      const merged = new Map(rows.map(row => [row.id, row]));
+      fallbackHistory().forEach(row => { if (row && row.id && !merged.has(row.id)) merged.set(row.id, row); });
+      return [...merged.values()].sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
+    } catch (_) {
+      return fallbackHistory().sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
+    }
+  }
+  async function historyPut(session) {
+    try {
+      const db = await openHistoryDb();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction('sessions', 'readwrite');
+        transaction.objectStore('sessions').put(session);
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+    } catch (_) {
+      const rows = fallbackHistory().filter(x => x && x.id !== session.id);
+      rows.push(session); store.set('workoutTimerHistoryFallbackV1', rows.slice(-500));
+    }
+  }
+  async function historyMerge(sessions) {
+    for (const session of sessions) await historyPut(session);
+  }
+
+  const defaultTheme = () => ({ work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] });
+  const validTheme = (t) => t && typeof t === 'object' && HEX.test(t.work || '') && HEX.test(t.rest || '');
+  const cleanTheme = (t) => validTheme(t) ? { work: t.work, rest: t.rest } : defaultTheme();
+  const idSlug = value => String(value || 'exercise').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 42) || 'exercise';
+  const cleanExerciseId = (value, fallback) => {
+    const cleaned = String(value || fallback || 'exercise').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+    return cleaned || 'exercise';
+  };
+  const cleanTracking = (value, label, legacySample) => value === 'weight-reps' ? 'weight-reps'
+    : value === 'reps' ? 'reps' : legacySample && String(label || '').trim().toLowerCase() === 'curls' ? 'weight-reps' : 'reps';
+
+  function textOn(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(c => {
+      const s = c / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    });
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) > 0.42 ? '#10100e' : '#ffffff';
+  }
+
+  function applyThemes() {
+    persistPlans();
+    renderSwatches();
+    renderWorkoutExercises();
+    renderCircuitTiles();
+  }
+
+  function renderSwatches() {
+    const build = (host, list, theme, key, kind) => {
+      host.innerHTML = '';
+      list.forEach(hex => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'swatch'; b.style.background = hex;
+        b.setAttribute('aria-pressed', String(theme[key] === hex));
+        b.setAttribute('aria-label', key + ' colour ' + hex);
+        b.addEventListener('click', () => { theme[key] = hex; applyThemes(); setPlanMsg(kind, 'Colours updated.'); });
+        host.appendChild(b);
+      });
+    };
+    build($('#wSwWork'), WORK_SWATCHES, workoutTheme, 'work', 'workout');
+    build($('#wSwRest'), REST_SWATCHES, workoutTheme, 'rest', 'workout');
+    build($('#cSwWork'), WORK_SWATCHES, circuitTheme, 'work', 'circuit');
+    build($('#cSwRest'), REST_SWATCHES, circuitTheme, 'rest', 'circuit');
+  }
+
+  /* ---------- config ---------- */
+  const cfg = {
+    workout: { prep: 5 },
+    circuit: { rounds: 3, prep: 5 },
+    rest: { minutes: 5, seconds: 0 },
+    stopwatch: { limit: 0, prep: 5 },
+    intervals: { rounds: 8, work: 20, rest: 10, prep: 5 }
+  };
+
+  function defaultWorkout() {
+    return {
+      layout: 'simple',
+      name: 'Workout',
+      items: [
+        { type: 'exercise', id: 'push-ups', label: 'Push-ups', target: '10 reps', sets: 3, restSeconds: 30, tracking: 'reps' },
+        { type: 'exercise', id: 'curls', label: 'Curls', target: '10–12 reps', sets: 3, restSeconds: 30, tracking: 'weight-reps' }
+      ]
+    };
+  }
+
+  function defaultCircuit() {
+    return {
+      name: 'Circuit',
+      segments: [
+        { label: 'Station 1', phase: 'work', completion: 'timed', seconds: 45 },
+        { label: 'Rest', phase: 'rest', seconds: 15 },
+        { label: 'Station 2', phase: 'work', completion: 'timed', seconds: 45 },
+        { label: 'Rest', phase: 'rest', seconds: 15 },
+        { label: 'Station 3', phase: 'work', completion: 'timed', seconds: 45 },
+        { label: 'Rest', phase: 'rest', seconds: 15 }
+      ]
+    };
+  }
+
+  function validateBasics(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('The file must contain a workout or circuit object.');
+    if (raw.format && raw.format !== FORMAT) throw new Error('This is not a Workout Timer plan file.');
+    let name = String(raw.name || '').trim();
+    if (!name || name.length > 80) throw new Error('The name must be 1 to 80 characters.');
+    const prep = Number(raw.prepSeconds != null ? raw.prepSeconds : (raw.prep || 0));
+    if (!Number.isInteger(prep) || prep < 0 || prep > 30) throw new Error('Prep seconds must be a whole number from 0 to 30.');
+    return { name, prep, theme: validTheme(raw.theme) ? cleanTheme(raw.theme) : null };
+  }
+
+  function normalizeWorkout(raw) {
+    const base = validateBasics(raw);
+    const version = Number(raw.version);
+    if (![5, 6, VERSION].includes(version) || raw.kind !== 'workout') throw new Error('This is not a supported Workout file.');
+    if (version === VERSION && Array.isArray(raw.blocks)) {
+      if (!raw.blocks.length || raw.blocks.length > 20) throw new Error('A structured workout needs 1 to 20 blocks.');
+      const cleanNotes = (value, where) => {
+        if (value == null) return [];
+        if (!Array.isArray(value) || value.length > 20) throw new Error(where + ' notes must be a list of up to 20 items.');
+        return value.map((note, i) => {
+          const text = String(note || '').trim();
+          if (!text || text.length > 500) throw new Error(where + ' note ' + (i + 1) + ' must be 1 to 500 characters.');
+          return text;
+        });
+      };
+      const blocks = raw.blocks.map((block, bi) => {
+        if (!block || typeof block !== 'object' || Array.isArray(block)) throw new Error('Workout block ' + (bi + 1) + ' is invalid.');
+        const title = String(block.title || '').trim();
+        const id = String(block.id || ('block-' + (bi + 1))).trim().slice(0, 60);
+        const mode = String(block.mode || 'sequence').toLowerCase();
+        if (!title || title.length > 80) throw new Error('Workout block ' + (bi + 1) + ' needs a title of 1 to 80 characters.');
+        if (!id) throw new Error(title + ' needs a block id.');
+        if (!['sequence', 'for-time', 'amrap'].includes(mode)) throw new Error('Workout block ' + (bi + 1) + ' mode must be sequence, for-time or amrap.');
+        const rounds = mode === 'for-time' ? Number(block.rounds) : 1;
+        const durationSeconds = mode === 'amrap' ? Number(block.durationSeconds) : 0;
+        const unitLabel = String(block.unitLabel || 'round').trim().toLowerCase();
+        const restBetweenRoundsSeconds = mode === 'for-time' ? Number(block.restBetweenRoundsSeconds || 0) : 0;
+        if (!/^[a-z][a-z -]{0,11}$/.test(unitLabel)) throw new Error(title + ' progress label must be 1 to 12 letters.');
+        if (mode === 'for-time' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 100)) throw new Error(title + ' rounds must be 1 to 100.');
+        if (!Number.isInteger(restBetweenRoundsSeconds) || restBetweenRoundsSeconds < 0 || restBetweenRoundsSeconds > 3600) throw new Error(title + ' between-round rest must be 0 to 3600 seconds.');
+        if (mode === 'amrap' && (!Number.isInteger(durationSeconds) || durationSeconds < 5 || durationSeconds > 7200)) throw new Error(title + ' duration must be 5 to 7200 seconds.');
+        if (!Array.isArray(block.items) || !block.items.length || block.items.length > 100) throw new Error(title + ' needs 1 to 100 items.');
+        const items = block.items.map((x, ii) => {
+          if (!x || typeof x !== 'object' || Array.isArray(x)) throw new Error(title + ' item ' + (ii + 1) + ' is invalid.');
+          const type = String(x.type || '').toLowerCase();
+          const label = String(x.label || '').trim();
+          if (!label || label.length > 60) throw new Error(title + ' item ' + (ii + 1) + ' needs a name of 1 to 60 characters.');
+          const notes = cleanNotes(x.notes, title + ' / ' + label);
+          if (type === 'rest') {
+            const seconds = Number(x.seconds);
+            if (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600) throw new Error(label + ' duration must be 1 to 3600 seconds.');
+            return { type: 'rest', label, seconds, notes };
+          }
+          if (type !== 'exercise') throw new Error(title + ' item ' + (ii + 1) + ' must be an exercise or rest.');
+          const completion = String(x.completion || (x.seconds ? 'timed' : 'manual')).toLowerCase();
+          if (!['manual', 'timed'].includes(completion)) throw new Error(label + ' completion must be manual or timed.');
+          const exercisePlanId = cleanExerciseId(x.id, id + '-' + (ii + 1) + '-' + idSlug(label));
+          const tracking = completion === 'manual' ? cleanTracking(x.tracking, label, false) : 'reps';
+          let setPlan = null;
+          if (x.setPlan != null) {
+            if (!Array.isArray(x.setPlan) || !x.setPlan.length || x.setPlan.length > 100) throw new Error(label + ' set plan must contain 1 to 100 sets.');
+            setPlan = x.setPlan.map((set, si) => {
+              if (!set || typeof set !== 'object' || Array.isArray(set)) throw new Error(label + ' set ' + (si + 1) + ' is invalid.');
+              const restSeconds = Number(set.restSeconds || 0);
+              if (!Number.isInteger(restSeconds) || restSeconds < 0 || restSeconds > 3600) throw new Error(label + ' set ' + (si + 1) + ' rest must be 0 to 3600 seconds.');
+              if (completion === 'timed') {
+                const seconds = Number(set.seconds);
+                if (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600) throw new Error(label + ' set ' + (si + 1) + ' duration must be 1 to 3600 seconds.');
+                return { seconds, restSeconds };
+              }
+              const target = String(set.target || '').trim();
+              if (!target || target.length > 40) throw new Error(label + ' set ' + (si + 1) + ' needs a target of 1 to 40 characters.');
+              return { target, restSeconds };
+            });
+          }
+          const sets = setPlan ? setPlan.length : Number(x.sets == null ? 1 : x.sets);
+          const restSeconds = setPlan ? 0 : Number(x.restSeconds || 0);
+          if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new Error(label + ' sets must be 1 to 100.');
+          if (!Number.isInteger(restSeconds) || restSeconds < 0 || restSeconds > 3600) throw new Error(label + ' rest must be 0 to 3600 seconds.');
+          if (completion === 'timed') {
+            const seconds = setPlan ? 0 : Number(x.seconds);
+            if (!setPlan && (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600)) throw new Error(label + ' duration must be 1 to 3600 seconds.');
+            return { type: 'exercise', id: exercisePlanId, label, completion, seconds, sets, restSeconds, setPlan, notes, tracking };
+          }
+          const target = setPlan ? '' : String(x.target || '').trim();
+          if (!setPlan && (!target || target.length > 40)) throw new Error(label + ' needs a target of 1 to 40 characters.');
+          return { type: 'exercise', id: exercisePlanId, label, completion, target, sets, restSeconds, setPlan, notes, tracking };
+        });
+        if (!items.some(x => x.type === 'exercise')) throw new Error(title + ' needs at least one exercise.');
+        return { id, title, mode, rounds, durationSeconds, unitLabel, restBetweenRoundsSeconds,
+          score: String(block.score || '').trim().slice(0, 40), notes: cleanNotes(block.notes, title), items };
+      });
+      if (new Set(blocks.map(block => block.id)).size !== blocks.length) throw new Error('Every workout block needs a unique id.');
+      const exerciseIds = blocks.flatMap(block => block.items.filter(item => item.type === 'exercise').map(item => item.id));
+      if (new Set(exerciseIds).size !== exerciseIds.length) throw new Error('Every exercise in a structured workout needs a unique id.');
+      return { name: base.name, prep: base.prep, layout: 'blocks', workoutType: String(raw.workoutType || 'workout').trim().slice(0, 40), blocks, theme: base.theme };
+    }
+    const source = version === 5
+      ? (Array.isArray(raw.exercises) ? raw.exercises.map(x => Object.assign({ type: 'exercise' }, x)) : null)
+      : raw.items;
+    if (!Array.isArray(source) || !source.length || source.length > 100) throw new Error('A workout needs 1 to 100 exercise or rest items.');
+    const items = source.map((x, i) => {
+      if (!x || typeof x !== 'object' || Array.isArray(x)) throw new Error('Workout item ' + (i + 1) + ' is invalid.');
+      const type = String(x.type || '').toLowerCase();
+      const label = String(x.label || '').trim();
+      if (!label || label.length > 60) throw new Error('Workout item ' + (i + 1) + ' needs a name of 1 to 60 characters.');
+      if (type === 'rest') {
+        const seconds = Number(x.seconds);
+        if (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600) throw new Error('Rest item ' + (i + 1) + ' duration must be 1 to 3600 seconds.');
+        return { type: 'rest', label, seconds };
+      }
+      if (type !== 'exercise') throw new Error('Workout item ' + (i + 1) + ' must be an exercise or rest.');
+      const target = String(x.target || '').trim();
+      const sets = Number(x.sets);
+      const restSeconds = Number(x.restSeconds);
+      if (!target || target.length > 40) throw new Error('Exercise ' + (i + 1) + ' needs a target of 1 to 40 characters.');
+      if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new Error('Exercise ' + (i + 1) + ' sets must be 1 to 100.');
+      if (!Number.isInteger(restSeconds) || restSeconds < 0 || restSeconds > 3600) throw new Error('Exercise ' + (i + 1) + ' rest must be 0 to 3600 seconds.');
+      return { type: 'exercise', id: cleanExerciseId(x.id, 'simple-' + (i + 1) + '-' + idSlug(label)), label, target, sets, restSeconds,
+        tracking: cleanTracking(x.tracking, label, version < VERSION || !x.id) };
+    });
+    if (!items.some(x => x.type === 'exercise')) throw new Error('A workout needs at least one exercise.');
+    const simpleExerciseIds = items.filter(item => item.type === 'exercise').map(item => item.id);
+    if (new Set(simpleExerciseIds).size !== simpleExerciseIds.length) throw new Error('Every exercise in a workout needs a unique id.');
+    return { name: base.name, prep: base.prep, layout: 'simple', items, theme: base.theme };
+  }
+
+  function normalizeCircuit(raw) {
+    const base = validateBasics(raw);
+    if (![5, 6, VERSION].includes(Number(raw.version)) || raw.kind !== 'circuit') throw new Error('This is not a supported Circuit file.');
+    const rounds = Number(raw.rounds);
+    if (!Number.isInteger(rounds) || rounds < 1 || rounds > 100) throw new Error('Circuit rounds must be 1 to 100.');
+    if (!Array.isArray(raw.segments) || !raw.segments.length || raw.segments.length > 100) throw new Error('A circuit needs 1 to 100 timed steps.');
+    const segments = raw.segments.map((s, i) => {
+      if (!s || typeof s !== 'object' || Array.isArray(s)) throw new Error('Circuit step ' + (i + 1) + ' is invalid.');
+      let label = String(s.label || '').trim();
+      const phase = String(s.phase || '').toLowerCase();
+      if (!label || label.length > 60) throw new Error('Circuit step ' + (i + 1) + ' needs a label of 1 to 60 characters.');
+      if (label === 'Transition') label = 'Rest';
+      if (phase !== 'work' && phase !== 'rest') throw new Error('Circuit step ' + (i + 1) + ' phase must be work or rest.');
+      const seconds = Number(s.seconds);
+      if (!Number.isInteger(seconds) || seconds < 1 || seconds > 3600) throw new Error('Circuit step ' + (i + 1) + ' duration must be 1 to 3600 seconds.');
+      return { label, phase, seconds };
+    });
+    return { name: base.name, rounds, prep: base.prep, segments, theme: base.theme };
+  }
+
+  function splitLegacy(raw) {
+    const v = raw && raw.version == null ? 1 : Number(raw && raw.version);
+    if (![1, 2, 3, 4].includes(v)) throw new Error('Workout plan version ' + (raw && raw.version) + ' is not supported.');
+    const base = validateBasics(raw);
+    const rounds = Number(raw.rounds == null ? 1 : raw.rounds);
+    if (!Number.isInteger(rounds) || rounds < 1 || rounds > 100) throw new Error('Rounds must be 1 to 100.');
+    if (!Array.isArray(raw.segments) || !raw.segments.length) throw new Error('The older plan has no steps.');
+    const exercises = [], segments = [];
+    const linkedRestIndices = new Set();
+    raw.segments.forEach((s, i) => {
+      const manual = s && String(s.phase || '').toLowerCase() === 'work' && String(s.completion || 'timed').toLowerCase() === 'manual';
+      const next = raw.segments[i + 1];
+      if (manual && next && String(next.phase || '').toLowerCase() === 'rest') linkedRestIndices.add(i + 1);
+    });
+    raw.segments.forEach((s, i) => {
+      if (!s || typeof s !== 'object') return;
+      const phase = String(s.phase || '').toLowerCase();
+      const label = String(s.label || (phase === 'rest' ? 'Rest' : 'Station ' + (i + 1))).trim().slice(0, 60);
+      const manual = phase === 'work' && String(s.completion || 'timed').toLowerCase() === 'manual';
+      if (manual) {
+        const next = raw.segments[i + 1];
+        const linkedRest = next && String(next.phase).toLowerCase() === 'rest' ? Number(next.seconds) : 30;
+        exercises.push({ label: label || 'Exercise ' + (exercises.length + 1), target: String(s.target || 'Complete one set').trim().slice(0, 40) || 'Complete one set', sets: clamp(Number(s.sets) || 1, 1, 100), restSeconds: clamp(Number.isFinite(linkedRest) ? linkedRest : 30, 0, 3600) });
+      } else if (!linkedRestIndices.has(i) && (phase === 'work' || phase === 'rest') && Number.isInteger(Number(s.seconds)) && Number(s.seconds) > 0) {
+        segments.push({ label: phase === 'rest' && label === 'Transition' ? 'Rest' : label, phase, seconds: clamp(Number(s.seconds), 1, 3600) });
+      }
+    });
+    return {
+      workout: exercises.length ? { name: base.name === 'My Workout' ? 'Workout' : base.name, prep: base.prep, items: exercises.map(x => Object.assign({ type: 'exercise' }, x)), theme: base.theme } : null,
+      circuit: segments.some(s => s.phase === 'work') ? { name: base.name === 'Workout' || base.name === 'My Workout' ? 'Circuit' : base.name, prep: base.prep, rounds, segments, theme: base.theme } : null
+    };
+  }
+
+  function workoutFile() {
+    if (workoutPlan.layout === 'blocks') {
+      return { format: FORMAT, version: VERSION, kind: 'workout', layout: 'blocks', name: workoutPlan.name, workoutType: workoutPlan.workoutType,
+        prepSeconds: cfg.workout.prep, blocks: JSON.parse(JSON.stringify(workoutPlan.blocks)), theme: { ...workoutTheme } };
+    }
+    return { format: FORMAT, version: VERSION, kind: 'workout', layout: 'simple', name: workoutPlan.name, prepSeconds: cfg.workout.prep,
+      items: workoutPlan.items.map(x => x.type === 'rest'
+        ? { type: 'rest', label: x.label, seconds: x.seconds }
+        : { type: 'exercise', id: x.id, label: x.label, target: x.target, sets: x.sets, restSeconds: x.restSeconds, tracking: x.tracking }), theme: { ...workoutTheme } };
+  }
+  function circuitFile() {
+    return { format: FORMAT, version: VERSION, kind: 'circuit', name: circuitPlan.name, prepSeconds: cfg.circuit.prep, rounds: cfg.circuit.rounds,
+      segments: circuitPlan.segments.map(s => ({ label: s.label, phase: s.phase, seconds: s.seconds })),
+      theme: { ...circuitTheme } };
+  }
+
+  function setWorkoutPlan(p) {
+    workoutPlan = p.layout === 'blocks'
+      ? { layout: 'blocks', name: p.name, workoutType: p.workoutType, blocks: p.blocks }
+      : { layout: 'simple', name: p.name, items: p.items.map((item, index) => item.type === 'exercise'
+        ? Object.assign({}, item, { id: cleanExerciseId(item.id, 'simple-' + (index + 1) + '-' + idSlug(item.label)), tracking: cleanTracking(item.tracking, item.label, true) })
+        : item) };
+    cfg.workout.prep = p.prep;
+    if (p.theme) workoutTheme = p.theme;
+  }
+
+  async function bundledWorkout() {
+    if (!location.protocol.startsWith('http')) throw new Error('The default workout is available from the hosted app.');
+    const response = await fetch('./lower-body-focus-day.workout.json');
+    if (!response.ok) throw new Error('The default workout file could not be loaded.');
+    return normalizeWorkout(await response.json());
+  }
+
+  let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
+  let workoutTheme = defaultTheme(), circuitTheme = defaultTheme();
+  let editingStructuredWorkout = false;
+  await (async function restorePlans() {
+    let restoredWorkout = false, restoredCircuit = false;
+    const savedWorkout = store.get('workoutTimerWorkoutPlanV7', null) || store.get('workoutTimerWorkoutPlanV6', null) || store.get('workoutTimerWorkoutPlanV5', null);
+    const savedCircuit = store.get('workoutTimerCircuitPlanV7', null) || store.get('workoutTimerCircuitPlanV6', null) || store.get('workoutTimerCircuitPlanV5', null);
+    if (savedWorkout) try {
+      const normalized = normalizeWorkout(savedWorkout);
+      setWorkoutPlan(normalized); restoredWorkout = true;
+    } catch (_) {}
+    if (savedCircuit) try { const p = normalizeCircuit(savedCircuit); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; restoredCircuit = true; } catch (_) {}
+    if (!restoredWorkout || !restoredCircuit) {
+      const legacy = store.get('workoutTimerCustomWorkout', null);
+      if (legacy) try {
+        const split = splitLegacy(legacy);
+        if (!restoredWorkout && split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); restoredWorkout = true; }
+        if (!restoredCircuit && split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; restoredCircuit = true; }
+      } catch (_) {}
+    }
+  })();
+
+  function persistPlans() {
+    store.set('workoutTimerWorkoutPlanV7', workoutFile());
+    store.set('workoutTimerCircuitPlanV7', circuitFile());
+  }
+
+  let restPresets = (() => {
+    const p = store.get('workoutTimerRestPresets', null);
+    return Array.isArray(p) && p.length === 5 && p.every(n => Number.isFinite(+n) && +n > 0) ? p.map(Number) : [30, 60, 120, 180, 300];
+  })();
+  let editingRestPresets = false;
+
+  const INTERVAL_DEFAULTS = [[8, 20, 10], [10, 30, 30], [10, 40, 20], [6, 60, 60], [5, 120, 60]];
+  let intervalPresets = (() => {
+    const p = store.get('workoutTimerIntervalPresets', null);
+    const valid = Array.isArray(p) && p.length === 5 && p.every(x =>
+      Array.isArray(x) && x.length === 3 &&
+      Number.isInteger(+x[0]) && +x[0] >= 1 && +x[0] <= 100 &&
+      Number.isInteger(+x[1]) && +x[1] >= 5 && +x[1] <= 3600 &&
+      Number.isInteger(+x[2]) && +x[2] >= 0 && +x[2] <= 3600
+    );
+    return valid ? p.map(x => x.map(Number)) : INTERVAL_DEFAULTS.map(x => [...x]);
+  })();
+  let editingIntervalPresets = false;
+
+  /* ---------- format ---------- */
+  function fmt(sec) {
+    sec = Math.max(0, Math.ceil(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  }
+  function fmtPad(sec) {
+    sec = Math.max(0, Math.ceil(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(s).padStart(2, '0');
+  }
+  function fmtElapsed(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(s).padStart(2, '0');
+  }
+  const shortSec = (s) => s >= 60 ? fmt(s) : s + 's';
+
+  /* ---------- state ---------- */
+  const S = { mode: 'workout', sound: true, screen: 'home', running: false, paused: false, queue: [], qi: 0, accum: 0, from: 0,
+    blockId: null, blockAccum: 0, blockFrom: 0, raf: 0, lastBeep: null, lastBlockBeep: null, wakeLock: null, doneTotal: 0, variableDuration: false,
+    sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, pendingSession: null,
+    sessionSetResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb' };
+
+  /* ---------- audio ---------- */
+  let ac = null;
+  function beep(freq, dur, vol) {
+    if (!S.sound) return;
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
+      o.connect(g); g.connect(ac.destination); o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      o.stop(ac.currentTime + dur);
+    } catch (_) {}
+  }
+  function primeAudio() { if (S.sound) beep(660, 0.03, 0.02); }
+
+  async function lockScreen() {
+    if (!('wakeLock' in navigator) || S.wakeLock) return;
+    try { S.wakeLock = await navigator.wakeLock.request('screen'); S.wakeLock.addEventListener('release', () => { S.wakeLock = null; }); } catch (_) { S.wakeLock = null; }
+  }
+  async function unlockScreen() { if (S.wakeLock) { try { await S.wakeLock.release(); } catch (_) {} S.wakeLock = null; } }
+
+  /* ---------- home rendering ---------- */
+  const DUMBBELL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"></path></svg>';
+  const BED_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5v14M21 19v-8a2 2 0 0 0-2-2H3M7 9V7a2 2 0 0 0-2-2H3M3 13h18"></path></svg>';
+  const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+
+  function structuredItemDetail(item) {
+    if (item.type === 'rest') return shortSec(item.seconds);
+    const sets = item.setPlan ? item.setPlan.length : item.sets;
+    const targets = item.setPlan
+      ? item.setPlan.map(set => item.completion === 'timed' ? shortSec(set.seconds) : set.target)
+      : [item.completion === 'timed' ? shortSec(item.seconds) : item.target];
+    let detail = sets + (sets === 1 ? ' set' : ' sets') + ' · ' + (new Set(targets).size === 1 ? targets[0] : targets.join(' / '));
+    const rests = item.setPlan ? item.setPlan.map(set => set.restSeconds).filter(Boolean) : (item.restSeconds ? [item.restSeconds] : []);
+    if (rests.length) detail += ' · rest ' + (new Set(rests).size === 1 ? shortSec(rests[0]) : rests.map(shortSec).join(' / '));
+    return detail;
+  }
+
+  function renderStructuredWorkout(host) {
+    workoutPlan.blocks.forEach((block, bi) => {
+      const card = document.createElement('section');
+      card.className = 'block-card';
+      const unit = block.unitLabel || 'round';
+      const units = block.rounds === 1 ? unit : unit + 's';
+      const modeLabel = block.mode === 'amrap' ? fmtPad(block.durationSeconds) + ' AMRAP'
+        : block.mode === 'for-time' ? block.rounds + ' ' + units + ' · for time' : 'Sequence';
+      let steps = block.items.map(item => {
+        const isRest = item.type === 'rest';
+        const bg = isRest ? workoutTheme.rest : workoutTheme.work;
+        const itemNotes = item.notes && item.notes.length ? '<div class="block-step-note">' + esc(item.notes.join(' ')) + '</div>' : '';
+        return '<div class="block-step"><span class="block-step-icon" style="background:' + bg + '">' + (isRest ? BED_ICON : DUMBBELL_ICON) + '</span>' +
+          '<div><div class="block-step-name">' + esc(item.label) + '</div><div class="block-step-detail">' + esc(structuredItemDetail(item)) + '</div>' + itemNotes + '</div></div>';
+      }).join('');
+      if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0) {
+        steps += '<div class="block-step"><span class="block-step-icon" style="background:' + workoutTheme.rest + '">' + BED_ICON + '</span>' +
+          '<div><div class="block-step-name">Rest between ' + esc(units) + '</div><div class="block-step-detail">' + esc(shortSec(block.restBetweenRoundsSeconds)) +
+          ' after each completed ' + esc(unit) + ', except the last</div><div class="block-step-note">The overall block stopwatch keeps running.</div></div></div>';
+      }
+      const notes = block.notes && block.notes.length
+        ? '<details class="block-notes"><summary>Coaching notes</summary><ul>' + block.notes.map(note => '<li>' + esc(note) + '</li>').join('') + '</ul></details>' : '';
+      card.innerHTML = '<div class="block-head"><div><div class="block-number">Block ' + String(bi + 1).padStart(2, '0') + '</div><div class="block-title">' + esc(block.title) + '</div></div>' +
+        '<span class="block-mode">' + esc(modeLabel) + '</span></div><div class="block-steps">' + steps + '</div>' + notes;
+      host.appendChild(card);
+    });
+    const help = document.createElement('div');
+    help.className = 'structured-help';
+    help.textContent = 'This workout keeps its sections, individual sets and coaching notes when you save or share it. Choose Edit workout above to make changes.';
+    host.appendChild(help);
+  }
+
+  function prepareStructuredForEditing() {
+    workoutPlan.blocks.forEach((block, bi) => block.items.forEach((item, ii) => {
+      if (item.type !== 'exercise') return;
+      item.id = cleanExerciseId(item.id, block.id + '-' + (ii + 1) + '-' + idSlug(item.label));
+      item.tracking = item.completion === 'manual' ? cleanTracking(item.tracking, item.label, false) : 'reps';
+      if (!item.setPlan) item.setPlan = Array.from({ length: item.sets }, () => item.completion === 'timed'
+        ? { seconds: item.seconds, restSeconds: item.restSeconds }
+        : { target: item.target, restSeconds: item.restSeconds });
+    }));
+  }
+
+  const notesText = notes => Array.isArray(notes) ? notes.join('\n') : '';
+  const parseNotes = value => String(value || '').split(/\n/).map(x => x.trim()).filter(Boolean).slice(0, 20).map(x => x.slice(0, 500));
+
+  function renderStructuredWorkoutEditor(host) {
+    prepareStructuredForEditing();
+    workoutPlan.blocks.forEach((block, bi) => {
+      const card = document.createElement('section');
+      card.className = 'edit-block';
+      const modeOptions = [['sequence', 'Sequence'], ['for-time', 'Rounds for time'], ['amrap', 'AMRAP']]
+        .map(([value, label]) => '<option value="' + value + '"' + (block.mode === value ? ' selected' : '') + '>' + label + '</option>').join('');
+      const modeFields = block.mode === 'for-time'
+        ? '<label class="edit-field"><span>Cycles / rounds</span><input type="number" min="1" max="100" value="' + block.rounds + '" data-block-number="rounds"></label>' +
+          '<label class="edit-field"><span>Progress label</span><input maxlength="12" value="' + esc(block.unitLabel || 'round') + '" data-block-field="unitLabel"></label>' +
+          '<label class="edit-field"><span>Rest between rounds (seconds)</span><input type="number" min="0" max="3600" value="' + block.restBetweenRoundsSeconds + '" data-block-number="restBetweenRoundsSeconds"></label>'
+        : block.mode === 'amrap'
+          ? '<label class="edit-field"><span>Time cap (seconds)</span><input type="number" min="5" max="7200" value="' + block.durationSeconds + '" data-block-number="durationSeconds"></label>' : '';
+      const items = block.items.map((item, ii) => {
+        const toolbar = '<div class="edit-item-head"><span class="mono">' + (item.type === 'rest' ? 'REST' : 'EXERCISE') + ' ' + String(ii + 1).padStart(2, '0') + '</span>' +
+          '<button class="move" type="button" data-act="item-up" aria-label="Move item earlier"' + (ii === 0 ? ' disabled' : '') + '>↑</button>' +
+          '<button class="move" type="button" data-act="item-down" aria-label="Move item later"' + (ii === block.items.length - 1 ? ' disabled' : '') + '>↓</button>' +
+          '<button class="small-remove" type="button" data-act="item-remove" aria-label="Remove item">×</button></div>';
+        if (item.type === 'rest') {
+          return '<div class="edit-item rest-item" data-ii="' + ii + '">' + toolbar + '<div class="edit-grid">' +
+            '<label class="edit-field"><span>Name</span><input maxlength="60" value="' + esc(item.label) + '" data-item-field="label"></label>' +
+            '<label class="edit-field"><span>Duration (seconds)</span><input type="number" min="1" max="3600" value="' + item.seconds + '" data-item-number="seconds"></label>' +
+            '<label class="edit-field wide"><span>Notes — one per line</span><textarea maxlength="10000" data-item-field="notes">' + esc(notesText(item.notes)) + '</textarea></label></div></div>';
+        }
+        const sets = item.setPlan.map((set, si) => '<div class="set-row" data-si="' + si + '"><span class="set-number">SET ' + (si + 1) + '</span>' +
+          '<label class="edit-field"><span>' + (item.completion === 'timed' ? 'Seconds' : 'Target') + '</span>' +
+          (item.completion === 'timed'
+            ? '<input type="number" min="1" max="3600" value="' + set.seconds + '" data-set-number="seconds">'
+            : '<input maxlength="40" value="' + esc(set.target) + '" data-set-field="target">') + '</label>' +
+          '<label class="edit-field set-rest"><span>Rest after (seconds)</span><input type="number" min="0" max="3600" value="' + set.restSeconds + '" data-set-number="restSeconds"></label>' +
+          '<button class="small-remove" type="button" data-act="set-remove" aria-label="Remove set"' + (item.setPlan.length === 1 ? ' disabled' : '') + '>×</button></div>').join('');
+        return '<div class="edit-item exercise-item" data-ii="' + ii + '">' + toolbar + '<div class="edit-grid">' +
+          '<label class="edit-field"><span>Name</span><input maxlength="60" value="' + esc(item.label) + '" data-item-field="label"></label>' +
+          '<label class="edit-field"><span>Completion</span><select data-item-choice="completion"><option value="manual"' + (item.completion === 'manual' ? ' selected' : '') + '>Reps / manual</option><option value="timed"' + (item.completion === 'timed' ? ' selected' : '') + '>Timed</option></select></label>' +
+          (item.completion === 'manual' ? '<label class="edit-field"><span>Logging</span><select data-item-choice="tracking"><option value="reps"' + (item.tracking !== 'weight-reps' ? ' selected' : '') + '>Reps only</option><option value="weight-reps"' + (item.tracking === 'weight-reps' ? ' selected' : '') + '>Weight + reps</option></select></label>' : '') +
+          '<label class="edit-field wide"><span>Notes — one per line</span><textarea maxlength="10000" data-item-field="notes">' + esc(notesText(item.notes)) + '</textarea></label></div>' +
+          '<div class="set-list">' + sets + '</div><button class="add-compact" type="button" data-act="set-add">＋ Add set</button></div>';
+      }).join('');
+      card.dataset.bi = bi;
+      card.innerHTML = '<div class="edit-block-head"><span class="block-number">Block ' + String(bi + 1).padStart(2, '0') + '</span>' +
+        '<button class="move" type="button" data-act="block-up" aria-label="Move block earlier"' + (bi === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="move" type="button" data-act="block-down" aria-label="Move block later"' + (bi === workoutPlan.blocks.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="small-remove" type="button" data-act="block-remove" aria-label="Remove block">×</button></div>' +
+        '<div class="edit-grid"><label class="edit-field"><span>Section name</span><input maxlength="80" value="' + esc(block.title) + '" data-block-field="title"></label>' +
+        '<label class="edit-field"><span>Section type</span><select data-block-choice="mode">' + modeOptions + '</select></label>' + modeFields +
+        '<label class="edit-field wide"><span>Section notes — one per line</span><textarea maxlength="10000" data-block-field="notes">' + esc(notesText(block.notes)) + '</textarea></label></div>' +
+        '<div class="edit-items">' + items + '</div><div class="edit-toolbar"><button class="ghost" type="button" data-act="item-add-exercise">＋ Exercise</button>' +
+        '<button class="ghost" type="button" data-act="item-add-rest">＋ Rest</button></div>';
+      host.appendChild(card);
+    });
+    const addBlock = document.createElement('button');
+    addBlock.type = 'button'; addBlock.className = 'add-compact'; addBlock.dataset.act = 'block-add'; addBlock.textContent = '＋ Add workout section';
+    host.appendChild(addBlock);
+
+    const rerender = message => { persistPlans(); renderWorkoutExercises(); renderSummaries(); if (message != null) setPlanMsg('workout', message); };
+    host.oninput = e => {
+      const blockEl = e.target.closest('[data-bi]');
+      if (!blockEl) return;
+      const block = workoutPlan.blocks[Number(blockEl.dataset.bi)];
+      const itemEl = e.target.closest('[data-ii]');
+      const item = itemEl ? block.items[Number(itemEl.dataset.ii)] : null;
+      if (e.target.dataset.blockField) {
+        const field = e.target.dataset.blockField;
+        if (field === 'notes') block.notes = parseNotes(e.target.value);
+        else if (field === 'unitLabel') block.unitLabel = e.target.value.toLowerCase().replace(/[^a-z -]/g, '').slice(0, 12) || 'round';
+        else block[field] = e.target.value.slice(0, 80) || 'Workout section';
+      } else if (item && e.target.dataset.itemField) {
+        const field = e.target.dataset.itemField;
+        if (field === 'notes') item.notes = parseNotes(e.target.value);
+        else item[field] = e.target.value.slice(0, 60) || (item.type === 'rest' ? 'Rest' : 'Exercise');
+      } else if (item && e.target.dataset.setField) {
+        const setEl = e.target.closest('[data-si]');
+        item.setPlan[Number(setEl.dataset.si)].target = e.target.value.slice(0, 40) || 'Complete set';
+      } else return;
+      persistPlans(); renderSummaries();
+    };
+    host.onchange = e => {
+      const blockEl = e.target.closest('[data-bi]');
+      if (!blockEl) return;
+      const block = workoutPlan.blocks[Number(blockEl.dataset.bi)];
+      const itemEl = e.target.closest('[data-ii]');
+      const item = itemEl ? block.items[Number(itemEl.dataset.ii)] : null;
+      if (e.target.dataset.blockChoice === 'mode') {
+        block.mode = e.target.value;
+        if (block.mode === 'for-time') { block.rounds = Math.max(1, block.rounds || 3); block.durationSeconds = 0; }
+        else if (block.mode === 'amrap') { block.durationSeconds = Math.max(5, block.durationSeconds || 600); block.rounds = 1; block.restBetweenRoundsSeconds = 0; }
+        else { block.rounds = 1; block.durationSeconds = 0; block.restBetweenRoundsSeconds = 0; }
+        return rerender('Section type updated.');
+      }
+      if (e.target.dataset.blockNumber) {
+        const field = e.target.dataset.blockNumber;
+        const limits = field === 'durationSeconds' ? [5, 7200] : field === 'rounds' ? [1, 100] : [0, 3600];
+        block[field] = clamp(Math.round(Number(e.target.value) || limits[0]), limits[0], limits[1]);
+        return rerender();
+      }
+      if (item && e.target.dataset.itemChoice === 'completion') {
+        const next = e.target.value;
+        if (next !== item.completion) {
+          item.setPlan = item.setPlan.map(set => next === 'timed'
+            ? { seconds: 30, restSeconds: set.restSeconds }
+            : { target: '10 reps', restSeconds: set.restSeconds });
+          item.completion = next;
+          if (next === 'timed') item.tracking = 'reps';
+        }
+        return rerender('Exercise completion updated.');
+      }
+      if (item && e.target.dataset.itemChoice === 'tracking') {
+        item.tracking = e.target.value === 'weight-reps' ? 'weight-reps' : 'reps';
+        return rerender('Exercise logging updated.');
+      }
+      if (item && e.target.dataset.itemNumber) {
+        item[e.target.dataset.itemNumber] = clamp(Math.round(Number(e.target.value) || 1), 1, 3600);
+        return rerender();
+      }
+      if (item && e.target.dataset.setNumber) {
+        const setEl = e.target.closest('[data-si]');
+        const field = e.target.dataset.setNumber;
+        const min = field === 'seconds' ? 1 : 0;
+        item.setPlan[Number(setEl.dataset.si)][field] = clamp(Math.round(Number(e.target.value) || min), min, 3600);
+        return rerender();
+      }
+    };
+    host.onclick = e => {
+      const button = e.target.closest('button[data-act]');
+      if (!button) return;
+      const act = button.dataset.act;
+      if (act === 'block-add') {
+        if (workoutPlan.blocks.length >= 20) return setPlanMsg('workout', 'A workout can hold at most 20 sections.', true);
+        workoutPlan.blocks.push({ id: 'block-' + Date.now().toString(36), title: 'New Section', mode: 'sequence', rounds: 1, durationSeconds: 0,
+          unitLabel: 'round', restBetweenRoundsSeconds: 0, score: '', notes: [], items: [{ type: 'exercise', label: 'Exercise', completion: 'manual',
+            id: 'exercise-' + Date.now().toString(36), target: '10 reps', sets: 1, restSeconds: 30, setPlan: [{ target: '10 reps', restSeconds: 30 }], notes: [], tracking: 'reps' }] });
+        return rerender('Workout section added.');
+      }
+      const blockEl = button.closest('[data-bi]');
+      if (!blockEl) return;
+      const bi = Number(blockEl.dataset.bi), block = workoutPlan.blocks[bi];
+      if (act === 'block-up' || act === 'block-down') {
+        const next = bi + (act === 'block-up' ? -1 : 1); if (next < 0 || next >= workoutPlan.blocks.length) return;
+        const [moved] = workoutPlan.blocks.splice(bi, 1); workoutPlan.blocks.splice(next, 0, moved); return rerender('Workout section moved.');
+      }
+      if (act === 'block-remove') {
+        if (workoutPlan.blocks.length === 1) return setPlanMsg('workout', 'A workout needs at least one section.', true);
+        workoutPlan.blocks.splice(bi, 1); return rerender('Workout section removed.');
+      }
+      if (act === 'item-add-exercise' || act === 'item-add-rest') {
+        if (block.items.length >= 100) return setPlanMsg('workout', 'A section can hold at most 100 items.', true);
+        block.items.push(act === 'item-add-rest'
+          ? { type: 'rest', label: 'Rest', seconds: 30, notes: [] }
+          : { type: 'exercise', id: 'exercise-' + Date.now().toString(36), label: 'Exercise', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 30,
+              setPlan: [{ target: '10 reps', restSeconds: 30 }], notes: [], tracking: 'reps' });
+        return rerender(act === 'item-add-rest' ? 'Rest added.' : 'Exercise added.');
+      }
+      const itemEl = button.closest('[data-ii]');
+      if (!itemEl) return;
+      const ii = Number(itemEl.dataset.ii), item = block.items[ii];
+      if (act === 'item-up' || act === 'item-down') {
+        const next = ii + (act === 'item-up' ? -1 : 1); if (next < 0 || next >= block.items.length) return;
+        const [moved] = block.items.splice(ii, 1); block.items.splice(next, 0, moved); return rerender('Workout item moved.');
+      }
+      if (act === 'item-remove') {
+        if (item.type === 'exercise' && block.items.filter(x => x.type === 'exercise').length === 1) return setPlanMsg('workout', 'Each section needs at least one exercise.', true);
+        block.items.splice(ii, 1); return rerender('Workout item removed.');
+      }
+      if (item.type !== 'exercise') return;
+      if (act === 'set-add') {
+        if (item.setPlan.length >= 100) return setPlanMsg('workout', 'An exercise can hold at most 100 sets.', true);
+        const last = item.setPlan[item.setPlan.length - 1];
+        item.setPlan.push(item.completion === 'timed' ? { seconds: last.seconds, restSeconds: 0 } : { target: last.target, restSeconds: 0 });
+        return rerender('Set added.');
+      }
+      if (act === 'set-remove') {
+        if (item.setPlan.length === 1) return;
+        const setEl = button.closest('[data-si]'); item.setPlan.splice(Number(setEl.dataset.si), 1); return rerender('Set removed.');
+      }
+    };
+  }
+
+  function renderWorkoutExercises() {
+    const host = $('#wExercises');
+    host.innerHTML = '';
+    host.className = workoutPlan.layout === 'blocks' ? 'structured-list' : 'tiles';
+    $('#wEdit').classList.toggle('hidden', workoutPlan.layout !== 'blocks');
+    $('#wEdit').textContent = editingStructuredWorkout ? 'Done editing' : 'Edit workout';
+    if (workoutPlan.layout === 'blocks') return editingStructuredWorkout ? renderStructuredWorkoutEditor(host) : renderStructuredWorkout(host);
+    editingStructuredWorkout = false;
+    workoutPlan.items.forEach((item, i) => {
+      const isRest = item.type === 'rest';
+      const exerciseNumber = workoutPlan.items.slice(0, i + 1).filter(x => x.type === 'exercise').length;
+      const el = document.createElement('div');
+      const bg = isRest ? workoutTheme.rest : workoutTheme.work;
+      el.className = 'tile' + (isRest ? '' : ' exercise-tile');
+      el.style.background = bg;
+      el.style.color = textOn(bg);
+      const kindLabel = isRest ? 'REST ' + String(i + 1).padStart(2, '0') : 'EXERCISE ' + String(exerciseNumber).padStart(2, '0');
+      const controls = isRest
+        ? '<div class="tile-bottom"><button class="icon" type="button" data-act="duration-minus" aria-label="Less rest">−</button><span class="val">' + shortSec(item.seconds) + '</span><button class="icon" type="button" data-act="duration-plus" aria-label="More rest">＋</button></div>'
+        : '<div class="exercise-fields"><div class="target-wrap"><span class="mono">Target</span><input class="target" maxlength="40" data-act="target" aria-label="Exercise target" placeholder="10 reps" /></div>' +
+          '<div class="sets-row"><span class="mono">Sets</span><div class="sets-stepper"><button type="button" data-act="sets-minus" aria-label="Fewer sets">−</button>' +
+          '<span class="sets-value">' + item.sets + '</span><button type="button" data-act="sets-plus" aria-label="More sets">＋</button></div></div></div>' +
+          '<label class="tracking-choice"><span class="mono">Logging</span><select data-act="tracking" aria-label="Exercise logging"><option value="reps"' + (item.tracking !== 'weight-reps' ? ' selected' : '') + '>Reps only</option><option value="weight-reps"' + (item.tracking === 'weight-reps' ? ' selected' : '') + '>Weight + reps</option></select></label>' +
+          '<div class="linked-rest" data-act="rest-wrap"><span class="mode-icon">' + BED_ICON + '</span><span class="linked-rest-copy"><span class="mono">Rest after each set</span></span>' +
+          '<div class="sets-stepper"><button type="button" data-act="rest-minus" aria-label="Less linked rest">−</button><span class="sets-value">' + shortSec(item.restSeconds) + '</span><button type="button" data-act="rest-plus" aria-label="More linked rest">＋</button></div></div>';
+      el.innerHTML = '<div class="tile-top"><span class="mono">' + kindLabel + '</span>' + (isRest ? '<span class="icon mode-icon">' + BED_ICON + '</span>' : '') + '<span class="grp">' +
+        '<button class="move" type="button" data-act="up" aria-label="Move ' + (isRest ? 'rest' : 'exercise') + ' earlier"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="move" type="button" data-act="down" aria-label="Move ' + (isRest ? 'rest' : 'exercise') + ' later"' + (i === workoutPlan.items.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="icon remove" type="button" data-act="remove" aria-label="Remove ' + (isRest ? 'rest' : 'exercise') + '">×</button></span></div>' +
+        '<input maxlength="60" data-act="label" aria-label="' + (isRest ? 'Rest label' : 'Exercise name') + '" />' + controls;
+      if (!isRest) {
+        el.querySelector('[data-act="rest-wrap"]').style.background = workoutTheme.rest;
+        el.querySelector('[data-act="rest-wrap"]').style.color = textOn(workoutTheme.rest);
+      }
+      const label = el.querySelector('[data-act="label"]'); label.value = item.label;
+      label.addEventListener('input', e => { item.label = e.target.value.slice(0, 60) || (isRest ? 'Rest' : 'Exercise'); persistPlans(); renderSummaries(); });
+      const rerender = () => { persistPlans(); renderWorkoutExercises(); renderSummaries(); };
+      if (isRest) {
+        el.querySelector('[data-act="duration-minus"]').addEventListener('click', () => { item.seconds = clamp(item.seconds - 5, 5, 3600); rerender(); });
+        el.querySelector('[data-act="duration-plus"]').addEventListener('click', () => { item.seconds = clamp(item.seconds + 5, 5, 3600); rerender(); });
+      } else {
+        const target = el.querySelector('[data-act="target"]'); target.value = item.target;
+        target.addEventListener('input', e => { item.target = e.target.value.slice(0, 40) || 'Complete one set'; persistPlans(); });
+        el.querySelector('[data-act="tracking"]').addEventListener('change', e => { item.tracking = e.target.value === 'weight-reps' ? 'weight-reps' : 'reps'; persistPlans(); });
+        el.querySelector('[data-act="sets-minus"]').addEventListener('click', () => { item.sets = clamp(item.sets - 1, 1, 100); rerender(); });
+        el.querySelector('[data-act="sets-plus"]').addEventListener('click', () => { item.sets = clamp(item.sets + 1, 1, 100); rerender(); });
+        el.querySelector('[data-act="rest-minus"]').addEventListener('click', () => { item.restSeconds = clamp(item.restSeconds - 5, 0, 3600); rerender(); });
+        el.querySelector('[data-act="rest-plus"]').addEventListener('click', () => { item.restSeconds = clamp(item.restSeconds + 5, 0, 3600); rerender(); });
+      }
+      const move = dir => {
+        const j = i + dir; if (j < 0 || j >= workoutPlan.items.length) return;
+        const [moved] = workoutPlan.items.splice(i, 1); workoutPlan.items.splice(j, 0, moved); rerender(); setPlanMsg('workout', 'Moved ' + moved.label + ' to position ' + (j + 1) + '.');
+      };
+      el.querySelector('[data-act="up"]').addEventListener('click', () => move(-1));
+      el.querySelector('[data-act="down"]').addEventListener('click', () => move(1));
+      el.querySelector('[data-act="remove"]').addEventListener('click', () => {
+        if (!isRest && workoutPlan.items.filter(x => x.type === 'exercise').length === 1) return setPlanMsg('workout', 'A workout needs at least one exercise.', true);
+        workoutPlan.items.splice(i, 1); rerender(); setPlanMsg('workout', '');
+      });
+      host.appendChild(el);
+    });
+    const addRow = document.createElement('div'); addRow.className = 'add-row';
+    const addExercise = document.createElement('button'); addExercise.type = 'button'; addExercise.className = 'add'; addExercise.textContent = '＋  Add exercise';
+    const addRest = document.createElement('button'); addRest.type = 'button'; addRest.className = 'add'; addRest.textContent = '＋  Add rest';
+    addExercise.addEventListener('click', () => {
+      if (workoutPlan.items.length >= 100) return setPlanMsg('workout', 'A workout can hold at most 100 items.', true);
+      const n = workoutPlan.items.filter(x => x.type === 'exercise').length + 1;
+      workoutPlan.items.push({ type: 'exercise', id: cleanExerciseId('', 'simple-' + Date.now().toString(36) + '-exercise-' + n), label: 'Exercise ' + n,
+        target: '10 reps', sets: 3, restSeconds: 30, tracking: 'reps' });
+      persistPlans(); renderWorkoutExercises(); renderSummaries(); setPlanMsg('workout', 'Exercise with linked set rest added.');
+    });
+    addRest.addEventListener('click', () => {
+      if (workoutPlan.items.length >= 100) return setPlanMsg('workout', 'A workout can hold at most 100 items.', true);
+      workoutPlan.items.push({ type: 'rest', label: 'Rest', seconds: 60 });
+      persistPlans(); renderWorkoutExercises(); renderSummaries(); setPlanMsg('workout', 'Standalone rest added.');
+    });
+    addRow.append(addExercise, addRest); host.appendChild(addRow);
+  }
+
+  function renderCircuitTiles() {
+    const host = $('#cTiles');
+    host.innerHTML = '';
+    circuitPlan.segments.forEach((seg, i) => {
+      const isRest = seg.phase === 'rest';
+      const bg = isRest ? circuitTheme.rest : circuitTheme.work;
+      const el = document.createElement('div');
+      el.className = 'tile'; el.style.background = bg; el.style.color = textOn(bg);
+      const phaseLabel = isRest ? 'Rest step. Tap to change to station.' : 'Station step. Tap to change to rest.';
+      el.innerHTML = '<div class="tile-top"><span class="mono">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<button class="flip mode-icon" type="button" data-act="flip" aria-label="' + phaseLabel + '" title="' + phaseLabel + '">' + (isRest ? BED_ICON : DUMBBELL_ICON) + '</button>' +
+        '<span class="grp"><button class="move" type="button" data-act="up" aria-label="Move step earlier"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="move" type="button" data-act="down" aria-label="Move step later"' + (i === circuitPlan.segments.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="icon remove" type="button" data-act="remove" aria-label="Remove step">×</button></span></div>' +
+        '<input maxlength="60" data-act="label" aria-label="Circuit step label" />' +
+        '<div class="tile-bottom"><button class="icon" type="button" data-act="minus" aria-label="Less time">−</button><span class="val">' + shortSec(seg.seconds) + '</span><button class="icon" type="button" data-act="plus" aria-label="More time">＋</button></div>';
+      const label = el.querySelector('[data-act="label"]'); label.value = seg.label;
+      label.addEventListener('input', e => { seg.label = e.target.value.slice(0, 60) || (isRest ? 'Rest' : 'Station'); persistPlans(); });
+      const rerender = () => { persistPlans(); renderCircuitTiles(); renderSummaries(); };
+      el.querySelector('[data-act="minus"]').addEventListener('click', () => { seg.seconds = clamp(seg.seconds - 5, 5, 3600); rerender(); });
+      el.querySelector('[data-act="plus"]').addEventListener('click', () => { seg.seconds = clamp(seg.seconds + 5, 5, 3600); rerender(); });
+      el.querySelector('[data-act="flip"]').addEventListener('click', () => { seg.phase = isRest ? 'work' : 'rest'; seg.label = isRest ? 'Station ' + (circuitPlan.segments.filter(s => s.phase === 'work').length + 1) : 'Rest'; seg.seconds = isRest ? 45 : 15; rerender(); });
+      const move = dir => { const j = i + dir; if (j < 0 || j >= circuitPlan.segments.length) return; const [moved] = circuitPlan.segments.splice(i, 1); circuitPlan.segments.splice(j, 0, moved); rerender(); setPlanMsg('circuit', 'Moved ' + moved.label + ' to position ' + (j + 1) + '.'); };
+      el.querySelector('[data-act="up"]').addEventListener('click', () => move(-1));
+      el.querySelector('[data-act="down"]').addEventListener('click', () => move(1));
+      el.querySelector('[data-act="remove"]').addEventListener('click', () => {
+        if (circuitPlan.segments.length === 1) return setPlanMsg('circuit', 'A circuit needs at least one timed step.', true);
+        circuitPlan.segments.splice(i, 1); rerender(); setPlanMsg('circuit', 'Circuit step removed.');
+      });
+      host.appendChild(el);
+    });
+    const add = document.createElement('button'); add.type = 'button'; add.className = 'add'; add.textContent = '＋  Add station + rest';
+    add.addEventListener('click', () => {
+      if (circuitPlan.segments.length > 98) return setPlanMsg('circuit', 'A circuit can hold at most 100 steps.', true);
+      const n = circuitPlan.segments.filter(s => s.phase === 'work').length + 1;
+      circuitPlan.segments.push({ label: 'Station ' + n, phase: 'work', seconds: 45 }, { label: 'Rest', phase: 'rest', seconds: 15 });
+      persistPlans(); renderCircuitTiles(); renderSummaries(); setPlanMsg('circuit', 'Station and rest added.');
+    });
+    host.appendChild(add);
+  }
+
+  function renderRestPresets() {
+    const host = $('#rPresets');
+    host.innerHTML = '';
+    host.classList.toggle('editing-grid', editingRestPresets);
+    restPresets.forEach((sec, i) => {
+      const el = document.createElement(editingRestPresets ? 'div' : 'button');
+      el.className = 'preset' + (editingRestPresets ? ' editing rest-edit' : '');
+      el.style.background = MODE_REST;
+      el.style.color = textOn(MODE_REST);
+      if (editingRestPresets) {
+        el.setAttribute('role', 'group');
+        el.setAttribute('aria-label', 'Edit rest preset ' + (i + 1));
+        el.innerHTML = '<span class="cap">PRESET ' + (i + 1) + '</span><div class="editstack"><div class="editblock">' +
+          '<span class="cap">DURATION</span><div class="edit">' +
+          '<button class="icon" type="button" data-dir="-1" aria-label="Decrease rest preset ' + (i + 1) + '">−</button>' +
+          '<span class="editval">' + fmt(sec) + '</span>' +
+          '<button class="icon" type="button" data-dir="1" aria-label="Increase rest preset ' + (i + 1) + '">＋</button></div></div></div>';
+        el.querySelectorAll('[data-dir]').forEach(b => b.addEventListener('click', () => {
+          const step = sec >= 300 ? 60 : sec >= 60 ? 30 : 15;
+          restPresets[i] = clamp(sec + step * Number(b.dataset.dir), 5, 10800);
+          store.set('workoutTimerRestPresets', restPresets); renderRestPresets();
+        }));
+      } else {
+        el.type = 'button';
+        el.innerHTML = '<span class="cap">REST</span><span class="big">' + fmt(sec) + '</span>';
+        el.addEventListener('click', () => { cfg.rest.minutes = Math.floor(sec / 60); cfg.rest.seconds = sec % 60; renderFields(); startRest(); });
+      }
+      host.appendChild(el);
+    });
+  }
+
+  function renderIntervalPresets() {
+    const host = $('#iPresets');
+    host.innerHTML = '';
+    host.classList.toggle('editing-grid', editingIntervalPresets);
+    intervalPresets.forEach(([r, w, rr], i) => {
+      const el = document.createElement(editingIntervalPresets ? 'div' : 'button');
+      el.className = 'preset' + (editingIntervalPresets ? ' editing' : '');
+      el.style.background = MODE_WORK; el.style.color = textOn(MODE_WORK);
+      if (editingIntervalPresets) {
+        el.setAttribute('role', 'group');
+        el.setAttribute('aria-label', 'Edit interval preset ' + (i + 1));
+        const control = (label, key, display) =>
+          '<div class="editblock"><span class="cap">' + label + '</span><div class="edit">' +
+          '<button class="icon" type="button" data-key="' + key + '" data-dir="-1" aria-label="Decrease preset ' + (i + 1) + ' ' + label.toLowerCase() + '">−</button>' +
+          '<span class="editval">' + display + '</span>' +
+          '<button class="icon" type="button" data-key="' + key + '" data-dir="1" aria-label="Increase preset ' + (i + 1) + ' ' + label.toLowerCase() + '">＋</button></div></div>';
+        el.innerHTML = '<span class="cap">PRESET ' + (i + 1) + '</span><div class="editstack">' +
+          control('Rounds', 'rounds', r) + control('Work', 'work', fmt(w)) + control('Rest', 'rest', fmt(rr)) + '</div>';
+        el.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => {
+          const index = b.dataset.key === 'rounds' ? 0 : b.dataset.key === 'work' ? 1 : 2;
+          const step = index === 0 ? 1 : 5;
+          const min = index === 0 ? 1 : index === 1 ? 5 : 0;
+          intervalPresets[i][index] = clamp(intervalPresets[i][index] + step * Number(b.dataset.dir), min, index === 0 ? 100 : 3600);
+          store.set('workoutTimerIntervalPresets', intervalPresets);
+          renderIntervalPresets();
+        }));
+      } else {
+        el.type = 'button';
+        el.setAttribute('aria-label', r + ' rounds, ' + w + ' seconds work, ' + rr + ' seconds rest. Start now');
+        el.innerHTML = '<span class="cap">' + r + ' ROUNDS</span><span class="big">' + fmt(w) + ' / ' + fmt(rr) + '</span>';
+        el.addEventListener('click', () => { cfg.intervals.rounds = r; cfg.intervals.work = w; cfg.intervals.rest = rr; renderFields(); renderSummaries(); startIntervals(); });
+      }
+      host.appendChild(el);
+    });
+  }
+
+  function renderFields() {
+    $$('.stepper[data-field]').forEach(st => {
+      const [group, key] = st.dataset.field.split('.');
+      st.querySelector('output').textContent = cfg[group][key];
+    });
+    $$('.chips[data-field]').forEach(ch => {
+      const [group, key] = ch.dataset.field.split('.');
+      ch.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.val) === cfg[group][key])));
+    });
+  }
+
+  function renderSummaries() {
+    if (workoutPlan.layout === 'blocks') {
+      const blocks = workoutPlan.blocks;
+      const exercises = blocks.reduce((sum, block) => sum + block.items.filter(x => x.type === 'exercise').length, 0);
+      const timedBlocks = blocks.filter(block => block.mode === 'amrap').length;
+      const scoredBlocks = blocks.filter(block => block.mode === 'for-time').length;
+      $('#wTotalLabel').textContent = 'Duration';
+      $('#wTotal').textContent = 'Variable';
+      $('#wNote').textContent = blocks.length + ' blocks · ' + exercises + ' exercises' +
+        (timedBlocks ? ' · ' + timedBlocks + ' timed cap' + (timedBlocks === 1 ? '' : 's') : '') +
+        (scoredBlocks ? ' · ' + scoredBlocks + ' for-time score' + (scoredBlocks === 1 ? '' : 's') : '') +
+        (cfg.workout.prep ? ' · ' + cfg.workout.prep + 's prep' : '');
+    } else {
+    const exercises = workoutPlan.items.filter(x => x.type === 'exercise');
+    const standaloneRests = workoutPlan.items.filter(x => x.type === 'rest');
+    const sets = exercises.reduce((sum, x) => sum + x.sets, 0);
+    const linkedRest = workoutPlan.items.reduce((sum, x, i) => {
+      if (x.type !== 'exercise') return sum;
+      const nextIsStandaloneRest = workoutPlan.items[i + 1] && workoutPlan.items[i + 1].type === 'rest';
+      const finalSetUsesLinkedRest = i < workoutPlan.items.length - 1 && !nextIsStandaloneRest;
+      return sum + x.restSeconds * (x.sets - (finalSetUsesLinkedRest ? 0 : 1));
+    }, 0);
+    const standaloneRest = standaloneRests.reduce((sum, x) => sum + x.seconds, 0);
+    const rests = linkedRest + standaloneRest;
+    $('#wTotalLabel').textContent = 'Duration';
+    $('#wTotal').textContent = 'Variable';
+    $('#wNote').textContent = exercises.length + ' exercise' + (exercises.length === 1 ? '' : 's') + ' · ' + sets + ' set' + (sets === 1 ? '' : 's') +
+      (standaloneRests.length ? ' · ' + standaloneRests.length + ' extra rest' + (standaloneRests.length === 1 ? '' : 's') : '') +
+      (rests ? ' · ' + fmtPad(rests) + ' planned rest' : '') + (cfg.workout.prep ? ' · ' + cfg.workout.prep + 's prep' : '');
+    }
+    const oneCircuit = circuitPlan.segments.reduce((sum, s) => sum + s.seconds, 0);
+    $('#cTotal').textContent = fmtPad(oneCircuit * cfg.circuit.rounds + cfg.circuit.prep);
+    $('#cNote').textContent = circuitPlan.segments.length + ' timed steps × ' + cfg.circuit.rounds + ' circuit round' + (cfg.circuit.rounds === 1 ? '' : 's') +
+      (cfg.circuit.prep ? ' + ' + cfg.circuit.prep + 's prep' : '');
+  }
+
+  function setPlanMsg(kind, text, isError) {
+    const el = $(kind === 'circuit' ? '#cMsg' : '#wMsg');
+    el.textContent = text || '';
+    el.classList.toggle('err', !!isError);
+  }
+
+  document.addEventListener('click', (e) => {
+    const stepBtn = e.target.closest('.stepper[data-field] button');
+    if (stepBtn) {
+      const st = stepBtn.closest('.stepper');
+      const [group, key] = st.dataset.field.split('.');
+      const next = clamp(cfg[group][key] + Number(st.dataset.step) * Number(stepBtn.dataset.dir), Number(st.dataset.min), Number(st.dataset.max));
+      cfg[group][key] = next;
+      if (group === 'workout' || group === 'circuit') persistPlans();
+      renderFields(); renderSummaries();
+      return;
+    }
+    const chip = e.target.closest('.chips[data-field] button');
+    if (chip) {
+      const [group, key] = chip.closest('.chips').dataset.field.split('.');
+      cfg[group][key] = Number(chip.dataset.val);
+      if (group === 'workout' || group === 'circuit') persistPlans();
+      renderFields(); renderSummaries();
+    }
+  });
+
+  $('#wName').addEventListener('input', (e) => { workoutPlan.name = e.target.value.slice(0, 80) || 'Workout'; persistPlans(); });
+  $('#cName').addEventListener('input', (e) => { circuitPlan.name = e.target.value.slice(0, 80) || 'Circuit'; persistPlans(); });
+
+  $('#modes').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-mode]');
+    if (!b) return;
+    S.mode = b.dataset.mode;
+    $('#panel-history').classList.add('hidden');
+    $$('#modes button').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    ['workout', 'circuit', 'rest', 'stopwatch', 'intervals'].forEach(m => $('#panel-' + m).classList.toggle('hidden', m !== S.mode));
+  });
+
+  $('#rEdit').addEventListener('click', () => {
+    editingRestPresets = !editingRestPresets;
+    $('#rEdit').textContent = editingRestPresets ? 'Done' : 'Edit presets';
+    $('#rPresetHelp').textContent = editingRestPresets ? 'Adjust the five one-tap rest durations.' : 'Tap a preset to start resting immediately.';
+    renderRestPresets();
+  });
+
+  $('#iEdit').addEventListener('click', () => {
+    editingIntervalPresets = !editingIntervalPresets;
+    $('#iEdit').textContent = editingIntervalPresets ? 'Done' : 'Edit presets';
+    $('#iPresetHelp').textContent = editingIntervalPresets ? 'Adjust rounds, work and rest for each quick preset.' : 'Tap a preset to begin with the prep selected below.';
+    renderIntervalPresets();
+  });
+
+  /* ---------- queue building ---------- */
+  const isManualItem = (it) => it && it.phase === 'work' && it.completion === 'manual';
+  const itemDetail = (it) => isManualItem(it) ? it.target : shortSec(it.seconds);
+
+  function withMeta(items, name) {
+    return items.map((it, i) => {
+      const next = items[i + 1];
+      return Object.assign({}, it, {
+        name: name,
+        next: next ? next.label + ' · ' + itemDetail(next) : 'Finish'
+      });
+    });
+  }
+
+  function buildWorkout() {
+    const items = [];
+    if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING' });
+    if (workoutPlan.layout === 'blocks') {
+      const addExerciseSet = (block, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds) => {
+        const base = { label: exercise.label, phase: 'work', completion: exercise.completion, set, sets, notes: exercise.notes,
+          exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps', liveLog: block.mode === 'sequence' && exercise.completion === 'manual',
+          round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+          blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
+          meta: block.title.toUpperCase() };
+        if (exercise.completion === 'timed') base.seconds = targetOrSeconds;
+        else base.target = targetOrSeconds;
+        items.push(base);
+        if (restSeconds > 0) items.push({ label: 'Rest', phase: 'rest', seconds: restSeconds,
+          blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
+          meta: 'REST · ' + block.title.toUpperCase() + (sets > 1 ? ' · SET ' + set + ' OF ' + sets : '') });
+      };
+      workoutPlan.blocks.forEach(block => {
+        const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? 200 : 1;
+        for (let round = 1; round <= rounds; round++) {
+          block.items.forEach(item => {
+            if (item.type === 'rest') {
+              items.push({ label: item.label, phase: 'rest', seconds: item.seconds, notes: item.notes,
+                round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+                blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
+                meta: block.title.toUpperCase() });
+              return;
+            }
+            const setPlan = item.setPlan || Array.from({ length: item.sets }, () => item.completion === 'timed'
+              ? { seconds: item.seconds, restSeconds: item.restSeconds }
+              : { target: item.target, restSeconds: item.restSeconds });
+            setPlan.forEach((set, si) => addExerciseSet(block, item, si + 1, setPlan.length, round, rounds,
+              item.completion === 'timed' ? set.seconds : set.target, set.restSeconds));
+          });
+          if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0 && round < rounds) {
+            items.push({ label: 'Rest', phase: 'rest', seconds: block.restBetweenRoundsSeconds, round, rounds,
+              progressLabel: block.unitLabel || 'round', notes: ['The density stopwatch continues during this rest.'],
+              blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: 0, meta: block.title.toUpperCase() });
+          }
+        }
+      });
+      return withMeta(items, workoutPlan.name);
+    }
+    const exerciseTotal = workoutPlan.items.filter(x => x.type === 'exercise').length;
+    let exerciseNumber = 0;
+    workoutPlan.items.forEach((item, i) => {
+      if (item.type === 'rest') {
+        items.push({ label: item.label, phase: 'rest', seconds: item.seconds, meta: 'STANDALONE REST · STEP ' + (i + 1) + ' OF ' + workoutPlan.items.length });
+        return;
+      }
+      exerciseNumber++;
+      const exercise = item;
+      for (let set = 1; set <= exercise.sets; set++) {
+        items.push({ label: exercise.label, phase: 'work', completion: 'manual', target: exercise.target, sets: exercise.sets, set,
+          exerciseId: exercise.id || exerciseId('workout', exercise.label), tracking: exercise.tracking || 'reps', liveLog: true,
+          meta: 'EXERCISE ' + exerciseNumber + ' OF ' + exerciseTotal });
+        const nextIsStandaloneRest = workoutPlan.items[i + 1] && workoutPlan.items[i + 1].type === 'rest';
+        const needsRest = exercise.restSeconds > 0 && (set < exercise.sets || (i < workoutPlan.items.length - 1 && !nextIsStandaloneRest));
+        if (needsRest) items.push({ label: 'Rest', phase: 'rest', seconds: exercise.restSeconds,
+          meta: 'REST AFTER ' + exercise.label.toUpperCase() + ' · SET ' + set + ' OF ' + exercise.sets });
+      }
+    });
+    return withMeta(items, workoutPlan.name);
+  }
+
+  function buildCircuit() {
+    const items = [];
+    if (cfg.circuit.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.circuit.prep, meta: 'STARTING' });
+    for (let r = 1; r <= cfg.circuit.rounds; r++) {
+      circuitPlan.segments.forEach((s, i) => items.push({ label: s.label, phase: s.phase, seconds: s.seconds,
+        meta: 'ROUND ' + r + ' OF ' + cfg.circuit.rounds + ' · STEP ' + (i + 1) + ' OF ' + circuitPlan.segments.length }));
+    }
+    return withMeta(items, circuitPlan.name);
+  }
+
+  function buildRest() {
+    const total = cfg.rest.minutes * 60 + cfg.rest.seconds;
+    if (total <= 0) return null;
+    return withMeta([{ label: 'Rest', phase: 'rest', seconds: total, meta: 'RECOVERY' }], 'Rest');
+  }
+
+  function buildIntervals() {
+    const iv = cfg.intervals, items = [];
+    if (iv.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: iv.prep, meta: 'STARTING' });
+    for (let r = 1; r <= iv.rounds; r++) {
+      items.push({ label: 'Work', phase: 'work', seconds: iv.work, meta: 'ROUND ' + r + ' OF ' + iv.rounds });
+      if (iv.rest > 0) items.push({ label: 'Rest', phase: 'rest', seconds: iv.rest, meta: 'ROUND ' + r + ' OF ' + iv.rounds });
+    }
+    return withMeta(items, 'Intervals');
+  }
+
+  function buildStopwatch() {
+    const items = [];
+    if (cfg.stopwatch.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.stopwatch.prep, meta: 'STARTING' });
+    items.push({ label: 'Stopwatch', phase: 'up', seconds: cfg.stopwatch.limit * 60, meta: cfg.stopwatch.limit ? 'LIMIT ' + fmtPad(cfg.stopwatch.limit * 60) : 'COUNTING UP' });
+    return withMeta(items, 'Stopwatch');
+  }
+
+  /* ---------- workout logging ---------- */
+  const sessionId = () => window.crypto && crypto.randomUUID ? crypto.randomUUID() : 'session-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+  const exerciseId = (blockId, label) => blockId + '-' + String(label || 'exercise').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
+  function targetRepRange(target) {
+    const values = (String(target || '').match(/\d+/g) || []).slice(0, 2).map(Number);
+    if (!values.length) return { min: null, max: null };
+    return { min: clamp(Math.min(...values), 0, 10000), max: clamp(Math.max(...values), 0, 10000) };
+  }
+  function targetReps(target) {
+    return targetRepRange(target).max;
+  }
+  function planExercises(plan) {
+    if (!plan) return [];
+    if (plan.layout === 'blocks') return (plan.blocks || []).flatMap(block => (block.items || []).filter(item => item.type === 'exercise').map(item => ({
+      id: item.id || exerciseId(block.id || 'block', item.label), label: item.label
+    })));
+    return (plan.items || []).filter(item => item.type === 'exercise').map(item => ({ id: item.id || exerciseId('workout', item.label), label: item.label }));
+  }
+  function previousExerciseMap(sessions, plan) {
+    const result = {};
+    const normalizedName = String(plan && plan.name || '').trim().toLowerCase();
+    const preferred = sessions.filter(session => String(session.workoutName || '').trim().toLowerCase() === normalizedName);
+    const remaining = sessions.filter(session => String(session.workoutName || '').trim().toLowerCase() !== normalizedName);
+    planExercises(plan).forEach(planned => {
+      const labelKey = String(planned.label || '').trim().toLowerCase();
+      let found = null;
+      for (const group of [preferred, remaining]) {
+        for (const session of group) {
+          for (const block of session.blocks || []) {
+            const exact = (block.exercises || []).find(exercise => exercise.exerciseId === planned.id);
+            const byLabel = (block.exercises || []).find(exercise => String(exercise.label || '').trim().toLowerCase() === labelKey);
+            const exercise = exact || byLabel;
+            if (exercise && (exercise.sets || []).some(set => set.completion === 'manual')) {
+              found = { sets: exercise.sets, unit: session.unit === 'kg' ? 'kg' : 'lb', completedAt: session.completedAt };
+              break;
+            }
+          }
+          if (found) break;
+        }
+        if (found) break;
+      }
+      if (found) result[planned.id] = found;
+    });
+    return result;
+  }
+  const setResultKey = (exercisePlanId, set) => exercisePlanId + '::' + Number(set || 1);
+  function previousSetForItem(item) {
+    const previous = S.previousExercises[item.exerciseId];
+    if (!previous) return null;
+    const manualSets = (previous.sets || []).filter(set => set.completion === 'manual');
+    return { set: manualSets[Number(item.set || 1) - 1] || manualSets[0] || null, unit: previous.unit };
+  }
+  function setSummary(set, unit) {
+    if (!set) return '';
+    const reps = set.actualReps == null ? '' : set.actualReps + ' reps';
+    const weight = set.weight == null ? '' : set.weight + ' ' + unit;
+    return [weight, reps].filter(Boolean).join(' × ');
+  }
+  function recordManualSet(item, nextItem) {
+    if (!item || !item.liveLog || !item.exerciseId) { S.restLogKey = null; return; }
+    const key = setResultKey(item.exerciseId, item.set);
+    const previous = previousSetForItem(item);
+    const priorToday = Object.values(S.sessionSetResults).filter(result => result.exerciseId === item.exerciseId && result.set < item.set).sort((a, b) => b.set - a.set)[0];
+    const existing = S.sessionSetResults[key];
+    const result = existing || {
+      exerciseId: item.exerciseId, label: item.label, set: Number(item.set) || 1, target: String(item.target || 'Complete set'),
+      tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps', actualReps: previous && previous.set && previous.set.actualReps != null ? previous.set.actualReps : targetReps(item.target),
+      weight: item.tracking === 'weight-reps'
+        ? (priorToday && priorToday.weight != null ? priorToday.weight : previous && previous.set && previous.set.weight != null ? previous.set.weight : null) : null,
+      previousReps: previous && previous.set ? previous.set.actualReps : null,
+      previousWeight: previous && previous.set ? previous.set.weight : null,
+      previousUnit: previous ? previous.unit : S.sessionUnit
+    };
+    S.sessionSetResults[key] = result;
+    S.restLogKey = nextItem && nextItem.phase === 'rest' ? key : null;
+  }
+  function renderRunPrevious(item) {
+    const host = $('#runPrevious');
+    const previous = item && item.liveLog ? previousSetForItem(item) : null;
+    const summary = previous && setSummary(previous.set, previous.unit);
+    host.textContent = summary ? 'LAST TIME · SET ' + item.set + ' · ' + summary : '';
+    host.classList.toggle('hidden', !summary);
+  }
+  function renderRunSetLogger(item) {
+    const host = $('#setLogger');
+    const result = item && item.phase === 'rest' && S.restLogKey ? S.sessionSetResults[S.restLogKey] : null;
+    if (!result) { host.classList.add('hidden'); host.innerHTML = ''; return; }
+    const previous = result.previousReps != null || result.previousWeight != null
+      ? 'Previous: ' + setSummary({ actualReps: result.previousReps, weight: result.previousWeight }, result.previousUnit) : 'Target: ' + result.target;
+    const weightField = result.tracking === 'weight-reps'
+      ? '<label>Weight (' + esc(S.sessionUnit) + ')<input type="number" inputmode="decimal" min="0" max="10000" step="0.5" value="' + (result.weight == null ? '' : result.weight) + '" data-live-field="weight"></label>' : '';
+    host.innerHTML = '<div class="setlogger-grid' + (result.tracking === 'weight-reps' ? '' : ' reps-only') + '"><div><div class="setlogger-title">' + esc(result.label) + ' · Set ' + result.set + '</div>' +
+      '<div class="setlogger-previous">' + esc(previous) + '</div></div>' + weightField +
+      '<label>Actual reps<input type="number" inputmode="numeric" min="0" max="10000" step="1" value="' + (result.actualReps == null ? '' : result.actualReps) + '" data-live-field="actualReps"></label>' +
+      '<div class="setlogger-saved">SAVED FOR FINAL REVIEW</div></div>';
+    host.classList.remove('hidden');
+  }
+  function captureActiveBlock() {
+    if (S.mode !== 'workout' || !S.blockId || !S.sessionPlan) return;
+    const item = S.queue[S.qi] || {};
+    S.sessionBlockTimes[S.blockId] = Math.max(0, Math.round(blockElapsed() / 1000));
+    S.sessionBlockProgress[S.blockId] = { round: Number(item.round) || 0, label: String(item.label || '') };
+  }
+  function logSets(item, exercisePlanId) {
+    const completion = String(item.completion || (item.seconds ? 'timed' : 'manual'));
+    const source = Array.isArray(item.setPlan) && item.setPlan.length
+      ? item.setPlan
+      : Array.from({ length: clamp(Number(item.sets) || 1, 1, 100) }, () => completion === 'timed'
+        ? { seconds: Number(item.seconds) || 1, restSeconds: Number(item.restSeconds) || 0 }
+        : { target: String(item.target || 'Complete set'), restSeconds: Number(item.restSeconds) || 0 });
+    return source.map((set, index) => completion === 'timed'
+      ? { set: index + 1, completion: 'timed', plannedSeconds: Number(set.seconds) || 1, actualSeconds: Number(set.seconds) || 1 }
+      : (() => {
+          const live = S.sessionSetResults[setResultKey(exercisePlanId, index + 1)];
+          return { set: index + 1, completion: 'manual', target: String(set.target || 'Complete set'), plannedReps: targetReps(set.target),
+            actualReps: live ? live.actualReps : targetReps(set.target), weight: live ? live.weight : null };
+        })());
+  }
+  function buildPendingSession() {
+    const plan = S.sessionPlan;
+    if (!plan) return null;
+    const sourceBlocks = plan.layout === 'blocks' && Array.isArray(plan.blocks)
+      ? plan.blocks
+      : [{ id: 'workout', title: plan.name || 'Workout', mode: 'sequence', durationSeconds: 0, rounds: 1,
+          items: (plan.items || []).filter(item => item.type !== 'rest').map(item => Object.assign({ completion: 'manual' }, item)) }];
+    const blocks = sourceBlocks.map(block => {
+      const progress = S.sessionBlockProgress[block.id] || {};
+      return {
+        id: String(block.id || 'block'), title: String(block.title || 'Workout section'), mode: String(block.mode || 'sequence'),
+        elapsedSeconds: Number(S.sessionBlockTimes[block.id]) || 0,
+        rounds: block.mode === 'amrap' ? Math.max(0, (Number(progress.round) || 1) - 1) : null,
+        extraReps: null,
+        exercises: (block.items || []).filter(item => item.type !== 'rest').map(item => {
+          const itemExerciseId = item.id || exerciseId(block.id || 'workout', item.label);
+          return { exerciseId: itemExerciseId, label: String(item.label || 'Exercise'), tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps',
+            completion: String(item.completion || (item.seconds ? 'timed' : 'manual')), sets: logSets(item, itemExerciseId) };
+        })
+      };
+    });
+    return {
+      id: sessionId(), formatVersion: 1, workoutName: String(plan.name || 'Workout'), workoutKind: plan.layout === 'blocks' ? 'structured' : 'simple',
+      startedAt: S.sessionStartedAt || new Date().toISOString(), completedAt: new Date().toISOString(),
+      durationSeconds: Math.max(0, Math.round((Date.now() - (S.sessionStartedMs || Date.now())) / 1000)),
+      unit: store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb', notes: '', blocks,
+      planSnapshot: JSON.parse(JSON.stringify(plan))
+    };
+  }
+  function renderSessionLog() {
+    const session = S.pendingSession;
+    if (!session) return;
+    $('#logTitle').textContent = session.workoutName;
+    $('#logUnit').value = session.unit;
+    $('#logNotes').value = session.notes || '';
+    $('#logMsg').textContent = '';
+    $('#logBlocks').innerHTML = session.blocks.map((block, bi) => {
+      const score = block.mode === 'amrap'
+        ? '<div class="log-score"><label class="edit-field"><span>Completed rounds</span><input type="number" min="0" max="10000" value="' + (block.rounds == null ? '' : block.rounds) + '" data-log-rounds data-bi="' + bi + '"></label>' +
+          '<label class="edit-field"><span>Extra reps</span><input type="number" min="0" max="10000" value="' + (block.extraReps == null ? '' : block.extraReps) + '" data-log-extra data-bi="' + bi + '"></label></div>'
+        : block.mode === 'for-time'
+          ? '<div class="log-score"><div><span class="mono">Elapsed time</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(fmtElapsed(block.elapsedSeconds)) + '</div></div></div>' : '';
+      const exercises = block.exercises.map((exercise, ei) => {
+        const sets = exercise.sets.map((set, si) => set.completion === 'timed'
+          ? '<div class="history-result">Set ' + set.set + ' · timed ' + esc(shortSec(set.actualSeconds)) + '</div>'
+          : '<div class="log-set"><div class="log-set-plan"><strong>Set ' + set.set + '</strong><br>Planned: ' + esc(set.target) + '</div>' +
+            '<label class="edit-field"><span>Actual reps</span><input type="number" min="0" max="10000" value="' + (set.actualReps == null ? '' : set.actualReps) + '" data-log-reps data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label>' +
+            '<label class="edit-field"><span>Weight</span><input type="number" min="0" max="10000" step="0.5" value="' + (set.weight == null ? '' : set.weight) + '" data-log-weight data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label></div>').join('');
+        return '<div class="log-exercise"><div class="log-exercise-name">' + esc(exercise.label) + '</div>' + sets + '</div>';
+      }).join('');
+      return '<section class="log-block"><div class="log-block-head"><div><div class="mono">' + esc(block.mode) + '</div><div class="log-block-title">' + esc(block.title) + '</div></div>' +
+        (block.elapsedSeconds ? '<span class="mono">' + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
+    }).join('');
+  }
+  function openSessionLog() {
+    S.pendingSession = buildPendingSession();
+    if (!S.pendingSession) return;
+    renderSessionLog();
+    S.screen = 'log'; $('#done').classList.add('hidden'); $('#log').classList.remove('hidden');
+  }
+  function closeSessionLog() {
+    $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
+  }
+  async function saveSessionLog() {
+    const session = S.pendingSession;
+    if (!session) return;
+    session.unit = $('#logUnit').value === 'kg' ? 'kg' : 'lb';
+    session.notes = $('#logNotes').value.trim().slice(0, 2000);
+    store.set('workoutTimerWeightUnit', session.unit);
+    $$('[data-log-reps]').forEach(input => {
+      const set = session.blocks[Number(input.dataset.bi)].exercises[Number(input.dataset.ei)].sets[Number(input.dataset.si)];
+      set.actualReps = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000);
+    });
+    $$('[data-log-weight]').forEach(input => {
+      const set = session.blocks[Number(input.dataset.bi)].exercises[Number(input.dataset.ei)].sets[Number(input.dataset.si)];
+      set.weight = input.value === '' ? null : clamp(Number(input.value) || 0, 0, 10000);
+    });
+    $$('[data-log-rounds]').forEach(input => { session.blocks[Number(input.dataset.bi)].rounds = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000); });
+    $$('[data-log-extra]').forEach(input => { session.blocks[Number(input.dataset.bi)].extraReps = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000); });
+    $('#logSave').disabled = true; $('#logSave').textContent = 'Saving…';
+    try {
+      await historyPut(session);
+      $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
+      $('#doneLog').textContent = 'Logged'; $('#doneLog').disabled = true;
+      $('#doneSub').textContent += ' · saved to history';
+    } catch (err) { $('#logMsg').textContent = err.message || 'Could not save this workout.'; }
+    finally { $('#logSave').disabled = false; $('#logSave').textContent = 'Save to history'; }
+  }
+
+  function historyDate(value) {
+    try { return new Date(value).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }); }
+    catch (_) { return String(value || ''); }
+  }
+  function historyBlockLines(block, unit) {
+    const lines = [];
+    if (block.mode === 'for-time' && block.elapsedSeconds) lines.push('Elapsed · ' + fmtElapsed(block.elapsedSeconds));
+    if (block.mode === 'amrap' && block.rounds != null) lines.push(block.rounds + ' rounds' + (block.extraReps != null ? ' + ' + block.extraReps + ' reps' : ''));
+    (block.exercises || []).forEach(exercise => {
+      const sets = (exercise.sets || []).map(set => {
+        if (set.completion === 'timed') return 'Set ' + set.set + ': ' + shortSec(set.actualSeconds || set.plannedSeconds || 0);
+        let value = set.actualReps == null ? 'not entered' : set.actualReps + ' reps';
+        if (set.weight != null) value += ' @ ' + set.weight + ' ' + unit;
+        return 'Set ' + set.set + ': ' + value;
+      });
+      if (sets.length) lines.push(exercise.label + ' · ' + sets.join(' · '));
+    });
+    return lines;
+  }
+  async function renderHistory() {
+    const host = $('#historyList'); host.innerHTML = '<div class="card note">Loading history…</div>';
+    const sessions = await historyAll();
+    if (!sessions.length) { host.innerHTML = '<div class="card"><div class="title" style="font-size:24px">No workouts logged yet</div><div class="note" style="margin-top:8px">Complete a workout and choose Log workout to create your first entry.</div></div>'; return; }
+    host.innerHTML = sessions.map(session => {
+      const blocks = (session.blocks || []).map(block => {
+        const lines = historyBlockLines(block, session.unit || 'lb');
+        return '<div><div class="history-block-title">' + esc(block.title || 'Workout section') + '</div>' +
+          (lines.length ? lines.map(line => '<div class="history-result">' + esc(line) + '</div>').join('') : '<div class="history-result">Completed</div>') + '</div>';
+      }).join('');
+      return '<details class="history-card"><summary><div><div class="history-name">' + esc(session.workoutName || 'Workout') + '</div><div class="history-meta">' +
+        esc(historyDate(session.completedAt)) + ' · ' + esc(fmtElapsed(Number(session.durationSeconds) || 0)) + '</div></div><span class="history-arrow">⌄</span></summary>' +
+        '<div class="history-body">' + blocks + (session.notes ? '<div class="history-note">' + esc(session.notes) + '</div>' : '') + '</div></details>';
+    }).join('');
+  }
+  async function openHistory() {
+    $$('.panel').forEach(panel => panel.classList.add('hidden'));
+    $('#panel-history').classList.remove('hidden'); $('#hMsg').textContent = ''; await renderHistory();
+  }
+  function closeHistory() {
+    $('#panel-history').classList.add('hidden');
+    const panel = $('#panel-' + S.mode); if (panel) panel.classList.remove('hidden');
+  }
+  async function exportHistory() {
+    const sessions = await historyAll();
+    if (!sessions.length) { $('#hMsg').textContent = 'There is no workout history to export yet.'; return; }
+    const data = { format: HISTORY_FORMAT, version: HISTORY_VERSION, exportedAt: new Date().toISOString(), sessions };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'workout-history-' + new Date().toISOString().slice(0, 10) + '.json'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000); $('#hMsg').textContent = 'Workout history exported.';
+  }
+  function chooseHistoryFile() { $('#historyFileInput').value = ''; $('#historyFileInput').click(); }
+  function normalizeHistorySession(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('A history entry is invalid.');
+    const id = String(value.id || '').slice(0, 100), workoutName = String(value.workoutName || '').trim().slice(0, 80);
+    if (!id || !workoutName || !Number.isFinite(Date.parse(value.completedAt))) throw new Error('A history entry is missing its ID, workout name or completion date.');
+    if (!Array.isArray(value.blocks) || value.blocks.length > 50) throw new Error('A history entry has invalid workout sections.');
+    const copy = JSON.parse(JSON.stringify(value));
+    copy.id = id; copy.workoutName = workoutName; copy.notes = String(copy.notes || '').slice(0, 2000);
+    copy.unit = copy.unit === 'kg' ? 'kg' : 'lb'; copy.durationSeconds = clamp(Math.round(Number(copy.durationSeconds) || 0), 0, 172800);
+    return copy;
+  }
+  async function importHistoryFile(e) {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    try {
+      if (file.size > 5242880) throw new Error('History files must be smaller than 5 MB.');
+      const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      if (!raw || raw.format !== HISTORY_FORMAT || Number(raw.version) !== HISTORY_VERSION || !Array.isArray(raw.sessions) || raw.sessions.length > 2000) throw new Error('This is not a supported workout history file.');
+      const sessions = raw.sessions.map(normalizeHistorySession);
+      await historyMerge(sessions); $('#hMsg').textContent = 'Imported and merged ' + sessions.length + ' workout' + (sessions.length === 1 ? '' : 's') + '.'; await renderHistory();
+    } catch (err) { $('#hMsg').textContent = err.message || 'Could not import that workout history.'; }
+  }
+
+  function renderRunRestPresets() {
+    const host = $('#runRestPresets');
+    host.innerHTML = '';
+    const selected = cfg.rest.minutes * 60 + cfg.rest.seconds;
+    restPresets.forEach(sec => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = fmt(sec);
+      b.setAttribute('aria-label', 'Restart rest at ' + fmt(sec));
+      b.setAttribute('aria-pressed', String(sec === selected));
+      b.addEventListener('click', e => {
+        e.stopPropagation();
+        cfg.rest.minutes = Math.floor(sec / 60); cfg.rest.seconds = sec % 60;
+        renderFields(); renderSummaries(); launch(buildRest());
+      });
+      host.appendChild(b);
+    });
+  }
+
+  /* ---------- run ---------- */
+  function phaseColor(phase) {
+    if (phase === 'prep') return PREP_BG;
+    if (S.mode === 'workout') return phase === 'rest' ? workoutTheme.rest : workoutTheme.work;
+    if (S.mode === 'circuit') return phase === 'rest' ? circuitTheme.rest : circuitTheme.work;
+    if (S.mode === 'rest') return MODE_REST;
+    if (S.mode === 'intervals') return phase === 'rest' ? MODE_REST : MODE_WORK;
+    return APP_ACCENT;
+  }
+
+  function paintPhase() {
+    const it = S.queue[S.qi];
+    const manual = isManualItem(it);
+    const showRound = (it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0;
+    const showSet = !showRound && Number(it.sets) > 1;
+    const showProgress = showRound || showSet;
+    const bg = phaseColor(it.phase);
+    const fg = it.phase === 'prep' ? '#ffffff' : textOn(bg);
+    const run = $('#run');
+    run.style.setProperty('--phase', bg);
+    run.style.setProperty('--phase-text', fg);
+    $('#wipe').style.background = fg === '#ffffff' ? 'rgba(0,0,0,.24)' : 'rgba(0,0,0,.14)';
+    $('#runName').textContent = (it.name || '').toUpperCase();
+    $('#runName').classList.toggle('hidden', !!it.blockTitle);
+    $('#runPos').textContent = it.meta || '';
+    $('#runLabel').textContent = it.label;
+    $('#runSet').classList.toggle('hidden', !showProgress);
+    if (showProgress) {
+      const hasTotal = showSet || Number(it.rounds) > 0;
+      $('#runSetLabel').textContent = showRound ? String(it.progressLabel || 'round').toUpperCase() : 'SET';
+      $('#runSetCurrent').textContent = showRound ? it.round : it.set;
+      $('#runSetOf').classList.toggle('hidden', !hasTotal);
+      $('#runSetTotal').classList.toggle('hidden', !hasTotal);
+      if (hasTotal) $('#runSetTotal').textContent = showRound ? it.rounds : it.sets;
+    }
+    const note = Array.isArray(it.notes) ? it.notes.join(' ') : '';
+    $('#runNote').textContent = note;
+    $('#runNote').classList.toggle('hidden', !note);
+    renderRunPrevious(it);
+    renderRunSetLogger(it);
+    $('#runNext').textContent = it.next;
+    $('#runNextWrap').classList.toggle('hidden', !it.next || it.next === 'Finish');
+    const t = $('#runTime');
+    t.classList.toggle('manual', manual);
+    if (manual) {
+      t.textContent = it.target;
+      paintBlockClock(it);
+      $('#wipe').style.width = '0%';
+    }
+    $('#btnPause').textContent = manual ? 'Set done' : 'Pause';
+    $('#btnSkip').classList.toggle('hidden', manual || S.mode === 'rest');
+    t.style.transform = 'scale(1.05)';
+    setTimeout(() => { t.style.transform = 'scale(1)'; }, 40);
+    const f = $('#flash');
+    f.style.transition = 'none'; f.style.opacity = it.phase === 'prep' ? '0.18' : '0.4';
+    requestAnimationFrame(() => { f.style.transition = ''; f.style.opacity = '0'; });
+  }
+
+  function paintTime(el, str) { el.innerHTML = String(str).split(':').join('<span class="cln">:</span>'); }
+
+  function elapsed() { return S.accum + (S.running && !S.paused ? performance.now() - S.from : 0); }
+  function blockElapsed() { return S.blockAccum + (S.running && !S.paused && S.blockId ? performance.now() - S.blockFrom : 0); }
+
+  function paintBlockClock(it) {
+    const ms = blockElapsed();
+    if (it.blockMode === 'amrap') $('#runLeft').textContent = fmtPad(Math.max(0, it.blockDuration - ms / 1000)) + ' LEFT';
+    else if (it.blockMode === 'for-time') $('#runLeft').textContent = fmtElapsed(ms / 1000);
+    else $('#runLeft').textContent = '';
+  }
+
+  function remainingAfter(index) {
+    let sum = 0;
+    for (let i = index; i < S.queue.length; i++) if (S.queue[i].phase !== 'up' && !isManualItem(S.queue[i])) sum += S.queue[i].seconds;
+    return sum;
+  }
+
+  function tick() {
+    cancelAnimationFrame(S.raf);
+    if (!S.running || S.paused) return;
+    const it = S.queue[S.qi];
+    const ms = elapsed();
+    const blockMs = blockElapsed();
+
+    if (it.blockMode === 'amrap') {
+      const blockLeft = Math.max(0, it.blockDuration * 1000 - blockMs);
+      const whole = Math.ceil(blockLeft / 1000);
+      if (whole !== S.lastBlockBeep) { S.lastBlockBeep = whole; if (whole > 0 && whole <= 3) beep(940, 0.1, 0.07); }
+      if (blockLeft <= 0) return completeActiveBlock();
+    }
+
+    if (isManualItem(it)) {
+      $('#runTime').textContent = it.target;
+      paintBlockClock(it);
+      $('#wipe').style.width = '0%';
+      if (it.blockMode !== 'for-time' && it.blockMode !== 'amrap') return;
+    } else if (it.phase === 'up') {
+      const limit = it.seconds * 1000;
+      paintTime($('#runTime'), fmtElapsed(ms / 1000));
+      $('#runLeft').textContent = limit ? fmtPad(Math.max(0, (limit - ms) / 1000)) + ' LEFT' : 'NO LIMIT';
+      $('#wipe').style.width = limit ? clamp((ms / limit) * 100, 0, 100) + '%' : '0%';
+      if (limit && ms >= limit) { S.doneTotal = it.seconds; return finish(); }
+    } else {
+      const dur = it.seconds * 1000;
+      const left = Math.max(0, dur - ms);
+      paintTime($('#runTime'), fmt(left / 1000));
+      $('#wipe').style.width = clamp((ms / dur) * 100, 0, 100) + '%';
+      if (it.blockMode === 'for-time' || it.blockMode === 'amrap') paintBlockClock(it);
+      else $('#runLeft').textContent = S.variableDuration ? '' : fmtPad(left / 1000 + remainingAfter(S.qi + 1)) + ' LEFT';
+      const whole = Math.ceil(left / 1000);
+      if (whole !== S.lastBeep) { S.lastBeep = whole; if (whole > 0 && whole <= 3) beep(720, 0.09, 0.06); }
+      if (left <= 0) { advance(); if (!S.running) return; }
+    }
+    S.raf = requestAnimationFrame(tick);
+  }
+
+  function moveToQueueIndex(index) {
+    const previousBlock = S.blockId;
+    const upcoming = S.queue[index];
+    const upcomingBlock = upcoming && upcoming.blockId || null;
+    if (previousBlock && upcomingBlock !== previousBlock) captureActiveBlock();
+    S.qi = index; S.accum = 0; S.from = performance.now(); S.lastBeep = null;
+    const it = S.queue[S.qi];
+    const nextBlock = it.blockId || null;
+    if (nextBlock !== previousBlock) {
+      S.blockId = nextBlock; S.blockAccum = 0; S.blockFrom = performance.now(); S.lastBlockBeep = null;
+    }
+    beep(it.phase === 'rest' ? 520 : it.phase === 'prep' ? 700 : 1100, 0.16, 0.1);
+    paintPhase(); tick();
+  }
+
+  function completeActiveBlock() {
+    const currentBlock = S.queue[S.qi] && S.queue[S.qi].blockId;
+    let next = S.qi + 1;
+    while (next < S.queue.length && S.queue[next].blockId === currentBlock) next++;
+    if (next >= S.queue.length) { S.doneTotal = 0; return finish(); }
+    moveToQueueIndex(next);
+  }
+
+  function advance() {
+    const current = S.queue[S.qi];
+    const upcoming = S.queue[S.qi + 1] || null;
+    if (isManualItem(current)) recordManualSet(current, upcoming);
+    else if (current && current.phase === 'rest') S.restLogKey = null;
+    if (S.qi >= S.queue.length - 1) {
+      S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) ? 0 : q.seconds), 0);
+      return finish();
+    }
+    moveToQueueIndex(S.qi + 1);
+  }
+
+  function launch(queue) {
+    if (!queue) return;
+    primeAudio(); lockScreen();
+    S.queue = queue; S.qi = 0; S.accum = 0; S.from = performance.now(); S.running = true; S.paused = false; S.lastBeep = null; S.lastBlockBeep = null; S.screen = 'run';
+    if (S.mode !== 'workout') { S.sessionPlan = null; S.pendingSession = null; S.restLogKey = null; }
+    S.blockId = queue[0].blockId || null; S.blockAccum = 0; S.blockFrom = performance.now();
+    S.variableDuration = queue.some(isManualItem);
+    $('#home').classList.add('hidden'); $('#done').classList.add('hidden'); $('#run').classList.remove('hidden');
+    $('#runRestPresets').classList.toggle('hidden', S.mode !== 'rest');
+    if (S.mode === 'rest') renderRunRestPresets();
+    $('#btnPause').textContent = 'Pause';
+    resetEnd();
+    $('#wipe').style.width = '0%';
+    paintPhase(); tick();
+  }
+
+  async function startWorkout() {
+    primeAudio();
+    S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
+    S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
+    S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
+    S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
+    S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
+    $('#doneLog').textContent = 'Log workout'; $('#doneLog').disabled = false;
+    launch(buildWorkout());
+  }
+  const startCircuit = () => launch(buildCircuit());
+  const startRest = () => launch(buildRest());
+  const startIntervals = () => launch(buildIntervals());
+  const startStopwatch = () => launch(buildStopwatch());
+
+  let endArmed = 0;
+  function resetEnd() {
+    if (endArmed) clearTimeout(endArmed);
+    endArmed = 0;
+    const b = $('#btnEnd');
+    b.textContent = 'End'; b.classList.remove('confirm');
+  }
+
+  function togglePause() {
+    if (!S.running) return;
+    if (isManualItem(S.queue[S.qi])) return;
+    if (S.paused) {
+      S.paused = false; S.from = performance.now(); S.blockFrom = performance.now(); lockScreen();
+      $('#btnPause').textContent = 'Pause'; $('#runLabel').textContent = S.queue[S.qi].label;
+      tick();
+    } else {
+      S.accum = elapsed(); S.blockAccum = blockElapsed(); S.paused = true; cancelAnimationFrame(S.raf); unlockScreen();
+      $('#btnPause').textContent = 'Resume'; $('#runLabel').textContent = 'Paused';
+    }
+  }
+
+  function finish() {
+    captureActiveBlock();
+    S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
+    S.screen = 'done';
+    beep(1100, 0.18, 0.11); setTimeout(() => beep(1320, 0.22, 0.11), 200);
+    $('#run').classList.add('hidden'); $('#done').classList.remove('hidden');
+    paintTime($('#doneTime'), S.variableDuration ? 'Done' : fmtPad(S.doneTotal));
+    const name = S.mode === 'workout' ? workoutPlan.name : S.mode === 'circuit' ? circuitPlan.name : S.mode === 'intervals' ? 'Intervals' : S.mode === 'rest' ? 'Rest' : 'Stopwatch';
+    const rounds = S.mode === 'circuit' ? cfg.circuit.rounds : S.mode === 'intervals' ? cfg.intervals.rounds : 0;
+    $('#doneSub').textContent = (rounds ? rounds + (rounds === 1 ? ' round · ' : ' rounds · ') : '') + name + (S.variableDuration ? ' · variable duration' : '');
+    $('#doneLog').classList.toggle('hidden', S.mode !== 'workout' || !S.sessionPlan);
+  }
+
+  function goHome() {
+    S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
+    S.screen = 'home';
+    resetEnd();
+    $('#run').classList.add('hidden'); $('#done').classList.add('hidden'); $('#log').classList.add('hidden'); $('#setLogger').classList.add('hidden'); $('#home').classList.remove('hidden');
+  }
+
+  function startCurrentMode() {
+    if (S.mode === 'workout') startWorkout();
+    else if (S.mode === 'circuit') startCircuit();
+    else if (S.mode === 'rest') startRest();
+    else if (S.mode === 'intervals') startIntervals();
+    else startStopwatch();
+  }
+
+  /* ---------- file actions ---------- */
+  function fileName(kind) {
+    const name = kind === 'circuit' ? circuitPlan.name : workoutPlan.name;
+    const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || kind;
+    return base === kind ? kind + '.json' : base + '.' + kind + '.json';
+  }
+  function currentFile(kind) { return kind === 'circuit' ? circuitFile() : workoutFile(); }
+  function savePlan(kind) {
+    try {
+      const blob = new Blob([JSON.stringify(currentFile(kind), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName(kind); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setPlanMsg(kind, 'Saved ' + fileName(kind));
+    } catch (err) { setPlanMsg(kind, err.message || 'Could not save this ' + kind + '.', true); }
+  }
+  async function sharePlan(kind) {
+    const data = currentFile(kind), json = JSON.stringify(data, null, 2);
+    try {
+      let file = null, ok = false;
+      try { file = new File([json], fileName(kind), { type: 'application/json' }); ok = !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (_) {}
+      if (ok) { await navigator.share({ files: [file], title: data.name, text: 'Workout Timer ' + kind }); setPlanMsg(kind, (kind === 'circuit' ? 'Circuit' : 'Workout') + ' shared.'); }
+      else { savePlan(kind); setPlanMsg(kind, 'Sharing is unavailable here, so the file was downloaded instead.'); }
+    } catch (err) {
+      setPlanMsg(kind, err && err.name === 'AbortError' ? 'Sharing canceled.' : (err.message || 'Could not share this ' + kind + '.'), true);
+    }
+  }
+  let pendingLoadKind = 'workout';
+  function chooseFile(kind) { pendingLoadKind = kind; $('#fileInput').value = ''; $('#fileInput').click(); }
+  function selectMode(kind) {
+    const b = $('#modes button[data-mode="' + kind + '"]');
+    if (b) b.click();
+  }
+  async function loadPlanFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 102400) throw new Error('Workout and circuit files must be smaller than 100 KB.');
+      const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      const v = raw.version == null ? 1 : Number(raw.version);
+      let loaded = [];
+      if ([5, 6, VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
+        if (raw.kind === 'workout') {
+          setWorkoutPlan(normalizeWorkout(raw)); loaded.push('workout');
+        } else if (raw.kind === 'circuit') {
+          const p = normalizeCircuit(raw); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; loaded.push('circuit');
+        }
+      } else {
+        const split = splitLegacy(raw);
+        if (split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); loaded.push('workout'); }
+        if (split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; loaded.push('circuit'); }
+      }
+      if (!loaded.length) throw new Error('No usable exercises or timed circuit stations were found.');
+      editingStructuredWorkout = false;
+      $('#wName').value = workoutPlan.name; $('#cName').value = circuitPlan.name;
+      persistPlans(); renderSwatches(); renderWorkoutExercises(); renderCircuitTiles(); renderFields(); renderSummaries();
+      const destination = loaded.includes(pendingLoadKind) ? pendingLoadKind : loaded[0];
+      selectMode(destination);
+      const message = v < 5 && loaded.length === 2 ? 'Loaded and split the older file into Workout and Circuit.' : 'Loaded ' + file.name + '.';
+      loaded.forEach(kind => setPlanMsg(kind, message));
+    } catch (err) { setPlanMsg(pendingLoadKind, err.message || 'Could not load that file.', true); }
+  }
+
+  let resetWorkoutArmed = 0;
+  function disarmWorkoutReset() {
+    if (resetWorkoutArmed) clearTimeout(resetWorkoutArmed);
+    resetWorkoutArmed = 0;
+    $('#wReset').textContent = 'Reset';
+    $('#wReset').classList.remove('reset-confirm');
+  }
+  async function resetWorkout() {
+    if (!resetWorkoutArmed) {
+      $('#wReset').textContent = 'Reset?';
+      $('#wReset').classList.add('reset-confirm');
+      resetWorkoutArmed = setTimeout(disarmWorkoutReset, 3000);
+      return;
+    }
+    disarmWorkoutReset();
+    workoutPlan = defaultWorkout();
+    workoutTheme = defaultTheme();
+    cfg.workout.prep = 5;
+    editingStructuredWorkout = false;
+    $('#wName').value = workoutPlan.name;
+    persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
+    setPlanMsg('workout', 'Reset to the basic workout.');
+  }
+
+  async function loadExampleWorkout() {
+    try {
+      setWorkoutPlan(await bundledWorkout());
+      editingStructuredWorkout = false;
+      $('#wName').value = workoutPlan.name;
+      persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
+      setPlanMsg('workout', 'Loaded the Lower Body structured workout demo.');
+    } catch (err) { setPlanMsg('workout', err.message || 'Could not load the example workout.', true); }
+  }
+
+  /* ---------- wiring ---------- */
+  $('#wStart').addEventListener('click', startWorkout);
+  $('#wEdit').addEventListener('click', () => {
+    if (workoutPlan.layout !== 'blocks') return;
+    editingStructuredWorkout = !editingStructuredWorkout;
+    persistPlans(); renderWorkoutExercises(); renderSummaries();
+    setPlanMsg('workout', editingStructuredWorkout ? 'Editing structured workout.' : 'Workout changes saved on this device.');
+  });
+  $('#cStart').addEventListener('click', startCircuit);
+  $('#sStart').addEventListener('click', startStopwatch);
+  $('#wSave').addEventListener('click', () => savePlan('workout'));
+  $('#wShare').addEventListener('click', () => sharePlan('workout'));
+  $('#wLoad').addEventListener('click', () => chooseFile('workout'));
+  $('#wExample').addEventListener('click', loadExampleWorkout);
+  $('#wReset').addEventListener('click', resetWorkout);
+  $('#cSave').addEventListener('click', () => savePlan('circuit'));
+  $('#cShare').addEventListener('click', () => sharePlan('circuit'));
+  $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
+  $('#fileInput').addEventListener('change', loadPlanFile);
+
+  $('#run').addEventListener('click', (e) => { if (!e.target.closest('.runctl,.runpresets,.setlogger')) togglePause(); });
+  $('#setLogger').addEventListener('click', e => e.stopPropagation());
+  $('#setLogger').addEventListener('input', e => {
+    const field = e.target.dataset.liveField;
+    const result = S.restLogKey && S.sessionSetResults[S.restLogKey];
+    if (!result || !field) return;
+    if (field === 'weight') result.weight = e.target.value === '' ? null : clamp(Number(e.target.value) || 0, 0, 10000);
+    if (field === 'actualReps') result.actualReps = e.target.value === '' ? null : clamp(Math.round(Number(e.target.value) || 0), 0, 10000);
+  });
+  $('#btnPause').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isManualItem(S.queue[S.qi])) advance(); else togglePause();
+  });
+  $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) advance(); });
+  $('#btnEnd').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (endArmed) { clearTimeout(endArmed); resetEnd(); return goHome(); }
+    const b = $('#btnEnd');
+    b.textContent = 'End?'; b.classList.add('confirm');
+    endArmed = setTimeout(resetEnd, 2600);
+  });
+  $('#doneAgain').addEventListener('click', startCurrentMode);
+  $('#doneHome').addEventListener('click', goHome);
+  $('#doneLog').addEventListener('click', openSessionLog);
+  $('#logCancel').addEventListener('click', closeSessionLog);
+  $('#logSave').addEventListener('click', saveSessionLog);
+  $('#wHistory').addEventListener('click', openHistory);
+  $('#hBack').addEventListener('click', closeHistory);
+  $('#hImport').addEventListener('click', chooseHistoryFile);
+  $('#hExport').addEventListener('click', exportHistory);
+  $('#historyFileInput').addEventListener('change', importHistoryFile);
+
+  const SVG = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"></path></svg>';
+  const SPEAKER = 'M11 5 6 9H3v6h3l5 4V5z';
+
+  function renderSound() {
+    const b = $('#soundBtn');
+    b.setAttribute('aria-pressed', String(S.sound));
+    b.setAttribute('aria-label', S.sound ? 'Sound on. Tap to mute.' : 'Sound off. Tap to unmute.');
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + SPEAKER + '"></path>' +
+      (S.sound
+        ? '<path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 6a8.5 8.5 0 0 1 0 12"></path>'
+        : '<path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path>') +
+      '</svg><span>' + (S.sound ? 'Sound on' : 'Sound off') + '</span>';
+  }
+
+  function renderFullscreen() {
+    const on = !!document.fullscreenElement;
+    const b = $('#fsBtn');
+    b.innerHTML = SVG(on ? 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5');
+    b.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
+  }
+
+  $('#soundBtn').addEventListener('click', () => {
+    S.sound = !S.sound;
+    renderSound();
+    if (S.sound) beep(880, 0.08, 0.05);
+  });
+  $('#fsBtn').addEventListener('click', async () => {
+    try { if (!document.fullscreenElement) await document.documentElement.requestFullscreen(); else await document.exitFullscreen(); } catch (_) {}
+  });
+  document.addEventListener('fullscreenchange', renderFullscreen);
+
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement && document.activeElement.tagName)) return;
+    const k = e.key.toLowerCase();
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (S.running) {
+        if (isManualItem(S.queue[S.qi])) advance(); else togglePause();
+      }
+      else if (S.mode === 'rest') {
+        cfg.rest.minutes = Math.floor(restPresets[0] / 60); cfg.rest.seconds = restPresets[0] % 60;
+        renderFields(); startRest();
+      }
+      else if (S.mode === 'intervals') {
+        [cfg.intervals.rounds, cfg.intervals.work, cfg.intervals.rest] = intervalPresets[0];
+        renderFields(); startIntervals();
+      } else startCurrentMode();
+    }
+    else if (k === 's') { if (S.running) advance(); }
+    else if (k === 'r') { goHome(); }
+    else if (k === 'f') { $('#fsBtn').click(); }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && S.running && !S.paused) { lockScreen(); tick(); }
+  });
+
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    $('#fsBtn').classList.add('hidden');
+  }
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+
+  $('#wName').value = workoutPlan.name;
+  $('#cName').value = circuitPlan.name;
+  renderSound();
+  renderFullscreen();
+  applyThemes();
+  renderRestPresets();
+  renderIntervalPresets();
+  renderFields();
+  renderSummaries();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+{
+  "format": "workout-timer-plan",
+  "version": 7,
+  "kind": "workout",
+  "layout": "blocks",
+  "name": "Lower Body Focus Day",
+  "workoutType": "strength",
+  "prepSeconds": 5,
+  "blocks": [
+    {
+      "id": "warm-up",
+      "title": "Warm-Up",
+      "mode": "sequence",
+      "score": "",
+      "notes": [
+        "Move with control and use the warm-up to prepare for the main lift."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "label": "Wall Sit",
+          "completion": "timed",
+          "setPlan": [
+            { "seconds": 30, "restSeconds": 30 },
+            { "seconds": 30, "restSeconds": 30 }
+          ],
+          "notes": ["Hold the wall-sit position."]
+        },
+        {
+          "type": "exercise",
+          "label": "Bodyweight Squats",
+          "completion": "manual",
+          "target": "5 reps",
+          "sets": 3,
+          "restSeconds": 30,
+          "notes": ["Slow descent. Full depth if possible."]
+        },
+        {
+          "type": "exercise",
+          "label": "Hip Thrust",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 2,
+          "restSeconds": 30,
+          "notes": ["Pause briefly at the top."]
+        },
+        {
+          "type": "exercise",
+          "label": "Reverse Lunges",
+          "completion": "manual",
+          "target": "10 per side",
+          "sets": 2,
+          "restSeconds": 30,
+          "notes": ["Controlled and balanced."]
+        },
+        {
+          "type": "exercise",
+          "label": "Deep Squat Position Hold",
+          "completion": "timed",
+          "seconds": 20,
+          "sets": 1,
+          "restSeconds": 20,
+          "notes": ["Sit into the squat and stay relaxed but stable."]
+        }
+      ]
+    },
+    {
+      "id": "main-lift",
+      "title": "Main Lift / Squats",
+      "mode": "sequence",
+      "score": "max-reps",
+      "notes": [
+        "Air squats or weighted squats. If you used a weight for your test, keep that weight; otherwise use bodyweight.",
+        "The main lift has no clock. Quality comes first while you are fresh.",
+        "Record the maximum set in the program benchmark when appropriate."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "main-lift-squats",
+          "label": "Squats",
+          "completion": "manual",
+          "tracking": "weight-reps",
+          "setPlan": [
+            { "target": "PR reps", "restSeconds": 180 },
+            { "target": "PR reps", "restSeconds": 150 },
+            { "target": "PR reps", "restSeconds": 0 }
+          ],
+          "notes": ["Use the prescribed PR rep target for each set."]
+        }
+      ]
+    },
+    {
+      "id": "density",
+      "title": "Density / Quality Work",
+      "mode": "for-time",
+      "rounds": 5,
+      "unitLabel": "cycle",
+      "restBetweenRoundsSeconds": 30,
+      "score": "elapsed-time",
+      "notes": [
+        "The source heading says 8 Cycle Rounds; the explicit five-sets-of-each instruction is used here.",
+        "Complete five cycles, alternating A then B in each cycle.",
+        "Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.",
+        "The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.",
+        "Prioritize quality reps. Sets do not all need to be unbroken; aim to keep the early sets unbroken.",
+        "Use extra weight for the lunges if available and appropriate to your level."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "label": "Neutral Grip Rows",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "label": "Reverse Lunges",
+          "completion": "manual",
+          "target": "20 overall reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "finisher",
+      "title": "Core / Finisher",
+      "mode": "amrap",
+      "durationSeconds": 720,
+      "score": "rounds-and-reps",
+      "notes": [
+        "Perform A-B-C repeatedly for 12 minutes, aiming for quality work.",
+        "Record total rounds plus any extra reps when the clock expires."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "label": "Side Plank — Left",
+          "completion": "timed",
+          "seconds": 35,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "label": "Side Plank — Right",
+          "completion": "timed",
+          "seconds": 35,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "label": "TRX or Ring Hamstring Curls",
+          "completion": "manual",
+          "target": "15 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "work": "#f04e23",
+    "rest": "#1668c4"
+  }
+}
