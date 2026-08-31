@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mmt2+G2gkHh/47DUGBHtB3Fgwvm6dWGBVH7kwuzVcnU='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-mC/yJCDGnMaKMVE4YdCqhebS2L39r2KSJM/cDbdp+Tc='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -225,6 +225,7 @@
   .bigtime{font-size:clamp(96px,26vmin,320px);line-height:.86;margin:.06em 0 0;transition:transform .3s ease-out}
   .bigtime .cln{display:inline-block;transform:translateY(-.085em)}
   .bigtime.manual{font-size:clamp(26px,5.5vmin,58px);line-height:1.08;text-transform:none;letter-spacing:-.01em;margin-top:clamp(16px,2.8vmin,30px);padding:.34em .64em;border-radius:14px;background:rgba(0,0,0,.2)}
+  .bigtime.block-ready{font-size:clamp(22px,4.5vmin,46px);padding:.45em .8em}
   .runnote{margin-top:clamp(10px,1.8vmin,18px);max-width:min(760px,88vw);font-size:clamp(14px,2vmin,20px);line-height:1.35;font-weight:600;opacity:.82;text-wrap:balance}
   .runprevious{margin-top:clamp(10px,1.7vmin,16px);padding:9px 14px;border-radius:999px;background:rgba(0,0,0,.2);font-family:var(--mono);font-size:clamp(11px,1.8vmin,15px);font-weight:750;letter-spacing:.08em}
   .next{margin-top:clamp(14px,2.4vmin,26px);display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:999px;padding:11px 22px;max-width:90vw}
@@ -810,6 +811,7 @@
   function estimateWorkoutQueue(plan, prepSeconds) {
     let total = Number(prepSeconds) > 0 ? 1 : 0;
     if (plan.layout === 'blocks') {
+      total += Math.max(0, plan.blocks.length - 1);
       plan.blocks.forEach(block => {
         const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
         const perRound = block.items.reduce((sum, item) => {
@@ -1667,7 +1669,20 @@
 
   /* ---------- queue building ---------- */
   const isManualItem = (it) => it && it.phase === 'work' && it.completion === 'manual';
-  const itemDetail = (it) => isManualItem(it) ? it.target : shortSec(it.seconds);
+  const isBlockTransition = (it) => it && it.phase === 'transition';
+  const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? it.target : shortSec(it.seconds);
+
+  function blockTransitionNotes(block) {
+    const exercises = block.items.filter(item => item.type === 'exercise').map(item => item.label);
+    const shown = exercises.slice(0, 4);
+    const exercisePreview = shown.join(' · ') + (exercises.length > shown.length ? ' · +' + (exercises.length - shown.length) + ' more' : '');
+    const unit = block.unitLabel || 'round';
+    const mode = block.mode === 'amrap' ? fmtPad(block.durationSeconds) + ' AMRAP'
+      : block.mode === 'for-time' ? block.rounds + ' ' + (block.rounds === 1 ? unit : unit + 's') + ' for time'
+        : 'Sequence';
+    return [mode + ' · ' + exercises.length + (exercises.length === 1 ? ' exercise' : ' exercises'), exercisePreview]
+      .concat((block.notes || []).slice(0, 2));
+  }
 
   function withMeta(items, name) {
     items.forEach((it, i) => {
@@ -1695,7 +1710,11 @@
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
           meta: 'REST · ' + block.title.toUpperCase() + (sets > 1 ? ' · SET ' + set + ' OF ' + sets : '') });
       };
-      workoutPlan.blocks.forEach(block => {
+      workoutPlan.blocks.forEach((block, blockIndex) => {
+        if (blockIndex > 0) {
+          items.push({ label: block.title, phase: 'transition', target: 'Ready when you are', notes: blockTransitionNotes(block),
+            meta: 'BLOCK ' + (blockIndex + 1) + ' OF ' + workoutPlan.blocks.length + ' · UP NEXT' });
+        }
         const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
         for (let round = 1; round <= rounds; round++) {
           block.items.forEach(item => {
@@ -2160,7 +2179,7 @@
 
   /* ---------- run ---------- */
   function phaseColor(phase) {
-    if (phase === 'prep') return PREP_BG;
+    if (phase === 'prep' || phase === 'transition') return PREP_BG;
     if (S.mode === 'workout') return phase === 'rest' ? workoutTheme.rest : workoutTheme.work;
     if (S.mode === 'circuit') return phase === 'rest' ? circuitTheme.rest : circuitTheme.work;
     if (S.mode === 'rest') return MODE_REST;
@@ -2171,11 +2190,12 @@
   function paintPhase() {
     const it = S.queue[S.qi];
     const manual = isManualItem(it);
+    const blockTransition = isBlockTransition(it);
     const showRound = (it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0;
     const showSet = !showRound && Number(it.sets) > 1;
     const showProgress = showRound || showSet;
     const bg = phaseColor(it.phase);
-    const fg = it.phase === 'prep' ? '#ffffff' : textOn(bg);
+    const fg = it.phase === 'prep' || blockTransition ? '#ffffff' : textOn(bg);
     const run = $('#run');
     run.style.setProperty('--phase', bg);
     run.style.setProperty('--phase-text', fg);
@@ -2201,14 +2221,19 @@
     $('#runNext').textContent = it.next;
     $('#runNextWrap').classList.toggle('hidden', !it.next || it.next === 'Finish');
     const t = $('#runTime');
-    t.classList.toggle('manual', manual);
-    if (manual) {
+    t.classList.toggle('manual', manual || blockTransition);
+    t.classList.toggle('block-ready', blockTransition);
+    if (blockTransition) {
+      t.textContent = it.target;
+      $('#runLeft').textContent = '';
+      $('#wipe').style.width = '0%';
+    } else if (manual) {
       t.textContent = it.target;
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
     }
-    $('#btnPause').textContent = manual ? 'Set done' : 'Pause';
-    $('#btnSkip').classList.toggle('hidden', manual || S.mode === 'rest');
+    $('#btnPause').textContent = blockTransition ? 'Start block' : manual ? 'Set done' : 'Pause';
+    $('#btnSkip').classList.toggle('hidden', blockTransition || manual || S.mode === 'rest');
     t.style.transform = 'scale(1.05)';
     setTimeout(() => { t.style.transform = 'scale(1)'; }, 40);
     const f = $('#flash');
@@ -2230,7 +2255,9 @@
 
   function remainingAfter(index) {
     let sum = 0;
-    for (let i = index; i < S.queue.length; i++) if (S.queue[i].phase !== 'up' && !isManualItem(S.queue[i])) sum += S.queue[i].seconds;
+    for (let i = index; i < S.queue.length; i++) {
+      if (S.queue[i].phase !== 'up' && !isManualItem(S.queue[i]) && !isBlockTransition(S.queue[i])) sum += S.queue[i].seconds;
+    }
     return sum;
   }
 
@@ -2240,6 +2267,12 @@
     const it = S.queue[S.qi];
     const ms = elapsed();
     const blockMs = blockElapsed();
+
+    if (isBlockTransition(it)) {
+      $('#runLeft').textContent = '';
+      $('#wipe').style.width = '0%';
+      return;
+    }
 
     if (it.blockMode === 'amrap') {
       const blockLeft = Math.max(0, it.blockDuration * 1000 - blockMs);
@@ -2284,7 +2317,7 @@
     if (nextBlock !== previousBlock) {
       S.blockId = nextBlock; S.blockAccum = 0; S.blockFrom = performance.now(); S.lastBlockBeep = null;
     }
-    beep(it.phase === 'rest' ? 520 : it.phase === 'prep' ? 700 : 1100, 0.16, 0.1);
+    beep(it.phase === 'rest' ? 520 : it.phase === 'prep' || isBlockTransition(it) ? 700 : 1100, 0.16, 0.1);
     paintPhase(); tick();
   }
 
@@ -2302,7 +2335,7 @@
     if (isManualItem(current)) recordManualSet(current, upcoming);
     else if (current && current.phase === 'rest') S.restLogKey = null;
     if (S.qi >= S.queue.length - 1) {
-      S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) ? 0 : q.seconds), 0);
+      S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) || isBlockTransition(q) ? 0 : q.seconds), 0);
       return finish();
     }
     moveToQueueIndex(S.qi + 1);
@@ -2354,7 +2387,7 @@
 
   function togglePause() {
     if (!S.running) return;
-    if (isManualItem(S.queue[S.qi])) return;
+    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) return;
     if (S.paused) {
       S.paused = false; S.from = performance.now(); S.blockFrom = performance.now(); lockScreen();
       $('#btnPause').textContent = 'Pause'; $('#runLabel').textContent = S.queue[S.qi].label;
@@ -2522,7 +2555,7 @@
   });
   $('#btnPause').addEventListener('click', (e) => {
     e.stopPropagation();
-    if (isManualItem(S.queue[S.qi])) advance(); else togglePause();
+    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) advance(); else togglePause();
   });
   $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) advance(); });
   $('#btnEnd').addEventListener('click', (e) => {
@@ -2580,7 +2613,7 @@
     if (e.code === 'Space') {
       e.preventDefault();
       if (S.running) {
-        if (isManualItem(S.queue[S.qi])) advance(); else togglePause();
+        if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) advance(); else togglePause();
       }
       else if (S.mode === 'rest') {
         cfg.rest.minutes = Math.floor(restPresets[0] / 60); cfg.rest.seconds = restPresets[0] % 60;
