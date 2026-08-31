@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mmt2+G2gkHh/47DUGBHtB3Fgwvm6dWGBVH7kwuzVcnU='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
 <meta name="theme-color" content="#131414" />
@@ -631,9 +633,11 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.0';
+  const APP_VERSION = '1.0.1';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
+  const MAX_WORKOUT_QUEUE_ITEMS = 20000;
+  const AMRAP_QUEUE_ROUNDS = 200;
   const HEX = /^#[0-9a-f]{6}$/i;
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -666,19 +670,27 @@
     const value = store.get('workoutTimerHistoryFallbackV1', []);
     return Array.isArray(value) ? value : [];
   }
+  function cleanHistoryRows(rows) {
+    const cleaned = [];
+    (Array.isArray(rows) ? rows : []).forEach(row => {
+      try { cleaned.push(normalizeHistorySession(row)); } catch (_) {}
+    });
+    return cleaned;
+  }
   async function historyAll() {
     try {
       const db = await openHistoryDb();
-      const rows = await new Promise((resolve, reject) => {
+      const storedRows = await new Promise((resolve, reject) => {
         const request = db.transaction('sessions', 'readonly').objectStore('sessions').getAll();
         request.onsuccess = () => resolve(request.result || []);
         request.onerror = () => reject(request.error);
       });
+      const rows = cleanHistoryRows(storedRows);
       const merged = new Map(rows.map(row => [row.id, row]));
-      fallbackHistory().forEach(row => { if (row && row.id && !merged.has(row.id)) merged.set(row.id, row); });
+      cleanHistoryRows(fallbackHistory()).forEach(row => { if (!merged.has(row.id)) merged.set(row.id, row); });
       return [...merged.values()].sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
     } catch (_) {
-      return fallbackHistory().sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
+      return cleanHistoryRows(fallbackHistory()).sort((a, b) => String(b.completedAt).localeCompare(String(a.completedAt)));
     }
   }
   async function historyPut(session) {
@@ -692,12 +704,18 @@
         transaction.onabort = () => reject(transaction.error);
       });
     } catch (_) {
-      const rows = fallbackHistory().filter(x => x && x.id !== session.id);
+      const rows = cleanHistoryRows(fallbackHistory()).filter(x => x.id !== session.id);
       rows.push(session); store.set('workoutTimerHistoryFallbackV1', rows.slice(-500));
     }
   }
   async function historyMerge(sessions) {
-    for (const session of sessions) await historyPut(session);
+    const existingIds = new Set((await historyAll()).map(session => session.id));
+    let added = 0, skipped = 0;
+    for (const session of sessions) {
+      if (existingIds.has(session.id)) { skipped++; continue; }
+      await historyPut(session); existingIds.add(session.id); added++;
+    }
+    return { added, skipped };
   }
 
   const defaultTheme = () => ({ work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] });
@@ -789,6 +807,39 @@
     return { name, prep, theme: validTheme(raw.theme) ? cleanTheme(raw.theme) : null };
   }
 
+  function estimateWorkoutQueue(plan, prepSeconds) {
+    let total = Number(prepSeconds) > 0 ? 1 : 0;
+    if (plan.layout === 'blocks') {
+      plan.blocks.forEach(block => {
+        const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
+        const perRound = block.items.reduce((sum, item) => {
+          if (item.type === 'rest') return sum + 1;
+          if (item.setPlan) return sum + item.setPlan.reduce((setSum, set) => setSum + 1 + (set.restSeconds > 0 ? 1 : 0), 0);
+          return sum + item.sets * (1 + (item.restSeconds > 0 ? 1 : 0));
+        }, 0);
+        total += perRound * rounds;
+        if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0) total += Math.max(0, rounds - 1);
+      });
+      return total;
+    }
+    plan.items.forEach((item, index) => {
+      if (item.type === 'rest') { total++; return; }
+      total += item.sets;
+      if (item.restSeconds <= 0) return;
+      const nextIsStandaloneRest = plan.items[index + 1] && plan.items[index + 1].type === 'rest';
+      total += item.sets - (index < plan.items.length - 1 && !nextIsStandaloneRest ? 0 : 1);
+    });
+    return total;
+  }
+
+  function assertWorkoutQueueBudget(plan, prepSeconds) {
+    const count = estimateWorkoutQueue(plan, prepSeconds);
+    if (count > MAX_WORKOUT_QUEUE_ITEMS) {
+      throw new Error('This workout expands to ' + count.toLocaleString() + ' timer steps. Reduce its rounds, exercises, sets or rests to stay under ' + MAX_WORKOUT_QUEUE_ITEMS.toLocaleString() + '.');
+    }
+    return count;
+  }
+
   function normalizeWorkout(raw) {
     const base = validateBasics(raw);
     const version = Number(raw.version);
@@ -874,7 +925,9 @@
       if (new Set(blocks.map(block => block.id)).size !== blocks.length) throw new Error('Every workout block needs a unique id.');
       const exerciseIds = blocks.flatMap(block => block.items.filter(item => item.type === 'exercise').map(item => item.id));
       if (new Set(exerciseIds).size !== exerciseIds.length) throw new Error('Every exercise in a structured workout needs a unique id.');
-      return { name: base.name, prep: base.prep, layout: 'blocks', workoutType: String(raw.workoutType || 'workout').trim().slice(0, 40), blocks, theme: base.theme };
+      const normalized = { name: base.name, prep: base.prep, layout: 'blocks', workoutType: String(raw.workoutType || 'workout').trim().slice(0, 40), blocks, theme: base.theme };
+      assertWorkoutQueueBudget(normalized, base.prep);
+      return normalized;
     }
     const source = version === 5
       ? (Array.isArray(raw.exercises) ? raw.exercises.map(x => Object.assign({ type: 'exercise' }, x)) : null)
@@ -903,7 +956,9 @@
     if (!items.some(x => x.type === 'exercise')) throw new Error('A workout needs at least one exercise.');
     const simpleExerciseIds = items.filter(item => item.type === 'exercise').map(item => item.id);
     if (new Set(simpleExerciseIds).size !== simpleExerciseIds.length) throw new Error('Every exercise in a workout needs a unique id.');
-    return { name: base.name, prep: base.prep, layout: 'simple', items, theme: base.theme };
+    const normalized = { name: base.name, prep: base.prep, layout: 'simple', items, theme: base.theme };
+    assertWorkoutQueueBudget(normalized, base.prep);
+    return normalized;
   }
 
   function normalizeCircuit(raw) {
@@ -1615,13 +1670,12 @@
   const itemDetail = (it) => isManualItem(it) ? it.target : shortSec(it.seconds);
 
   function withMeta(items, name) {
-    return items.map((it, i) => {
+    items.forEach((it, i) => {
       const next = items[i + 1];
-      return Object.assign({}, it, {
-        name: name,
-        next: next ? next.label + ' · ' + itemDetail(next) : 'Finish'
-      });
+      it.name = name;
+      it.next = next ? next.label + ' · ' + itemDetail(next) : 'Finish';
     });
+    return items;
   }
 
   function buildWorkout() {
@@ -1642,7 +1696,7 @@
           meta: 'REST · ' + block.title.toUpperCase() + (sets > 1 ? ' · SET ' + set + ' OF ' + sets : '') });
       };
       workoutPlan.blocks.forEach(block => {
-        const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? 200 : 1;
+        const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
         for (let round = 1; round <= rounds; round++) {
           block.items.forEach(item => {
             if (item.type === 'rest') {
@@ -1981,15 +2035,96 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000); $('#hMsg').textContent = 'Workout history exported.';
   }
   function chooseHistoryFile() { $('#historyFileInput').value = ''; $('#historyFileInput').click(); }
+  function historyText(value, where, maxLength) {
+    if (typeof value !== 'string') throw new Error(where + ' must be text.');
+    const text = value.trim();
+    if (!text || text.length > maxLength) throw new Error(where + ' must be 1 to ' + maxLength + ' characters.');
+    return text;
+  }
+  function historyInteger(value, where, min, max, nullable) {
+    if (nullable && value == null) return null;
+    if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) throw new Error(where + ' must be a whole number from ' + min + ' to ' + max + '.');
+    return value;
+  }
+  function historyNumber(value, where, min, max, nullable) {
+    if (nullable && value == null) return null;
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(where + ' must be a number from ' + min + ' to ' + max + '.');
+    return value;
+  }
+  function canonicalHistoryPlanSnapshot(value) {
+    const plan = normalizeWorkout(value);
+    const theme = plan.theme || defaultTheme();
+    if (plan.layout === 'blocks') {
+      return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks', name: plan.name, workoutType: plan.workoutType,
+        prepSeconds: plan.prep, blocks: JSON.parse(JSON.stringify(plan.blocks)), theme };
+    }
+    return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'simple', name: plan.name, prepSeconds: plan.prep,
+      items: plan.items.map(item => item.type === 'rest'
+        ? { type: 'rest', label: item.label, seconds: item.seconds }
+        : { type: 'exercise', id: item.id, label: item.label, target: item.target, sets: item.sets, restSeconds: item.restSeconds, tracking: item.tracking }), theme };
+  }
   function normalizeHistorySession(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('A history entry is invalid.');
-    const id = String(value.id || '').slice(0, 100), workoutName = String(value.workoutName || '').trim().slice(0, 80);
-    if (!id || !workoutName || !Number.isFinite(Date.parse(value.completedAt))) throw new Error('A history entry is missing its ID, workout name or completion date.');
-    if (!Array.isArray(value.blocks) || value.blocks.length > 50) throw new Error('A history entry has invalid workout sections.');
-    const copy = JSON.parse(JSON.stringify(value));
-    copy.id = id; copy.workoutName = workoutName; copy.notes = String(copy.notes || '').slice(0, 2000);
-    copy.unit = copy.unit === 'kg' ? 'kg' : 'lb'; copy.durationSeconds = clamp(Math.round(Number(copy.durationSeconds) || 0), 0, 172800);
-    return copy;
+    if (value.formatVersion != null && value.formatVersion !== 1) throw new Error('A history entry has an unsupported format version.');
+    const id = historyText(value.id, 'A history entry ID', 100);
+    const workoutName = historyText(value.workoutName, 'A history workout name', 80);
+    if (typeof value.completedAt !== 'string') throw new Error('A history entry completion date must be text.');
+    const completedMs = Date.parse(value.completedAt);
+    if (!Number.isFinite(completedMs)) throw new Error('A history entry has an invalid completion date.');
+    if (value.startedAt != null && typeof value.startedAt !== 'string') throw new Error('A history entry start date must be text.');
+    const startedMs = value.startedAt == null ? completedMs : Date.parse(value.startedAt);
+    if (!Number.isFinite(startedMs)) throw new Error('A history entry has an invalid start date.');
+    if (!Array.isArray(value.blocks) || !value.blocks.length || value.blocks.length > 50) throw new Error('A history entry must contain 1 to 50 workout sections.');
+    const blocks = value.blocks.map((block, bi) => {
+      if (!block || typeof block !== 'object' || Array.isArray(block)) throw new Error('History section ' + (bi + 1) + ' is invalid.');
+      const title = historyText(block.title, 'History section ' + (bi + 1) + ' title', 80);
+      const blockId = cleanExerciseId(historyText(block.id, title + ' ID', 60), 'history-block-' + (bi + 1));
+      const mode = String(block.mode || '').toLowerCase();
+      if (!['sequence', 'for-time', 'amrap'].includes(mode)) throw new Error(title + ' has an invalid history mode.');
+      if (!Array.isArray(block.exercises) || !block.exercises.length || block.exercises.length > 100) throw new Error(title + ' must contain 1 to 100 logged exercises.');
+      const exercises = block.exercises.map((exercise, ei) => {
+        if (!exercise || typeof exercise !== 'object' || Array.isArray(exercise)) throw new Error(title + ' exercise ' + (ei + 1) + ' is invalid.');
+        const label = historyText(exercise.label, title + ' exercise ' + (ei + 1) + ' label', 60);
+        const exerciseId = cleanExerciseId(historyText(exercise.exerciseId, title + ' / ' + label + ' ID', 60), 'history-' + (bi + 1) + '-' + (ei + 1) + '-' + idSlug(label));
+        const completion = String(exercise.completion || '').toLowerCase();
+        if (!['manual', 'timed'].includes(completion)) throw new Error(title + ' / ' + label + ' has an invalid completion type.');
+        if (!['reps', 'weight-reps'].includes(exercise.tracking)) throw new Error(title + ' / ' + label + ' has an invalid tracking type.');
+        if (!Array.isArray(exercise.sets) || !exercise.sets.length || exercise.sets.length > 100) throw new Error(title + ' / ' + label + ' must contain 1 to 100 sets.');
+        const sets = exercise.sets.map((set, si) => {
+          if (!set || typeof set !== 'object' || Array.isArray(set)) throw new Error(title + ' / ' + label + ' set ' + (si + 1) + ' is invalid.');
+          const setCompletion = String(set.completion || completion).toLowerCase();
+          if (setCompletion !== completion) throw new Error(title + ' / ' + label + ' set ' + (si + 1) + ' has a mismatched completion type.');
+          const setNumber = historyInteger(set.set == null ? si + 1 : set.set, title + ' / ' + label + ' set number', 1, 100, false);
+          if (completion === 'timed') {
+            const plannedSeconds = historyInteger(set.plannedSeconds, title + ' / ' + label + ' planned seconds', 1, 3600, false);
+            const actualSeconds = historyInteger(set.actualSeconds, title + ' / ' + label + ' actual seconds', 1, 3600, false);
+            return { set: setNumber, completion: 'timed', plannedSeconds, actualSeconds };
+          }
+          return { set: setNumber, completion: 'manual', target: historyText(set.target, title + ' / ' + label + ' set target', 40),
+            plannedReps: historyInteger(set.plannedReps, title + ' / ' + label + ' planned reps', 0, 10000, true),
+            actualReps: historyInteger(set.actualReps, title + ' / ' + label + ' actual reps', 0, 10000, true),
+            weight: historyNumber(set.weight, title + ' / ' + label + ' weight', 0, 10000, true) };
+        });
+        return { exerciseId, label, tracking: exercise.tracking, completion, sets };
+      });
+      return { id: blockId, title, mode,
+        elapsedSeconds: historyInteger(block.elapsedSeconds == null ? 0 : block.elapsedSeconds, title + ' elapsed seconds', 0, 172800, false),
+        rounds: historyInteger(block.rounds, title + ' completed rounds', 0, 10000, true),
+        extraReps: historyInteger(block.extraReps, title + ' extra reps', 0, 10000, true), exercises };
+    });
+    if (value.notes != null && typeof value.notes !== 'string') throw new Error('History workout notes must be text.');
+    const notes = value.notes || '';
+    if (notes.length > 2000) throw new Error('History workout notes must be at most 2000 characters.');
+    if (!['simple', 'structured'].includes(value.workoutKind)) throw new Error('A history entry has an invalid workout type.');
+    if (!['lb', 'kg'].includes(value.unit)) throw new Error('A history entry has an invalid weight unit.');
+    const session = { id, formatVersion: 1, workoutName, workoutKind: value.workoutKind,
+      startedAt: new Date(startedMs).toISOString(), completedAt: new Date(completedMs).toISOString(),
+      durationSeconds: historyInteger(value.durationSeconds == null ? 0 : value.durationSeconds, 'History duration', 0, 172800, false),
+      unit: value.unit, notes, blocks };
+    if (value.planSnapshot != null) {
+      try { session.planSnapshot = canonicalHistoryPlanSnapshot(value.planSnapshot); } catch (_) {}
+    }
+    return session;
   }
   async function importHistoryFile(e) {
     const file = e.target.files && e.target.files[0]; if (!file) return;
@@ -1998,7 +2133,10 @@
       const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
       if (!raw || raw.format !== HISTORY_FORMAT || Number(raw.version) !== HISTORY_VERSION || !Array.isArray(raw.sessions) || raw.sessions.length > 2000) throw new Error('This is not a supported workout history file.');
       const sessions = raw.sessions.map(normalizeHistorySession);
-      await historyMerge(sessions); $('#hMsg').textContent = 'Imported and merged ' + sessions.length + ' workout' + (sessions.length === 1 ? '' : 's') + '.'; await renderHistory();
+      const result = await historyMerge(sessions);
+      $('#hMsg').textContent = 'Imported ' + result.added + ' workout' + (result.added === 1 ? '' : 's') + '.' +
+        (result.skipped ? ' Skipped ' + result.skipped + ' already on this device.' : '');
+      await renderHistory();
     } catch (err) { $('#hMsg').textContent = err.message || 'Could not import that workout history.'; }
   }
 
@@ -2187,14 +2325,19 @@
   }
 
   async function startWorkout() {
-    primeAudio();
-    S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
-    S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
-    S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
-    S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
-    S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
-    $('#doneLog').textContent = 'Log workout'; $('#doneLog').disabled = false;
-    launch(buildWorkout());
+    try {
+      assertWorkoutQueueBudget(workoutPlan, cfg.workout.prep);
+      primeAudio();
+      S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
+      S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
+      S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
+      S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
+      S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
+      $('#doneLog').textContent = 'Log workout'; $('#doneLog').disabled = false;
+      launch(buildWorkout());
+    } catch (err) {
+      setPlanMsg('workout', err.message || 'Could not start this workout.', true);
+    }
   }
   const startCircuit = () => launch(buildCircuit());
   const startRest = () => launch(buildRest());

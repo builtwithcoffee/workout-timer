@@ -24,6 +24,7 @@ Read `README.md` for the public product and installation overview. Inspect the c
 - The app is intentionally dependency-free and primarily contained in `index.html`.
 - Do not introduce frameworks, package managers, CDNs, or hosted runtime dependencies without explicit approval.
 - Keep `APP_VERSION` synchronized in `index.html` and `sw.js` for every release.
+- Keep the hash-based Content Security Policy synchronized with the inline script by running `node scripts/verify-release.mjs` after JavaScript changes.
 - Keep application versioning separate from the workout-plan format version.
 - Avoid service-worker changes that reload an active workout or clear locally stored plans/history.
 - Verify meaningful changes locally and consider iOS/PWA behavior where relevant.

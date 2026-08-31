@@ -53,8 +53,9 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.0**.
+- Current application release: **1.0.1**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
+- `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.
 
 For quick desktop iteration, open `index.html` directly. Installation and service-worker testing require the app to be served over HTTP or HTTPS.
