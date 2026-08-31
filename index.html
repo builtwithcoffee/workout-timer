@@ -198,6 +198,10 @@
   .note{font-size:14px;line-height:1.5;color:var(--muted)}
   .msg{font-size:14px;color:var(--accent);min-height:1.3em}
   .msg.err{color:#ff8f8f}
+  .update-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 15px;border:1px solid rgba(240,78,35,.45);border-radius:13px;background:rgba(240,78,35,.1)}
+  .update-notice-copy{font-size:14px;line-height:1.45;color:var(--text)}
+  .update-notice-copy strong{display:block;margin-bottom:2px}
+  .update-notice button{min-height:40px;padding:0 13px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;flex:none}
   .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
   @media(max-width:560px){ .footleft{width:100%} }
@@ -324,6 +328,11 @@
     <div class="util">
       <button class="iconbtn" id="fsBtn" type="button" aria-label="Enter fullscreen" title="Fullscreen (F)"></button>
     </div>
+  </div>
+
+  <div class="update-notice hidden" id="updateNotice" role="status" aria-live="polite">
+    <div class="update-notice-copy"><strong>Update ready</strong>The new version will be used after you fully close and reopen the app.</div>
+    <button id="updateDismiss" type="button" aria-label="Dismiss update notice">Got it</button>
   </div>
 
   <!-- WORKOUT -->
@@ -542,7 +551,10 @@
       <button class="footbtn" id="soundBtn" type="button" aria-pressed="true"></button>
       <span class="note">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
     </div>
-    <span class="mono">Tap anywhere while running to pause</span>
+    <div class="footleft">
+      <span class="mono">Tap anywhere while running to pause</span>
+      <span class="mono" id="appVersion"></span>
+    </div>
   </div>
 </div>
 
@@ -619,8 +631,9 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
+  const APP_VERSION = '1.0.0';
   const FORMAT = 'workout-timer-plan';
-  const VERSION = 7;
+  const PLAN_VERSION = 7;
   const HEX = /^#[0-9a-f]{6}$/i;
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -779,8 +792,8 @@
   function normalizeWorkout(raw) {
     const base = validateBasics(raw);
     const version = Number(raw.version);
-    if (![5, 6, VERSION].includes(version) || raw.kind !== 'workout') throw new Error('This is not a supported Workout file.');
-    if (version === VERSION && Array.isArray(raw.blocks)) {
+    if (![5, 6, PLAN_VERSION].includes(version) || raw.kind !== 'workout') throw new Error('This is not a supported Workout file.');
+    if (version === PLAN_VERSION && Array.isArray(raw.blocks)) {
       if (!raw.blocks.length || raw.blocks.length > 20) throw new Error('A structured workout needs 1 to 20 blocks.');
       const cleanNotes = (value, where) => {
         if (value == null) return [];
@@ -885,7 +898,7 @@
       if (!Number.isInteger(sets) || sets < 1 || sets > 100) throw new Error('Exercise ' + (i + 1) + ' sets must be 1 to 100.');
       if (!Number.isInteger(restSeconds) || restSeconds < 0 || restSeconds > 3600) throw new Error('Exercise ' + (i + 1) + ' rest must be 0 to 3600 seconds.');
       return { type: 'exercise', id: cleanExerciseId(x.id, 'simple-' + (i + 1) + '-' + idSlug(label)), label, target, sets, restSeconds,
-        tracking: cleanTracking(x.tracking, label, version < VERSION || !x.id) };
+        tracking: cleanTracking(x.tracking, label, version < PLAN_VERSION || !x.id) };
     });
     if (!items.some(x => x.type === 'exercise')) throw new Error('A workout needs at least one exercise.');
     const simpleExerciseIds = items.filter(item => item.type === 'exercise').map(item => item.id);
@@ -895,7 +908,7 @@
 
   function normalizeCircuit(raw) {
     const base = validateBasics(raw);
-    if (![5, 6, VERSION].includes(Number(raw.version)) || raw.kind !== 'circuit') throw new Error('This is not a supported Circuit file.');
+    if (![5, 6, PLAN_VERSION].includes(Number(raw.version)) || raw.kind !== 'circuit') throw new Error('This is not a supported Circuit file.');
     const rounds = Number(raw.rounds);
     if (!Number.isInteger(rounds) || rounds < 1 || rounds > 100) throw new Error('Circuit rounds must be 1 to 100.');
     if (!Array.isArray(raw.segments) || !raw.segments.length || raw.segments.length > 100) throw new Error('A circuit needs 1 to 100 timed steps.');
@@ -948,16 +961,16 @@
 
   function workoutFile() {
     if (workoutPlan.layout === 'blocks') {
-      return { format: FORMAT, version: VERSION, kind: 'workout', layout: 'blocks', name: workoutPlan.name, workoutType: workoutPlan.workoutType,
+      return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks', name: workoutPlan.name, workoutType: workoutPlan.workoutType,
         prepSeconds: cfg.workout.prep, blocks: JSON.parse(JSON.stringify(workoutPlan.blocks)), theme: { ...workoutTheme } };
     }
-    return { format: FORMAT, version: VERSION, kind: 'workout', layout: 'simple', name: workoutPlan.name, prepSeconds: cfg.workout.prep,
+    return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'simple', name: workoutPlan.name, prepSeconds: cfg.workout.prep,
       items: workoutPlan.items.map(x => x.type === 'rest'
         ? { type: 'rest', label: x.label, seconds: x.seconds }
         : { type: 'exercise', id: x.id, label: x.label, target: x.target, sets: x.sets, restSeconds: x.restSeconds, tracking: x.tracking }), theme: { ...workoutTheme } };
   }
   function circuitFile() {
-    return { format: FORMAT, version: VERSION, kind: 'circuit', name: circuitPlan.name, prepSeconds: cfg.circuit.prep, rounds: cfg.circuit.rounds,
+    return { format: FORMAT, version: PLAN_VERSION, kind: 'circuit', name: circuitPlan.name, prepSeconds: cfg.circuit.prep, rounds: cfg.circuit.rounds,
       segments: circuitPlan.segments.map(s => ({ label: s.label, phase: s.phase, seconds: s.seconds })),
       theme: { ...circuitTheme } };
   }
@@ -2279,7 +2292,7 @@
       const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
       const v = raw.version == null ? 1 : Number(raw.version);
       let loaded = [];
-      if ([5, 6, VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
+      if ([5, 6, PLAN_VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
         if (raw.kind === 'workout') {
           setWorkoutPlan(normalizeWorkout(raw)); loaded.push('workout');
         } else if (raw.kind === 'circuit') {
@@ -2447,8 +2460,28 @@
   if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     $('#fsBtn').classList.add('hidden');
   }
+  $('#appVersion').textContent = 'Version ' + APP_VERSION;
+  $('#updateDismiss').addEventListener('click', () => $('#updateNotice').classList.add('hidden'));
+
+  function showUpdateNotice() {
+    $('#updateNotice').classList.remove('hidden');
+  }
+
+  function watchInstallingWorker(worker) {
+    if (!worker) return;
+    worker.addEventListener('statechange', () => {
+      if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateNotice();
+    });
+  }
+
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('./sw.js');
+        if (registration.waiting && navigator.serviceWorker.controller) showUpdateNotice();
+        registration.addEventListener('updatefound', () => watchInstallingWorker(registration.installing));
+      } catch (_) {}
+    });
   }
 
   $('#wName').value = workoutPlan.name;

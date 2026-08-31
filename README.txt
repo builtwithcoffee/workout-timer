@@ -168,7 +168,16 @@ FASTEST DEPLOYMENT (GITHUB PAGES)
 6. Open the resulting HTTPS URL in Safari on iPhone/iPad.
 7. Safari > Share > Add to Home Screen > turn on Open as Web App > Add.
 8. Launch Workout Timer once while online so its static files can be cached.
-9. After replacing index.html, bump CACHE in sw.js (currently workout-timer-v54).
+9. For each release, update APP_VERSION in both index.html and sw.js. The current release is 1.0.0.
+
+APP UPDATES
+- The application release and service-worker cache use the same version number, for example 1.0.0 or 1.0.1.
+- The workout and circuit file format has its own PLAN_VERSION (currently 7) and is intentionally independent from the application release.
+- A newly downloaded service worker waits while the current app remains open. It activates after every page using the previous version has been fully closed.
+- When an update is ready, the setup screen explains that it will be used after the app is fully closed and reopened. Active workouts are never reloaded by the update code.
+- On iPhone and iPad, fully closing may require removing the app from the App Switcher rather than only returning to the Home Screen.
+- Cache cleanup is limited to names beginning with workout-timer-v so it cannot remove caches belonging to other projects on the same GitHub Pages domain.
+- Application updates replace cached code and assets only. They do not clear workout plans in localStorage or workout history in IndexedDB.
 
 NOTES
 - No fonts, audio files, analytics or other runtime assets are fetched from a network.

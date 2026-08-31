@@ -1,4 +1,6 @@
-const CACHE = 'workout-timer-v54';
+const APP_VERSION = '1.0.0';
+const CACHE_PREFIX = 'workout-timer-v';
+const CACHE = `${CACHE_PREFIX}${APP_VERSION}`;
 const ASSETS = [
   './',
   './index.html',
@@ -11,14 +13,19 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+    Promise.all([
+      caches.keys().then(keys => Promise.all(
+        keys
+          .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE)
+          .map(key => caches.delete(key))
+      )),
+      self.clients.claim()
+    ])
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
