@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-mC/yJCDGnMaKMVE4YdCqhebS2L39r2KSJM/cDbdp+Tc='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MPBCGBRahLNZGR2mzJhZI3O8sjNAVuEPxgQVXzjWGRw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -191,6 +191,9 @@
   .ghost.reset-confirm{background:#7e0c24;color:#fff}
   .panelhead .ghost{min-height:64px;padding:0 22px;font-size:16px}
   .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .card-label{display:block;margin-bottom:12px}
+  .plan-actions{display:grid;grid-template-columns:1fr;gap:8px}
+  .plan-actions .ghost{text-align:left}
 
   .swatches{display:flex;gap:8px;flex-wrap:wrap}
   .swatch{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
@@ -216,7 +219,11 @@
   .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .42s ease-out}
   .runhead{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
   .runhead .mono{color:currentColor;opacity:.72;font-size:clamp(11px,1.4vw,14px)}
+  .runhead-status{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
   #runLeft{white-space:nowrap;text-align:right}
+  .block-skip{min-height:32px;padding:0 10px;border-radius:9px;color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);font-family:var(--mono);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
+  .block-skip:hover{background:rgba(255,255,255,.12);opacity:1}
+  .block-skip.confirm{background:rgba(255,255,255,.92);color:var(--phase);box-shadow:none;opacity:1}
   .runbody{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;min-height:0}
   .steplabel{font-size:clamp(28px,6vmin,64px);font-weight:800;letter-spacing:-.01em;text-transform:uppercase;line-height:1.05;text-wrap:balance}
   .setstatus{display:flex;align-items:baseline;justify-content:center;gap:.24em;margin-top:clamp(14px,2.4vmin,26px);font-family:var(--mono);font-size:clamp(30px,6.5vmin,76px);font-weight:800;letter-spacing:.05em;line-height:1}
@@ -365,17 +372,29 @@
           </div>
         </div>
         <div class="card">
-          <span class="mono" id="wTotalLabel">Total</span>
-          <div class="summary"><span class="num" id="wTotal">06:00</span></div>
+          <span class="mono card-label">Workout overview</span>
           <div class="note" id="wNote"></div>
         </div>
         <div class="card">
+          <span class="mono card-label">Workout plans</span>
+          <div class="plan-actions">
+            <button class="ghost" id="wExample" type="button">Lower Body Focus</button>
+            <button class="ghost" id="wCardioExample" type="button">Optional Cardio · Burpees</button>
+            <button class="ghost" id="wPullExample" type="button">Pull Focus Day</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="mono card-label">Workout files</span>
           <div class="actions">
             <button class="ghost" id="wLoad" type="button">Load</button>
-            <button class="ghost" id="wExample" type="button">Lower Body demo</button>
             <button class="ghost" id="wSave" type="button">Save</button>
-            <button class="ghost" id="wShare" type="button">Share</button>
             <button class="ghost" id="wReset" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="mono card-label">Share &amp; history</span>
+          <div class="actions">
+            <button class="ghost" id="wShare" type="button">Share</button>
             <button class="ghost" id="wHistory" type="button">History</button>
           </div>
         </div>
@@ -570,7 +589,10 @@
       <div class="mono" id="runName">WORKOUT</div>
       <div class="mono" id="runPos">ROUND 1 OF 3 · STEP 1 OF 6</div>
     </div>
-    <div class="mono" id="runLeft">06:00 LEFT</div>
+    <div class="runhead-status">
+      <div class="mono" id="runLeft">06:00 LEFT</div>
+      <button class="block-skip hidden" id="btnSkipBlock" type="button">Skip block</button>
+    </div>
   </div>
   <div class="runbody">
     <div class="steplabel" id="runLabel">Station 1</div>
@@ -1042,11 +1064,199 @@
     if (p.theme) workoutTheme = p.theme;
   }
 
-  async function bundledWorkout() {
-    if (!location.protocol.startsWith('http')) throw new Error('The default workout is available from the hosted app.');
-    const response = await fetch('./lower-body-focus-day.workout.json');
-    if (!response.ok) throw new Error('The default workout file could not be loaded.');
-    return normalizeWorkout(await response.json());
+  function lowerBodyFocusWorkout() {
+    return normalizeWorkout({
+      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
+      name: 'Lower Body Focus Day', workoutType: 'strength', prepSeconds: 5,
+      blocks: [
+        {
+          id: 'warm-up', title: 'Warm-Up', mode: 'sequence', score: '',
+          notes: ['Move with control and use the warm-up to prepare for the main lift.'],
+          items: [
+            { type: 'exercise', label: 'Wall Sit', completion: 'timed', setPlan: [
+              { seconds: 30, restSeconds: 30 }, { seconds: 30, restSeconds: 30 }
+            ], notes: ['Hold the wall-sit position.'] },
+            { type: 'exercise', label: 'Bodyweight Squats', completion: 'manual', target: '5 reps', sets: 3, restSeconds: 30, notes: ['Slow descent. Full depth if possible.'] },
+            { type: 'exercise', label: 'Hip Thrust', completion: 'manual', target: '10 reps', sets: 2, restSeconds: 30, notes: ['Pause briefly at the top.'] },
+            { type: 'exercise', label: 'Reverse Lunges', completion: 'manual', target: '10 per side', sets: 2, restSeconds: 30, notes: ['Controlled and balanced.'] },
+            { type: 'exercise', label: 'Deep Squat Position Hold', completion: 'timed', seconds: 20, sets: 1, restSeconds: 20, notes: ['Sit into the squat and stay relaxed but stable.'] }
+          ]
+        },
+        {
+          id: 'main-lift', title: 'Main Lift / Squats', mode: 'sequence', score: 'max-reps',
+          notes: [
+            'Air squats or weighted squats. If you used a weight for your test, keep that weight; otherwise use bodyweight.',
+            'The main lift has no clock. Quality comes first while you are fresh.',
+            'Record the maximum set in the program benchmark when appropriate.'
+          ],
+          items: [
+            { type: 'exercise', id: 'main-lift-squats', label: 'Squats', completion: 'manual', tracking: 'weight-reps', setPlan: [
+              { target: 'PR reps', restSeconds: 180 }, { target: 'PR reps', restSeconds: 150 }, { target: 'PR reps', restSeconds: 0 }
+            ], notes: ['Use the prescribed PR rep target for each set.'] }
+          ]
+        },
+        {
+          id: 'density', title: 'Density / Quality Work', mode: 'for-time', rounds: 5, unitLabel: 'cycle',
+          restBetweenRoundsSeconds: 30, score: 'elapsed-time',
+          notes: [
+            'The source heading says 8 Cycle Rounds; the explicit five-sets-of-each instruction is used here.',
+            'Complete five cycles, alternating A then B in each cycle.',
+            'Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.',
+            'The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.',
+            'Prioritize quality reps. Sets do not all need to be unbroken; aim to keep the early sets unbroken.',
+            'Use extra weight for the lunges if available and appropriate to your level.'
+          ],
+          items: [
+            { type: 'exercise', label: 'Neutral Grip Rows', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', label: 'Reverse Lunges', completion: 'manual', target: '20 overall reps', sets: 1, restSeconds: 0, notes: [] }
+          ]
+        },
+        {
+          id: 'finisher', title: 'Core / Finisher', mode: 'amrap', durationSeconds: 720, score: 'rounds-and-reps',
+          notes: [
+            'Perform A-B-C repeatedly for 12 minutes, aiming for quality work.',
+            'Record total rounds plus any extra reps when the clock expires.'
+          ],
+          items: [
+            { type: 'exercise', label: 'Side Plank — Left', completion: 'timed', seconds: 35, sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', label: 'Side Plank — Right', completion: 'timed', seconds: 35, sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', label: 'TRX or Ring Hamstring Curls', completion: 'manual', target: '15 reps', sets: 1, restSeconds: 0, notes: [] }
+          ]
+        }
+      ],
+      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
+    });
+  }
+
+  function optionalCardioBurpeeWorkout() {
+    return normalizeWorkout({
+      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
+      name: 'Optional Cardio · Burpees', workoutType: 'cardio', prepSeconds: 5,
+      blocks: [
+        {
+          id: 'structured-warm-up', title: 'Phase 1 · Structured Warm-Up', mode: 'for-time', rounds: 2, unitLabel: 'round',
+          restBetweenRoundsSeconds: 0, score: 'elapsed-time',
+          notes: [
+            'Controlled intensity. Aim to complete both rounds in about 5 minutes.',
+            'Purpose: improve conditioning while maintaining recovery for strength sessions.'
+          ],
+          items: [
+            { type: 'exercise', id: 'warm-up-slow-squats', label: 'Slow Squats', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Move slowly and with control.'] },
+            { type: 'exercise', id: 'warm-up-controlled-burpees', label: 'Controlled Burpees', completion: 'manual', target: '5 reps', sets: 1, restSeconds: 0, notes: ['Step back instead of jumping back.'] },
+            { type: 'exercise', id: 'warm-up-plank-hold', label: 'Plank Hold', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'warm-up-reverse-lunges', label: 'Alternating Reverse Lunges', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] }
+          ]
+        },
+        {
+          id: 'burpee-test', title: 'Phase 2 · Burpee Test', mode: 'sequence', score: 'max-reps',
+          notes: [
+            'Perform 1 minute of max-rep original burpees.',
+            'After the timer, record your total as today’s burpee PR, then recover for 3 minutes.'
+          ],
+          items: [
+            { type: 'exercise', id: 'burpee-test-timer', label: 'Max-Rep Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Complete as many quality original burpees as possible.'] },
+            { type: 'exercise', id: 'burpee-pr-result', label: 'Record Burpee PR', completion: 'manual', tracking: 'reps', target: 'Total reps', sets: 1, restSeconds: 180, notes: ['Tap Set done, then enter your total reps during the recovery timer.'] }
+          ]
+        },
+        {
+          id: 'main-session-emom', title: 'Phase 3 · 21-Minute EMOM', mode: 'amrap', durationSeconds: 1260, unitLabel: 'cycle', score: 'emom',
+          notes: [
+            'Every minute on the minute for 21 minutes. Complete the prescribed reps, then rest for the remainder of that minute.',
+            'Odd minutes: PR-based reps of Two-Pump Burpees.',
+            'Even minutes: PR-based reps of Original Burpees.',
+            'The source screenshots contain PR placeholders rather than a numeric rep formula; use the PR-based prescription from your program.'
+          ],
+          items: [
+            { type: 'exercise', id: 'emom-two-pump-burpees', label: 'Two-Pump Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Odd minute · complete your PR-based reps, then recover.'] },
+            { type: 'exercise', id: 'emom-original-burpees', label: 'Original Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Even minute · complete your PR-based reps, then recover.'] }
+          ]
+        }
+      ],
+      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
+    });
+  }
+
+  function pullFocusWorkout() {
+    return normalizeWorkout({
+      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
+      name: 'Pull Focus Day', workoutType: 'strength', prepSeconds: 5,
+      blocks: [
+        {
+          id: 'pull-warm-up', title: 'Pull Focus Day · Warm-Up', mode: 'sequence', score: '',
+          notes: [
+            'Move with control and do not rush. This prepares scapular stability, grip strength and core tension without fatigue.',
+            'The explosive pull-up primer is optional; skip its four sets if it is not appropriate today.'
+          ],
+          items: [
+            { type: 'exercise', id: 'warm-up-burpees-round-1', label: 'Original Burpees · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Controlled, not rushed.'] },
+            { type: 'exercise', id: 'warm-up-forward-circles-round-1', label: 'Forward Arm Circles · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'warm-up-backward-circles-round-1', label: 'Backward Arm Circles · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'warm-up-burpees-round-2', label: 'Original Burpees · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Controlled, not rushed.'] },
+            { type: 'exercise', id: 'warm-up-forward-circles-round-2', label: 'Forward Arm Circles · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'warm-up-backward-circles-round-2', label: 'Backward Arm Circles · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'warm-up-scapula-pull-ups', label: 'Scapula Pull-Ups', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '6 reps', restSeconds: 30 }, { target: '6 reps', restSeconds: 0 }
+            ], notes: ['Move only the shoulder blades. Do not bend the elbows.'] },
+            { type: 'exercise', id: 'warm-up-passive-hang-1', label: 'Passive Dead Hang · Round 1', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: ['Relax the shoulders.'] },
+            { type: 'exercise', id: 'warm-up-active-hang-1', label: 'Active Dead Hang · Round 1', completion: 'timed', seconds: 10, sets: 1, restSeconds: 30, notes: ['Engage the shoulders without bending the elbows.'] },
+            { type: 'exercise', id: 'warm-up-passive-hang-2', label: 'Passive Dead Hang · Round 2', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: ['Relax the shoulders.'] },
+            { type: 'exercise', id: 'warm-up-active-hang-2', label: 'Active Dead Hang · Round 2', completion: 'timed', seconds: 10, sets: 1, restSeconds: 0, notes: ['Engage the shoulders without bending the elbows.'] },
+            { type: 'exercise', id: 'warm-up-ring-rows', label: 'Overhand Ring Rows', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '5–8 reps', restSeconds: 30 }, { target: '5–8 reps', restSeconds: 0 }
+            ], notes: ['Use an easy high angle and controlled tempo. Do not approach failure.'] },
+            { type: 'exercise', id: 'warm-up-hollow-body-hold', label: 'Hollow Body Hold', completion: 'timed', setPlan: [
+              { seconds: 20, restSeconds: 0 }, { seconds: 20, restSeconds: 0 }
+            ], notes: ['Focus on full-body tension.'] },
+            { type: 'exercise', id: 'warm-up-explosive-pull-up', label: 'Optional Explosive Pull-Up', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '1 rep', restSeconds: 30 }, { target: '1 rep', restSeconds: 30 },
+              { target: '1 rep', restSeconds: 30 }, { target: '1 rep', restSeconds: 0 }
+            ], notes: ['One powerful pull-up per set to activate fast-twitch muscle fibres. Skip if not appropriate today.'] }
+          ]
+        },
+        {
+          id: 'main-lift-pull-ups', title: 'Main Lift · Pull-Ups', mode: 'sequence', score: 'max-reps',
+          notes: [
+            'Use pull-ups or banded pull-ups. Focus on full range of motion and clean reps.',
+            'You may move slightly faster on the biggest set, but keep every rep intentional.',
+            'Record your maximum unbroken set as the benchmark if you have not already done so.',
+            'If the benchmark is 0 or 1 without a band, perform four sets of 1–2 reps.',
+            'Aim to collect 6–8 total reps each time, or remain with the banded variation you currently use.'
+          ],
+          items: [
+            { type: 'exercise', id: 'main-lift-pull-ups', label: 'Pull-Ups / Banded Pull-Ups', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: 'PR-based reps', restSeconds: 180 }, { target: 'PR-based reps', restSeconds: 150 },
+              { target: 'PR-based reps', restSeconds: 150 }, { target: 'PR-based reps', restSeconds: 0 }
+            ], notes: ['Use the current pull-up benchmark to choose the set target.'] }
+          ]
+        },
+        {
+          id: 'pull-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 10, unitLabel: 'cycle', restBetweenRoundsSeconds: 0, score: 'elapsed-time',
+          notes: [
+            'Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.',
+            'Alternate A-B until you complete 10 sets of each. Aim for unbroken sets early, but not every set must be unbroken.',
+            'The source screenshot contains a PR placeholder for dips; use the prescribed PR-based target.',
+            'If your squat entry test used additional weight, use that weight for the prisoner squat jumps when appropriate.'
+          ],
+          items: [
+            { type: 'exercise', id: 'density-dips', label: 'Dips / Banded Dips', completion: 'manual', tracking: 'reps', target: 'PR-based reps', sets: 1, restSeconds: 0, notes: ['Quality reps; use assistance if needed.'] },
+            { type: 'exercise', id: 'density-prisoner-squat-jumps', label: 'Prisoner Squat Jumps', completion: 'manual', tracking: 'weight-reps', target: '8 reps', sets: 1, restSeconds: 0, notes: ['Use your entry-test weight only if appropriate.'] }
+          ]
+        },
+        {
+          id: 'pull-core-finisher', title: 'Core · Finisher', mode: 'amrap', durationSeconds: 480, unitLabel: 'round', score: 'rounds-and-reps',
+          notes: [
+            'Perform an 8-minute AMRAP for quality, alternating A-B until time expires.',
+            'Record completed rounds plus any extra reps, for example 8 rounds + 7 reps.',
+            'Aim for full burpees. If your push muscles are exhausted, use original burpees.'
+          ],
+          items: [
+            { type: 'exercise', id: 'finisher-toes-to-bar', label: 'Toes to Bar / Hanging Knee Raises', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'finisher-burpees', label: 'Burpees', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: ['Use full burpees when possible; switch to original burpees if needed.'] }
+          ]
+        }
+      ],
+      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
+    });
   }
 
   let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
@@ -1116,7 +1326,7 @@
   /* ---------- state ---------- */
   const S = { mode: 'workout', sound: true, screen: 'home', running: false, paused: false, queue: [], qi: 0, accum: 0, from: 0,
     blockId: null, blockAccum: 0, blockFrom: 0, raf: 0, lastBeep: null, lastBlockBeep: null, wakeLock: null, doneTotal: 0, variableDuration: false,
-    sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, pendingSession: null,
+    sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, sessionSkippedBlocks: {}, sessionEarlyEndedBlocks: {}, pendingSession: null,
     sessionSetResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb' };
 
   /* ---------- audio ---------- */
@@ -1158,14 +1368,22 @@
     return detail;
   }
 
+  function structuredBlockModeLabel(block) {
+    if (block.mode === 'amrap') return fmtPad(block.durationSeconds) + (block.score === 'emom' ? ' EMOM' : ' AMRAP');
+    if (block.mode === 'for-time') {
+      const unit = block.unitLabel || 'round';
+      return block.rounds + ' ' + (block.rounds === 1 ? unit : unit + 's') + ' · for time';
+    }
+    return 'Sequence';
+  }
+
   function renderStructuredWorkout(host) {
     workoutPlan.blocks.forEach((block, bi) => {
       const card = document.createElement('section');
       card.className = 'block-card';
       const unit = block.unitLabel || 'round';
       const units = block.rounds === 1 ? unit : unit + 's';
-      const modeLabel = block.mode === 'amrap' ? fmtPad(block.durationSeconds) + ' AMRAP'
-        : block.mode === 'for-time' ? block.rounds + ' ' + units + ' · for time' : 'Sequence';
+      const modeLabel = structuredBlockModeLabel(block);
       let steps = block.items.map(item => {
         const isRest = item.type === 'rest';
         const bg = isRest ? workoutTheme.rest : workoutTheme.work;
@@ -1585,12 +1803,10 @@
       const exercises = blocks.reduce((sum, block) => sum + block.items.filter(x => x.type === 'exercise').length, 0);
       const timedBlocks = blocks.filter(block => block.mode === 'amrap').length;
       const scoredBlocks = blocks.filter(block => block.mode === 'for-time').length;
-      $('#wTotalLabel').textContent = 'Duration';
-      $('#wTotal').textContent = 'Variable';
-      $('#wNote').textContent = blocks.length + ' blocks · ' + exercises + ' exercises' +
-        (timedBlocks ? ' · ' + timedBlocks + ' timed cap' + (timedBlocks === 1 ? '' : 's') : '') +
-        (scoredBlocks ? ' · ' + scoredBlocks + ' for-time score' + (scoredBlocks === 1 ? '' : 's') : '') +
-        (cfg.workout.prep ? ' · ' + cfg.workout.prep + 's prep' : '');
+      $('#wNote').textContent = blocks.length + ' workout blocks with ' + exercises + ' exercises.' +
+        (timedBlocks ? ' Includes ' + timedBlocks + ' timed cap' + (timedBlocks === 1 ? '' : 's') + '.' : '') +
+        (scoredBlocks ? ' Includes ' + scoredBlocks + ' for-time block' + (scoredBlocks === 1 ? '' : 's') + '.' : '') +
+        (cfg.workout.prep ? ' Starts with ' + cfg.workout.prep + ' seconds of prep.' : '');
     } else {
     const exercises = workoutPlan.items.filter(x => x.type === 'exercise');
     const standaloneRests = workoutPlan.items.filter(x => x.type === 'rest');
@@ -1603,11 +1819,9 @@
     }, 0);
     const standaloneRest = standaloneRests.reduce((sum, x) => sum + x.seconds, 0);
     const rests = linkedRest + standaloneRest;
-    $('#wTotalLabel').textContent = 'Duration';
-    $('#wTotal').textContent = 'Variable';
-    $('#wNote').textContent = exercises.length + ' exercise' + (exercises.length === 1 ? '' : 's') + ' · ' + sets + ' set' + (sets === 1 ? '' : 's') +
-      (standaloneRests.length ? ' · ' + standaloneRests.length + ' extra rest' + (standaloneRests.length === 1 ? '' : 's') : '') +
-      (rests ? ' · ' + fmtPad(rests) + ' planned rest' : '') + (cfg.workout.prep ? ' · ' + cfg.workout.prep + 's prep' : '');
+    $('#wNote').textContent = exercises.length + ' exercise' + (exercises.length === 1 ? '' : 's') + ' across ' + sets + ' set' + (sets === 1 ? '' : 's') + '.' +
+      (standaloneRests.length ? ' Includes ' + standaloneRests.length + ' standalone rest' + (standaloneRests.length === 1 ? '' : 's') + '.' : '') +
+      (rests ? ' Plans ' + fmtPad(rests) + ' of rest.' : '') + (cfg.workout.prep ? ' Starts with ' + cfg.workout.prep + ' seconds of prep.' : '');
     }
     const oneCircuit = circuitPlan.segments.reduce((sum, s) => sum + s.seconds, 0);
     $('#cTotal').textContent = fmtPad(oneCircuit * cfg.circuit.rounds + cfg.circuit.prep);
@@ -1676,10 +1890,7 @@
     const exercises = block.items.filter(item => item.type === 'exercise').map(item => item.label);
     const shown = exercises.slice(0, 4);
     const exercisePreview = shown.join(' · ') + (exercises.length > shown.length ? ' · +' + (exercises.length - shown.length) + ' more' : '');
-    const unit = block.unitLabel || 'round';
-    const mode = block.mode === 'amrap' ? fmtPad(block.durationSeconds) + ' AMRAP'
-      : block.mode === 'for-time' ? block.rounds + ' ' + (block.rounds === 1 ? unit : unit + 's') + ' for time'
-        : 'Sequence';
+    const mode = structuredBlockModeLabel(block).replace(' · ', ' ');
     return [mode + ' · ' + exercises.length + (exercises.length === 1 ? ' exercise' : ' exercises'), exercisePreview]
       .concat((block.notes || []).slice(0, 2));
   }
@@ -1920,11 +2131,12 @@
       ? plan.blocks
       : [{ id: 'workout', title: plan.name || 'Workout', mode: 'sequence', durationSeconds: 0, rounds: 1,
           items: (plan.items || []).filter(item => item.type !== 'rest').map(item => Object.assign({ completion: 'manual' }, item)) }];
-    const blocks = sourceBlocks.map(block => {
+    const blocks = sourceBlocks.filter(block => !S.sessionSkippedBlocks[block.id]).map(block => {
       const progress = S.sessionBlockProgress[block.id] || {};
       return {
         id: String(block.id || 'block'), title: String(block.title || 'Workout section'), mode: String(block.mode || 'sequence'),
         elapsedSeconds: Number(S.sessionBlockTimes[block.id]) || 0,
+        stoppedEarly: !!S.sessionEarlyEndedBlocks[block.id],
         rounds: block.mode === 'amrap' ? Math.max(0, (Number(progress.round) || 1) - 1) : null,
         extraReps: null,
         exercises: (block.items || []).filter(item => item.type !== 'rest').map(item => {
@@ -1964,7 +2176,7 @@
         return '<div class="log-exercise"><div class="log-exercise-name">' + esc(exercise.label) + '</div>' + sets + '</div>';
       }).join('');
       return '<section class="log-block"><div class="log-block-head"><div><div class="mono">' + esc(block.mode) + '</div><div class="log-block-title">' + esc(block.title) + '</div></div>' +
-        (block.elapsedSeconds ? '<span class="mono">' + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
+        (block.elapsedSeconds ? '<span class="mono">' + (block.stoppedEarly ? 'Stopped early · ' : '') + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
     }).join('');
   }
   function openSessionLog() {
@@ -2009,6 +2221,7 @@
   function historyBlockLines(block, unit) {
     const lines = [];
     if (block.mode === 'for-time' && block.elapsedSeconds) lines.push('Elapsed · ' + fmtElapsed(block.elapsedSeconds));
+    if (block.mode === 'amrap' && block.elapsedSeconds) lines.push((block.stoppedEarly ? 'Stopped early · ' : 'Time worked · ') + fmtElapsed(block.elapsedSeconds));
     if (block.mode === 'amrap' && block.rounds != null) lines.push(block.rounds + ' rounds' + (block.extraReps != null ? ' + ' + block.extraReps + ' reps' : ''));
     (block.exercises || []).forEach(exercise => {
       const sets = (exercise.sets || []).map(set => {
@@ -2100,6 +2313,7 @@
       const blockId = cleanExerciseId(historyText(block.id, title + ' ID', 60), 'history-block-' + (bi + 1));
       const mode = String(block.mode || '').toLowerCase();
       if (!['sequence', 'for-time', 'amrap'].includes(mode)) throw new Error(title + ' has an invalid history mode.');
+      if (block.stoppedEarly != null && typeof block.stoppedEarly !== 'boolean') throw new Error(title + ' has an invalid early-stop value.');
       if (!Array.isArray(block.exercises) || !block.exercises.length || block.exercises.length > 100) throw new Error(title + ' must contain 1 to 100 logged exercises.');
       const exercises = block.exercises.map((exercise, ei) => {
         if (!exercise || typeof exercise !== 'object' || Array.isArray(exercise)) throw new Error(title + ' exercise ' + (ei + 1) + ' is invalid.');
@@ -2128,6 +2342,7 @@
       });
       return { id: blockId, title, mode,
         elapsedSeconds: historyInteger(block.elapsedSeconds == null ? 0 : block.elapsedSeconds, title + ' elapsed seconds', 0, 172800, false),
+        stoppedEarly: block.stoppedEarly === true,
         rounds: historyInteger(block.rounds, title + ' completed rounds', 0, 10000, true),
         extraReps: historyInteger(block.extraReps, title + ' extra reps', 0, 10000, true), exercises };
     });
@@ -2234,6 +2449,7 @@
     }
     $('#btnPause').textContent = blockTransition ? 'Start block' : manual ? 'Set done' : 'Pause';
     $('#btnSkip').classList.toggle('hidden', blockTransition || manual || S.mode === 'rest');
+    resetBlockAction();
     t.style.transform = 'scale(1.05)';
     setTimeout(() => { t.style.transform = 'scale(1)'; }, 40);
     const f = $('#flash');
@@ -2307,6 +2523,7 @@
   }
 
   function moveToQueueIndex(index) {
+    resetBlockAction();
     const previousBlock = S.blockId;
     const upcoming = S.queue[index];
     const upcomingBlock = upcoming && upcoming.blockId || null;
@@ -2329,6 +2546,70 @@
     moveToQueueIndex(next);
   }
 
+  function activeStructuredBlockId() {
+    const current = S.queue[S.qi];
+    if (!current || S.mode !== 'workout' || !S.sessionPlan || S.sessionPlan.layout !== 'blocks') return null;
+    if (current.blockId) return current.blockId;
+    if (!isBlockTransition(current)) return null;
+    for (let i = S.qi + 1; i < S.queue.length; i++) {
+      if (S.queue[i].blockId) return S.queue[i].blockId;
+    }
+    return null;
+  }
+
+  function nextBlockTransitionIndex() {
+    const blockId = activeStructuredBlockId();
+    if (!blockId) return -1;
+    let foundBlock = false;
+    for (let i = isBlockTransition(S.queue[S.qi]) ? S.qi + 1 : S.qi; i < S.queue.length; i++) {
+      if (S.queue[i].blockId === blockId) { foundBlock = true; continue; }
+      if (foundBlock && isBlockTransition(S.queue[i])) return i;
+    }
+    return -1;
+  }
+
+  function blockActionMode() {
+    if (!S.running) return '';
+    const current = S.queue[S.qi];
+    if (current && current.blockId && current.blockMode === 'amrap' && !isBlockTransition(current)) return 'end-amrap';
+    return nextBlockTransitionIndex() >= 0 ? 'skip' : '';
+  }
+
+  let blockActionArmed = 0;
+  function resetBlockAction() {
+    if (blockActionArmed) clearTimeout(blockActionArmed);
+    blockActionArmed = 0;
+    const button = $('#btnSkipBlock');
+    const mode = blockActionMode();
+    button.textContent = mode === 'end-amrap' ? 'End AMRAP' : 'Skip block';
+    button.classList.toggle('hidden', !mode);
+    button.classList.remove('confirm');
+  }
+
+  function runBlockAction() {
+    const mode = blockActionMode();
+    const blockId = activeStructuredBlockId();
+    const next = nextBlockTransitionIndex();
+    if (!mode || !blockId) return;
+    if (!blockActionArmed) {
+      const button = $('#btnSkipBlock');
+      button.textContent = mode === 'end-amrap' ? 'End AMRAP?' : 'Skip block?';
+      button.classList.add('confirm');
+      blockActionArmed = setTimeout(resetBlockAction, 2600);
+      return;
+    }
+    resetBlockAction();
+    if (mode === 'end-amrap') {
+      S.sessionEarlyEndedBlocks[blockId] = true;
+      S.restLogKey = null;
+      return completeActiveBlock();
+    }
+    if (next < 0) return;
+    S.sessionSkippedBlocks[blockId] = true;
+    S.restLogKey = null;
+    moveToQueueIndex(next);
+  }
+
   function advance() {
     const current = S.queue[S.qi];
     const upcoming = S.queue[S.qi + 1] || null;
@@ -2343,6 +2624,7 @@
 
   function launch(queue) {
     if (!queue) return;
+    resetBlockAction();
     primeAudio(); lockScreen();
     S.queue = queue; S.qi = 0; S.accum = 0; S.from = performance.now(); S.running = true; S.paused = false; S.lastBeep = null; S.lastBlockBeep = null; S.screen = 'run';
     if (S.mode !== 'workout') { S.sessionPlan = null; S.pendingSession = null; S.restLogKey = null; }
@@ -2363,7 +2645,7 @@
       primeAudio();
       S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
       S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
-      S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
+      S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.sessionSkippedBlocks = {}; S.sessionEarlyEndedBlocks = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
       S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
       S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
       $('#doneLog').textContent = 'Log workout'; $('#doneLog').disabled = false;
@@ -2399,6 +2681,7 @@
   }
 
   function finish() {
+    resetBlockAction();
     captureActiveBlock();
     S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
     S.screen = 'done';
@@ -2412,6 +2695,7 @@
   }
 
   function goHome() {
+    resetBlockAction();
     S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
     S.screen = 'home';
     resetEnd();
@@ -2514,14 +2798,24 @@
     setPlanMsg('workout', 'Reset to the basic workout.');
   }
 
-  async function loadExampleWorkout() {
-    try {
-      setWorkoutPlan(await bundledWorkout());
-      editingStructuredWorkout = false;
-      $('#wName').value = workoutPlan.name;
-      persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
-      setPlanMsg('workout', 'Loaded the Lower Body structured workout demo.');
-    } catch (err) { setPlanMsg('workout', err.message || 'Could not load the example workout.', true); }
+  function applyBuiltInWorkout(plan, message) {
+    setWorkoutPlan(plan);
+    editingStructuredWorkout = false;
+    $('#wName').value = workoutPlan.name;
+    persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
+    setPlanMsg('workout', message);
+  }
+  function loadExampleWorkout() {
+    try { applyBuiltInWorkout(lowerBodyFocusWorkout(), 'Loaded the Lower Body Focus workout.'); }
+    catch (err) { setPlanMsg('workout', err.message || 'Could not load the example workout.', true); }
+  }
+  function loadCardioExampleWorkout() {
+    try { applyBuiltInWorkout(optionalCardioBurpeeWorkout(), 'Loaded the Optional Cardio Burpee workout.'); }
+    catch (err) { setPlanMsg('workout', err.message || 'Could not load the cardio workout.', true); }
+  }
+  function loadPullExampleWorkout() {
+    try { applyBuiltInWorkout(pullFocusWorkout(), 'Loaded the Pull Focus Day workout.'); }
+    catch (err) { setPlanMsg('workout', err.message || 'Could not load the Pull Focus workout.', true); }
   }
 
   /* ---------- wiring ---------- */
@@ -2538,6 +2832,8 @@
   $('#wShare').addEventListener('click', () => sharePlan('workout'));
   $('#wLoad').addEventListener('click', () => chooseFile('workout'));
   $('#wExample').addEventListener('click', loadExampleWorkout);
+  $('#wCardioExample').addEventListener('click', loadCardioExampleWorkout);
+  $('#wPullExample').addEventListener('click', loadPullExampleWorkout);
   $('#wReset').addEventListener('click', resetWorkout);
   $('#cSave').addEventListener('click', () => savePlan('circuit'));
   $('#cShare').addEventListener('click', () => sharePlan('circuit'));
@@ -2558,6 +2854,7 @@
     if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) advance(); else togglePause();
   });
   $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) advance(); });
+  $('#btnSkipBlock').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) runBlockAction(); });
   $('#btnEnd').addEventListener('click', (e) => {
     e.stopPropagation();
     if (endArmed) { clearTimeout(endArmed); resetEnd(); return goHome(); }
