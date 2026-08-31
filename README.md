@@ -34,12 +34,10 @@ Workout history is stored locally in the browser on that device. It is never upl
 
 Use **Export history** to make a backup or move history to another device. On the second device, use **Import history** to merge the backup without duplicating existing sessions. Export periodically if the history matters to you, especially before clearing Safari website data or changing devices.
 
-## Example workouts
+## Example workout
 
-The repository includes a few plans that can be downloaded and loaded into the app:
+The repository includes a structured plan that can be downloaded and loaded into the app:
 
-- [Simple strength workout](strength-workout.workout.json)
-- [Strength circuit](strength-circuit.workout.json)
 - [Structured lower-body workout](lower-body-focus-day.workout.json)
 
 ## About the project
