@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MPBCGBRahLNZGR2mzJhZI3O8sjNAVuEPxgQVXzjWGRw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2tq96ryW2ZUKMuT2k1mtqu6oT1N3ytpH/zPlz13M54M='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -122,10 +122,8 @@
   .block-title{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
   .block-mode{flex:none;padding:8px 10px;border-radius:999px;background:var(--card2);font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
   .block-steps{display:flex;flex-direction:column}
-  .block-step{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:start}
+  .block-step{padding:14px 18px;border-bottom:1px solid var(--line);border-left:3px solid var(--step-colour,var(--mode-work))}
   .block-step:last-child{border-bottom:none}
-  .block-step-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff}
-  .block-step-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .block-step-name{font-size:17px;font-weight:750;line-height:1.25}
   .block-step-detail{margin-top:4px;color:var(--muted);font-size:14px;line-height:1.4}
   .block-step-note{margin-top:6px;color:var(--text);opacity:.78;font-size:13px;line-height:1.45}
@@ -208,6 +206,8 @@
   .update-notice-copy strong{display:block;margin-bottom:2px}
   .update-notice button{min-height:40px;padding:0 13px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;flex:none}
   .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  .desktop-hint{display:none}
+  @media(hover:hover) and (pointer:fine){.desktop-hint{display:inline}}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
   @media(max-width:560px){ .footleft{width:100%} }
 
@@ -215,6 +215,7 @@
   .run{position:fixed;inset:0;background:var(--phase);color:var(--phase-text);display:flex;flex-direction:column;
     padding:calc(28px + env(safe-area-inset-top)) calc(30px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(30px + env(safe-area-inset-left));
     transition:background-color .28s ease;z-index:10;overflow:hidden}
+  .run.paused{background:#202322;background:color-mix(in srgb,var(--phase) 52%,#101211)}
   .wipe{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(0,0,0,.22);pointer-events:none}
   .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .42s ease-out}
   .runhead{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
@@ -224,18 +225,27 @@
   .block-skip{min-height:32px;padding:0 10px;border-radius:9px;color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);font-family:var(--mono);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
   .block-skip:hover{background:rgba(255,255,255,.12);opacity:1}
   .block-skip.confirm{background:rgba(255,255,255,.92);color:var(--phase);box-shadow:none;opacity:1}
-  .runbody{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;min-height:0}
+  .runbody{position:relative;flex:1;display:grid;grid-template-rows:minmax(60px,1fr) clamp(120px,30vmin,320px) minmax(60px,1fr);text-align:center;min-height:0}
+  .run-context{min-height:0;display:flex;flex-direction:column;align-items:center;width:100%}
+  .run-context-top{justify-content:flex-end;padding-bottom:clamp(8px,1.5vmin,16px)}
+  .run-clock-band{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+  .run-context-bottom{justify-content:flex-start;gap:clamp(8px,1.4vmin,14px);padding-top:clamp(8px,1.5vmin,16px);overflow-y:auto;overscroll-behavior:contain}
+  .run-gate-meta{margin-bottom:clamp(7px,1.2vmin,12px);font-family:var(--mono);font-size:clamp(10px,1.5vmin,13px);font-weight:750;letter-spacing:.14em;text-transform:uppercase;opacity:.72}
+  .run-gate-exercises{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 10px;list-style:none;margin:0;padding:0;max-width:min(620px,84vw)}
+  .run-gate-exercises li{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.2);font-size:clamp(12px,1.8vmin,16px);font-weight:750;line-height:1.25}
   .steplabel{font-size:clamp(28px,6vmin,64px);font-weight:800;letter-spacing:-.01em;text-transform:uppercase;line-height:1.05;text-wrap:balance}
   .setstatus{display:flex;align-items:baseline;justify-content:center;gap:.24em;margin-top:clamp(14px,2.4vmin,26px);font-family:var(--mono);font-size:clamp(30px,6.5vmin,76px);font-weight:800;letter-spacing:.05em;line-height:1}
   .setstatus .current{font-size:1.18em;letter-spacing:-.05em;line-height:.9}
   .setstatus .word{font-size:.34em;opacity:.72;letter-spacing:.2em}
-  .bigtime{font-size:clamp(96px,26vmin,320px);line-height:.86;margin:.06em 0 0;transition:transform .3s ease-out}
+  .bigtime{font-size:clamp(96px,26vmin,320px);line-height:.86;margin:0;transition:transform .3s ease-out}
+  .bigtime.pause-target{cursor:pointer;touch-action:manipulation}
   .bigtime .cln{display:inline-block;transform:translateY(-.085em)}
-  .bigtime.manual{font-size:clamp(26px,5.5vmin,58px);line-height:1.08;text-transform:none;letter-spacing:-.01em;margin-top:clamp(16px,2.8vmin,30px);padding:.34em .64em;border-radius:14px;background:rgba(0,0,0,.2)}
+  .bigtime.manual{font-size:clamp(26px,5.5vmin,58px);line-height:1.08;text-transform:none;letter-spacing:-.01em;padding:.34em .64em;border-radius:14px;background:rgba(0,0,0,.2)}
   .bigtime.block-ready{font-size:clamp(22px,4.5vmin,46px);padding:.45em .8em}
-  .runnote{margin-top:clamp(10px,1.8vmin,18px);max-width:min(760px,88vw);font-size:clamp(14px,2vmin,20px);line-height:1.35;font-weight:600;opacity:.82;text-wrap:balance}
-  .runprevious{margin-top:clamp(10px,1.7vmin,16px);padding:9px 14px;border-radius:999px;background:rgba(0,0,0,.2);font-family:var(--mono);font-size:clamp(11px,1.8vmin,15px);font-weight:750;letter-spacing:.08em}
-  .next{margin-top:clamp(14px,2.4vmin,26px);display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:999px;padding:11px 22px;max-width:90vw}
+  .runnote{max-width:min(620px,84vw);font-size:clamp(14px,2vmin,20px);line-height:1.42;font-weight:600;opacity:.82;text-wrap:balance}
+  .run-tap-hint{position:absolute;left:0;right:0;bottom:4px;font-family:var(--mono);font-size:clamp(9px,1.4vmin,12px);font-weight:750;letter-spacing:.12em;text-transform:uppercase;opacity:.62}
+  .runprevious{padding:9px 14px;border-radius:999px;background:rgba(0,0,0,.2);font-family:var(--mono);font-size:clamp(11px,1.8vmin,15px);font-weight:750;letter-spacing:.08em}
+  .next{display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:999px;padding:11px 22px;max-width:90vw}
   .next .cap{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.72}
   .next .txt{font-size:clamp(15px,2.2vmin,22px);font-weight:700}
   .runctl{position:relative;display:flex;gap:10px}
@@ -245,10 +255,10 @@
   .runctl .alt:hover{background:rgba(255,255,255,.14)}
   .runctl .end{flex:none;width:clamp(82px,13vw,132px);box-shadow:inset 0 0 0 2px rgba(255,255,255,.2);opacity:.78;font-size:clamp(14px,2vmin,20px);margin-left:clamp(8px,2.4vw,28px)}
   .runctl .end.confirm{background:rgba(255,255,255,.92);color:var(--phase);opacity:1;box-shadow:none}
-  .runpresets{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-bottom:12px}
+  .runpresets{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;width:100%;max-width:680px}
   .runpresets button{min-height:48px;border-radius:11px;background:rgba(0,0,0,.22);color:currentColor;font-family:var(--mono);font-size:clamp(11px,2.6vw,15px);font-weight:800}
   .runpresets button[aria-pressed="true"]{background:var(--phase-text);color:var(--phase)}
-  .setlogger{position:relative;width:min(680px,100%);margin:0 auto 12px;padding:12px 14px;border-radius:15px;background:rgba(0,0,0,.25);color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+  .setlogger{position:relative;width:min(680px,100%);padding:12px 14px;border-radius:15px;background:rgba(0,0,0,.25);color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .setlogger-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(94px,.65fr) minmax(94px,.65fr);gap:10px;align-items:end}
   .setlogger-grid.reps-only{grid-template-columns:minmax(0,1fr) minmax(94px,.45fr)}
   .setlogger-title{font-size:17px;font-weight:850;line-height:1.2}
@@ -571,12 +581,9 @@
   <div class="foot">
     <div class="footleft">
       <button class="footbtn" id="soundBtn" type="button" aria-pressed="true"></button>
-      <span class="note">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
+      <span class="note desktop-hint">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
     </div>
-    <div class="footleft">
-      <span class="mono">Tap anywhere while running to pause</span>
-      <span class="mono" id="appVersion"></span>
-    </div>
+    <span class="mono" id="appVersion"></span>
   </div>
 </div>
 
@@ -595,15 +602,24 @@
     </div>
   </div>
   <div class="runbody">
-    <div class="steplabel" id="runLabel">Station 1</div>
-    <div class="setstatus hidden" id="runSet"><span class="word" id="runSetLabel">SET</span><span class="current" id="runSetCurrent">1</span><span class="word" id="runSetOf">OF</span><span id="runSetTotal">3</span></div>
-    <div class="bigtime num" id="runTime">0<span class="cln">:</span>45</div>
-    <div class="runnote hidden" id="runNote"></div>
-    <div class="runprevious hidden" id="runPrevious"></div>
-    <div class="next" id="runNextWrap"><span class="cap">NEXT</span><span class="txt" id="runNext">Rest · 15s</span></div>
+    <div class="run-context run-context-top">
+      <div class="run-gate-meta hidden" id="runGateMeta"></div>
+      <div class="steplabel" id="runLabel">Station 1</div>
+      <div class="setstatus hidden" id="runSet"><span class="word" id="runSetLabel">SET</span><span class="current" id="runSetCurrent">1</span><span class="word" id="runSetOf">OF</span><span id="runSetTotal">3</span></div>
+    </div>
+    <div class="run-clock-band">
+      <div class="bigtime num" id="runTime">0<span class="cln">:</span>45</div>
+      <div class="run-tap-hint hidden" id="runTapHint">Tap timer to pause</div>
+    </div>
+    <div class="run-context run-context-bottom">
+      <ul class="run-gate-exercises hidden" id="runGateExercises"></ul>
+      <div class="runnote hidden" id="runNote"></div>
+      <div class="runprevious hidden" id="runPrevious"></div>
+      <div class="next" id="runNextWrap"><span class="cap">NEXT</span><span class="txt" id="runNext">Rest · 15s</span></div>
+      <div class="setlogger hidden" id="setLogger" aria-live="polite"></div>
+      <div class="runpresets hidden" id="runRestPresets" aria-label="Restart rest timer"></div>
+    </div>
   </div>
-  <div class="setlogger hidden" id="setLogger" aria-live="polite"></div>
-  <div class="runpresets hidden" id="runRestPresets" aria-label="Restart rest timer"></div>
   <div class="runctl">
     <button class="main" id="btnPause" type="button">Pause</button>
     <button class="alt" id="btnSkip" type="button">Skip</button>
@@ -656,7 +672,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.1';
+  const APP_VERSION = '1.0.2';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
@@ -1327,7 +1343,7 @@
   const S = { mode: 'workout', sound: true, screen: 'home', running: false, paused: false, queue: [], qi: 0, accum: 0, from: 0,
     blockId: null, blockAccum: 0, blockFrom: 0, raf: 0, lastBeep: null, lastBlockBeep: null, wakeLock: null, doneTotal: 0, variableDuration: false,
     sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, sessionSkippedBlocks: {}, sessionEarlyEndedBlocks: {}, pendingSession: null,
-    sessionSetResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb' };
+    sessionSetResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb', pauseHintEligible: false, pauseHintShown: false, pauseHintTimer: 0 };
 
   /* ---------- audio ---------- */
   let ac = null;
@@ -1388,18 +1404,18 @@
         const isRest = item.type === 'rest';
         const bg = isRest ? workoutTheme.rest : workoutTheme.work;
         const itemNotes = item.notes && item.notes.length ? '<div class="block-step-note">' + esc(item.notes.join(' ')) + '</div>' : '';
-        return '<div class="block-step"><span class="block-step-icon" style="background:' + bg + '">' + (isRest ? BED_ICON : DUMBBELL_ICON) + '</span>' +
-          '<div><div class="block-step-name">' + esc(item.label) + '</div><div class="block-step-detail">' + esc(structuredItemDetail(item)) + '</div>' + itemNotes + '</div></div>';
+        return '<div class="block-step" style="--step-colour:' + bg + '"><div class="block-step-name">' + esc(item.label) +
+          '</div><div class="block-step-detail">' + esc(structuredItemDetail(item)) + '</div>' + itemNotes + '</div>';
       }).join('');
       if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0) {
-        steps += '<div class="block-step"><span class="block-step-icon" style="background:' + workoutTheme.rest + '">' + BED_ICON + '</span>' +
-          '<div><div class="block-step-name">Rest between ' + esc(units) + '</div><div class="block-step-detail">' + esc(shortSec(block.restBetweenRoundsSeconds)) +
-          ' after each completed ' + esc(unit) + ', except the last</div><div class="block-step-note">The overall block stopwatch keeps running.</div></div></div>';
+        steps += '<div class="block-step" style="--step-colour:' + workoutTheme.rest + '"><div class="block-step-name">Rest between ' + esc(units) +
+          '</div><div class="block-step-detail">' + esc(shortSec(block.restBetweenRoundsSeconds)) + ' after each completed ' + esc(unit) +
+          ', except the last</div><div class="block-step-note">The overall block stopwatch keeps running.</div></div>';
       }
       const notes = block.notes && block.notes.length
         ? '<details class="block-notes"><summary>Coaching notes</summary><ul>' + block.notes.map(note => '<li>' + esc(note) + '</li>').join('') + '</ul></details>' : '';
       card.innerHTML = '<div class="block-head"><div><div class="block-number">Block ' + String(bi + 1).padStart(2, '0') + '</div><div class="block-title">' + esc(block.title) + '</div></div>' +
-        '<span class="block-mode">' + esc(modeLabel) + '</span></div><div class="block-steps">' + steps + '</div>' + notes;
+        (block.mode === 'sequence' ? '' : '<span class="block-mode">' + esc(modeLabel) + '</span>') + '</div><div class="block-steps">' + steps + '</div>' + notes;
       host.appendChild(card);
     });
     const help = document.createElement('div');
@@ -1886,13 +1902,14 @@
   const isBlockTransition = (it) => it && it.phase === 'transition';
   const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? it.target : shortSec(it.seconds);
 
-  function blockTransitionNotes(block) {
+  function blockTransitionDetails(block) {
     const exercises = block.items.filter(item => item.type === 'exercise').map(item => item.label);
-    const shown = exercises.slice(0, 4);
-    const exercisePreview = shown.join(' · ') + (exercises.length > shown.length ? ' · +' + (exercises.length - shown.length) + ' more' : '');
     const mode = structuredBlockModeLabel(block).replace(' · ', ' ');
-    return [mode + ' · ' + exercises.length + (exercises.length === 1 ? ' exercise' : ' exercises'), exercisePreview]
-      .concat((block.notes || []).slice(0, 2));
+    return {
+      summary: mode + ' · ' + exercises.length + (exercises.length === 1 ? ' exercise' : ' exercises'),
+      exercises,
+      notes: (block.notes || []).slice(0, 2)
+    };
   }
 
   function withMeta(items, name) {
@@ -1906,24 +1923,30 @@
 
   function buildWorkout() {
     const items = [];
-    if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING' });
+    if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING',
+      blockIndex: workoutPlan.layout === 'blocks' ? 1 : 0, blockCount: workoutPlan.layout === 'blocks' ? workoutPlan.blocks.length : 0 });
     if (workoutPlan.layout === 'blocks') {
-      const addExerciseSet = (block, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds) => {
+      const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds) => {
         const base = { label: exercise.label, phase: 'work', completion: exercise.completion, set, sets, notes: exercise.notes,
           exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps', liveLog: block.mode === 'sequence' && exercise.completion === 'manual',
           round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+          blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
           meta: block.title.toUpperCase() };
         if (exercise.completion === 'timed') base.seconds = targetOrSeconds;
         else base.target = targetOrSeconds;
         items.push(base);
         if (restSeconds > 0) items.push({ label: 'Rest', phase: 'rest', seconds: restSeconds,
+          contextLabel: exercise.label, set, sets, round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+          blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
           meta: 'REST · ' + block.title.toUpperCase() + (sets > 1 ? ' · SET ' + set + ' OF ' + sets : '') });
       };
       workoutPlan.blocks.forEach((block, blockIndex) => {
         if (blockIndex > 0) {
-          items.push({ label: block.title, phase: 'transition', target: 'Ready when you are', notes: blockTransitionNotes(block),
+          const details = blockTransitionDetails(block);
+          items.push({ label: block.title, phase: 'transition', target: 'Ready when you are', notes: details.notes,
+            gateSummary: details.summary, gateExercises: details.exercises, blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
             meta: 'BLOCK ' + (blockIndex + 1) + ' OF ' + workoutPlan.blocks.length + ' · UP NEXT' });
         }
         const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
@@ -1932,6 +1955,7 @@
             if (item.type === 'rest') {
               items.push({ label: item.label, phase: 'rest', seconds: item.seconds, notes: item.notes,
                 round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+                blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
                 blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
                 meta: block.title.toUpperCase() });
               return;
@@ -1939,12 +1963,13 @@
             const setPlan = item.setPlan || Array.from({ length: item.sets }, () => item.completion === 'timed'
               ? { seconds: item.seconds, restSeconds: item.restSeconds }
               : { target: item.target, restSeconds: item.restSeconds });
-            setPlan.forEach((set, si) => addExerciseSet(block, item, si + 1, setPlan.length, round, rounds,
+            setPlan.forEach((set, si) => addExerciseSet(block, blockIndex, item, si + 1, setPlan.length, round, rounds,
               item.completion === 'timed' ? set.seconds : set.target, set.restSeconds));
           });
           if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0 && round < rounds) {
             items.push({ label: 'Rest', phase: 'rest', seconds: block.restBetweenRoundsSeconds, round, rounds,
               progressLabel: block.unitLabel || 'round', notes: ['The density stopwatch continues during this rest.'],
+              blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
               blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: 0, meta: block.title.toUpperCase() });
           }
         }
@@ -2393,6 +2418,21 @@
   }
 
   /* ---------- run ---------- */
+  function hideRunTapHint() {
+    if (S.pauseHintTimer) clearTimeout(S.pauseHintTimer);
+    S.pauseHintTimer = 0;
+    $('#runTapHint').classList.add('hidden');
+  }
+
+  function showRunTapHint() {
+    if (!S.pauseHintEligible || S.pauseHintShown) return;
+    S.pauseHintShown = true;
+    const views = clamp(Number(store.get('workoutTimerPauseHintViewsV1', 0)) || 0, 0, 3);
+    store.set('workoutTimerPauseHintViewsV1', Math.min(3, views + 1));
+    $('#runTapHint').classList.remove('hidden');
+    S.pauseHintTimer = setTimeout(hideRunTapHint, 4500);
+  }
+
   function phaseColor(phase) {
     if (phase === 'prep' || phase === 'transition') return PREP_BG;
     if (S.mode === 'workout') return phase === 'rest' ? workoutTheme.rest : workoutTheme.work;
@@ -2400,6 +2440,20 @@
     if (S.mode === 'rest') return MODE_REST;
     if (S.mode === 'intervals') return phase === 'rest' ? MODE_REST : MODE_WORK;
     return APP_ACCENT;
+  }
+
+  function structuredRunPosition(it) {
+    if (!it || !it.blockCount) return it && it.meta || '';
+    const parts = ['Block ' + it.blockIndex + ' of ' + it.blockCount];
+    if (it.phase === 'prep') return parts.concat('Starting').join(' · ');
+    if (isBlockTransition(it)) return parts.concat('Up next').join(' · ');
+    const contextLabel = it.contextLabel || (it.label !== 'Rest' ? it.label : '');
+    if (contextLabel) parts.push(contextLabel);
+    if ((it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0) {
+      const unit = String(it.progressLabel || 'round');
+      parts.push(unit.charAt(0).toUpperCase() + unit.slice(1) + ' ' + it.round + (Number(it.rounds) > 0 ? ' of ' + it.rounds : ''));
+    } else if (Number(it.sets) > 1) parts.push('Set ' + it.set + ' of ' + it.sets);
+    return parts.join(' · ');
   }
 
   function paintPhase() {
@@ -2416,9 +2470,14 @@
     run.style.setProperty('--phase-text', fg);
     $('#wipe').style.background = fg === '#ffffff' ? 'rgba(0,0,0,.24)' : 'rgba(0,0,0,.14)';
     $('#runName').textContent = (it.name || '').toUpperCase();
-    $('#runName').classList.toggle('hidden', !!it.blockTitle);
-    $('#runPos').textContent = it.meta || '';
+    $('#runName').classList.remove('hidden');
+    $('#runPos').textContent = structuredRunPosition(it);
     $('#runLabel').textContent = it.label;
+    $('#runGateMeta').textContent = blockTransition ? it.gateSummary || '' : '';
+    $('#runGateMeta').classList.toggle('hidden', !blockTransition || !it.gateSummary);
+    const gateExercises = blockTransition && Array.isArray(it.gateExercises) ? it.gateExercises : [];
+    $('#runGateExercises').innerHTML = gateExercises.map(label => '<li>' + esc(label) + '</li>').join('');
+    $('#runGateExercises').classList.toggle('hidden', !gateExercises.length);
     $('#runSet').classList.toggle('hidden', !showProgress);
     if (showProgress) {
       const hasTotal = showSet || Number(it.rounds) > 0;
@@ -2436,11 +2495,15 @@
     $('#runNext').textContent = it.next;
     $('#runNextWrap').classList.toggle('hidden', !it.next || it.next === 'Finish');
     const t = $('#runTime');
+    const timerTappable = !manual && !blockTransition;
     t.classList.toggle('manual', manual || blockTransition);
     t.classList.toggle('block-ready', blockTransition);
+    t.classList.toggle('pause-target', timerTappable);
+    t.title = timerTappable ? 'Tap timer to pause or resume' : '';
+    if (timerTappable) showRunTapHint(); else hideRunTapHint();
     if (blockTransition) {
       t.textContent = it.target;
-      $('#runLeft').textContent = '';
+      paintBlockClock(it);
       $('#wipe').style.width = '0%';
     } else if (manual) {
       t.textContent = it.target;
@@ -2465,7 +2528,10 @@
   function paintBlockClock(it) {
     const ms = blockElapsed();
     if (it.blockMode === 'amrap') $('#runLeft').textContent = fmtPad(Math.max(0, it.blockDuration - ms / 1000)) + ' LEFT';
-    else if (it.blockMode === 'for-time') $('#runLeft').textContent = fmtElapsed(ms / 1000);
+    else if (it.blockMode === 'for-time') $('#runLeft').textContent = fmtElapsed(ms / 1000) + ' ELAPSED';
+    else if (S.mode === 'workout' && S.sessionPlan && S.sessionPlan.layout === 'blocks') {
+      $('#runLeft').textContent = fmtElapsed((Date.now() - (S.sessionStartedMs || Date.now())) / 1000) + ' ELAPSED';
+    }
     else $('#runLeft').textContent = '';
   }
 
@@ -2485,7 +2551,7 @@
     const blockMs = blockElapsed();
 
     if (isBlockTransition(it)) {
-      $('#runLeft').textContent = '';
+      paintBlockClock(it);
       $('#wipe').style.width = '0%';
       return;
     }
@@ -2513,7 +2579,7 @@
       const left = Math.max(0, dur - ms);
       paintTime($('#runTime'), fmt(left / 1000));
       $('#wipe').style.width = clamp((ms / dur) * 100, 0, 100) + '%';
-      if (it.blockMode === 'for-time' || it.blockMode === 'amrap') paintBlockClock(it);
+      if (it.blockMode === 'for-time' || it.blockMode === 'amrap' || (S.mode === 'workout' && S.sessionPlan && S.sessionPlan.layout === 'blocks')) paintBlockClock(it);
       else $('#runLeft').textContent = S.variableDuration ? '' : fmtPad(left / 1000 + remainingAfter(S.qi + 1)) + ' LEFT';
       const whole = Math.ceil(left / 1000);
       if (whole !== S.lastBeep) { S.lastBeep = whole; if (whole > 0 && whole <= 3) beep(720, 0.09, 0.06); }
@@ -2625,12 +2691,14 @@
   function launch(queue) {
     if (!queue) return;
     resetBlockAction();
+    hideRunTapHint();
     primeAudio(); lockScreen();
     S.queue = queue; S.qi = 0; S.accum = 0; S.from = performance.now(); S.running = true; S.paused = false; S.lastBeep = null; S.lastBlockBeep = null; S.screen = 'run';
+    S.pauseHintEligible = (Number(store.get('workoutTimerPauseHintViewsV1', 0)) || 0) < 3; S.pauseHintShown = false;
     if (S.mode !== 'workout') { S.sessionPlan = null; S.pendingSession = null; S.restLogKey = null; }
     S.blockId = queue[0].blockId || null; S.blockAccum = 0; S.blockFrom = performance.now();
     S.variableDuration = queue.some(isManualItem);
-    $('#home').classList.add('hidden'); $('#done').classList.add('hidden'); $('#run').classList.remove('hidden');
+    $('#home').classList.add('hidden'); $('#done').classList.add('hidden'); $('#run').classList.remove('hidden', 'paused');
     $('#runRestPresets').classList.toggle('hidden', S.mode !== 'rest');
     if (S.mode === 'rest') renderRunRestPresets();
     $('#btnPause').textContent = 'Pause';
@@ -2670,23 +2738,27 @@
   function togglePause() {
     if (!S.running) return;
     if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) return;
+    hideRunTapHint();
     if (S.paused) {
       S.paused = false; S.from = performance.now(); S.blockFrom = performance.now(); lockScreen();
+      $('#run').classList.remove('paused');
       $('#btnPause').textContent = 'Pause'; $('#runLabel').textContent = S.queue[S.qi].label;
       tick();
     } else {
       S.accum = elapsed(); S.blockAccum = blockElapsed(); S.paused = true; cancelAnimationFrame(S.raf); unlockScreen();
+      $('#run').classList.add('paused');
       $('#btnPause').textContent = 'Resume'; $('#runLabel').textContent = 'Paused';
     }
   }
 
   function finish() {
     resetBlockAction();
+    hideRunTapHint();
     captureActiveBlock();
     S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
     S.screen = 'done';
     beep(1100, 0.18, 0.11); setTimeout(() => beep(1320, 0.22, 0.11), 200);
-    $('#run').classList.add('hidden'); $('#done').classList.remove('hidden');
+    $('#run').classList.add('hidden'); $('#run').classList.remove('paused'); $('#done').classList.remove('hidden');
     paintTime($('#doneTime'), S.variableDuration ? 'Done' : fmtPad(S.doneTotal));
     const name = S.mode === 'workout' ? workoutPlan.name : S.mode === 'circuit' ? circuitPlan.name : S.mode === 'intervals' ? 'Intervals' : S.mode === 'rest' ? 'Rest' : 'Stopwatch';
     const rounds = S.mode === 'circuit' ? cfg.circuit.rounds : S.mode === 'intervals' ? cfg.intervals.rounds : 0;
@@ -2696,10 +2768,11 @@
 
   function goHome() {
     resetBlockAction();
+    hideRunTapHint();
     S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
     S.screen = 'home';
     resetEnd();
-    $('#run').classList.add('hidden'); $('#done').classList.add('hidden'); $('#log').classList.add('hidden'); $('#setLogger').classList.add('hidden'); $('#home').classList.remove('hidden');
+    $('#run').classList.add('hidden'); $('#run').classList.remove('paused'); $('#done').classList.add('hidden'); $('#log').classList.add('hidden'); $('#setLogger').classList.add('hidden'); $('#home').classList.remove('hidden');
   }
 
   function startCurrentMode() {
@@ -2840,8 +2913,7 @@
   $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
   $('#fileInput').addEventListener('change', loadPlanFile);
 
-  $('#run').addEventListener('click', (e) => { if (!e.target.closest('.runctl,.runpresets,.setlogger')) togglePause(); });
-  $('#setLogger').addEventListener('click', e => e.stopPropagation());
+  $('#runTime').addEventListener('click', () => { if ($('#runTime').classList.contains('pause-target')) togglePause(); });
   $('#setLogger').addEventListener('input', e => {
     const field = e.target.dataset.liveField;
     const result = S.restLogKey && S.sessionSetResults[S.restLogKey];
