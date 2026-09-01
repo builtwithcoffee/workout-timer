@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2tq96ryW2ZUKMuT2k1mtqu6oT1N3ytpH/zPlz13M54M='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ZK8Wy8d+mAGbo3VOHXoQuOTlFBNwtHzorKlAJpnsCxk='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -122,8 +122,10 @@
   .block-title{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
   .block-mode{flex:none;padding:8px 10px;border-radius:999px;background:var(--card2);font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
   .block-steps{display:flex;flex-direction:column}
-  .block-step{padding:14px 18px;border-bottom:1px solid var(--line);border-left:3px solid var(--step-colour,var(--mode-work))}
+  .block-step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:start}
   .block-step:last-child{border-bottom:none}
+  .block-step-marker{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.055);color:var(--step-colour,var(--mode-work));box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)}
+  .block-step-marker svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .block-step-name{font-size:17px;font-weight:750;line-height:1.25}
   .block-step-detail{margin-top:4px;color:var(--muted);font-size:14px;line-height:1.4}
   .block-step-note{margin-top:6px;color:var(--text);opacity:.78;font-size:13px;line-height:1.45}
@@ -672,7 +674,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.2';
+  const APP_VERSION = '1.0.3';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
@@ -1370,6 +1372,8 @@
   /* ---------- home rendering ---------- */
   const DUMBBELL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"></path></svg>';
   const BED_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5v14M21 19v-8a2 2 0 0 0-2-2H3M7 9V7a2 2 0 0 0-2-2H3M3 13h18"></path></svg>';
+  const CLOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 7v5l3 2M12 3a9 9 0 1 1-9 9 9 9 0 0 1 9-9z"></path></svg>';
+  const REPS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 7 2 2 3-3M11 8h10M3 15l2 2 3-3M11 16h10"></path></svg>';
   const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 
   function structuredItemDetail(item) {
@@ -1404,13 +1408,14 @@
         const isRest = item.type === 'rest';
         const bg = isRest ? workoutTheme.rest : workoutTheme.work;
         const itemNotes = item.notes && item.notes.length ? '<div class="block-step-note">' + esc(item.notes.join(' ')) + '</div>' : '';
-        return '<div class="block-step" style="--step-colour:' + bg + '"><div class="block-step-name">' + esc(item.label) +
-          '</div><div class="block-step-detail">' + esc(structuredItemDetail(item)) + '</div>' + itemNotes + '</div>';
+        const icon = isRest ? BED_ICON : item.completion === 'timed' ? CLOCK_ICON : REPS_ICON;
+        return '<div class="block-step" style="--step-colour:' + bg + '"><span class="block-step-marker">' + icon + '</span><div><div class="block-step-name">' +
+          esc(item.label) + '</div><div class="block-step-detail">' + esc(structuredItemDetail(item)) + '</div>' + itemNotes + '</div></div>';
       }).join('');
       if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0) {
-        steps += '<div class="block-step" style="--step-colour:' + workoutTheme.rest + '"><div class="block-step-name">Rest between ' + esc(units) +
-          '</div><div class="block-step-detail">' + esc(shortSec(block.restBetweenRoundsSeconds)) + ' after each completed ' + esc(unit) +
-          ', except the last</div><div class="block-step-note">The overall block stopwatch keeps running.</div></div>';
+        steps += '<div class="block-step" style="--step-colour:' + workoutTheme.rest + '"><span class="block-step-marker">' + BED_ICON +
+          '</span><div><div class="block-step-name">Rest between ' + esc(units) + '</div><div class="block-step-detail">' + esc(shortSec(block.restBetweenRoundsSeconds)) +
+          ' after each completed ' + esc(unit) + ', except the last</div><div class="block-step-note">The overall block stopwatch keeps running.</div></div></div>';
       }
       const notes = block.notes && block.notes.length
         ? '<details class="block-notes"><summary>Coaching notes</summary><ul>' + block.notes.map(note => '<li>' + esc(note) + '</li>').join('') + '</ul></details>' : '';
