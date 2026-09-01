@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sgGYqxYAfiwmyzlf87pnFc/CTgZQBR1EQ/6TYyZTHkM='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-1tEacCvxVU2ICdV1Co1iD1wdjj9ybJ+L2w5FUayB/GI='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -246,6 +246,8 @@
   .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .42s ease-out}
   .runhead{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
   .runhead .mono{color:currentColor;opacity:.72;font-size:clamp(11px,1.4vw,14px)}
+  .runhead>div:first-child{min-width:0}
+  #runName,#runPos{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .runhead-status{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
   #runLeft{white-space:nowrap;text-align:right}
   .block-skip{min-height:32px;padding:0 10px;border-radius:9px;color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);font-family:var(--mono);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
@@ -361,6 +363,17 @@
     .runhead>div{min-width:0;max-width:58%}
     .runhead .mono{font-size:10px;line-height:1.35;letter-spacing:.14em}
     .install-shell{padding:19px}
+  }
+  @media(orientation:landscape) and (max-height:600px){
+    .run{padding-top:calc(18px + env(safe-area-inset-top));padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+    .runhead{min-height:38px}
+    .runhead>div:first-child{max-width:28vw}
+    .runhead .mono{font-size:10px;line-height:1.35;letter-spacing:.14em}
+    .runbody{margin-top:8px;grid-template-rows:minmax(64px,1fr) clamp(96px,28vmin,190px) minmax(52px,1fr)}
+    .steplabel{font-size:clamp(24px,5.2vmin,46px);max-width:52vw}
+    .setstatus{margin-top:clamp(9px,1.8vmin,18px)}
+    .run-context-bottom{padding-top:6px;gap:6px}
+    .next{padding:7px 16px}
   }
   @media(max-width:360px){
     .home{padding-left:calc(12px + env(safe-area-inset-left));padding-right:calc(12px + env(safe-area-inset-right))}
@@ -749,7 +762,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.6';
+  const APP_VERSION = '1.0.7';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
