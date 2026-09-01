@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+g82yOotsC/zDuzghA8ZHzYiCJtVntfZKxkkMWh9n5Y='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LRwWa6K1rVSfIxXD8M7PrDNUoXIKJ026vx7mzS+UdSQ='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -373,8 +373,21 @@
     .runbody{margin-top:8px;grid-template-rows:minmax(64px,1fr) clamp(96px,28vmin,190px) minmax(52px,1fr)}
     .steplabel{font-size:clamp(24px,5.2vmin,46px);max-width:52vw}
     .setstatus{margin-top:clamp(9px,1.8vmin,18px)}
-    .run-context-bottom{padding-top:6px;gap:6px}
-    .next{padding:7px 16px}
+    .run-context-bottom{padding-top:4px;gap:4px}
+    .next{padding:5px 12px}
+    .runctl button{height:58px}
+    .runbody:has(.setlogger:not(.hidden)){grid-template-rows:minmax(58px,1fr) 82px minmax(82px,1.25fr)}
+    .runbody:has(.setlogger:not(.hidden)) .bigtime{font-size:clamp(72px,22vmin,120px)}
+    .runbody:has(.setlogger:not(.hidden)) .setstatus{margin-top:5px}
+    .run-context-bottom:has(.setlogger:not(.hidden)){padding-top:2px;gap:3px}
+    .run-context-bottom:has(.setlogger:not(.hidden)) .next{display:none}
+    .setlogger{padding:8px 10px}
+    .setlogger-grid,.setlogger-grid.reps-only{gap:6px}
+    .setlogger-title{font-size:15px}
+    .setlogger-previous{margin-top:2px;font-size:9px}
+    .setlogger label{gap:3px}
+    .setlogger input{min-height:38px;padding:6px 8px;font-size:16px}
+    .setlogger-saved{font-size:8px}
   }
   @media(max-width:360px){
     .home{padding-left:calc(12px + env(safe-area-inset-left));padding-right:calc(12px + env(safe-area-inset-right))}
@@ -452,19 +465,19 @@
           <div class="note" id="wNote"></div>
         </div>
         <div class="card">
-          <span class="mono card-label">Create workout</span>
-          <div class="plan-actions">
-            <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
-            <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
-          </div>
-        </div>
-        <div class="card">
           <span class="mono card-label">Workout plans</span>
           <div class="plan-actions">
             <button class="ghost" id="wExample" type="button">Lower Body Focus</button>
             <button class="ghost" id="wCardioExample" type="button">Optional Cardio · Burpees</button>
             <button class="ghost" id="wPullExample" type="button">Pull Focus Day</button>
             <button class="ghost" id="wDipExample" type="button">Dip Focus Day</button>
+          </div>
+        </div>
+        <div class="card">
+          <span class="mono card-label">Create workout</span>
+          <div class="plan-actions">
+            <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
+            <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
           </div>
         </div>
         <div class="card">
@@ -763,7 +776,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.8';
+  const APP_VERSION = '1.0.9';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
@@ -3078,6 +3091,8 @@
     $('#wName').value = workoutPlan.name;
     persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
     setPlanMsg('workout', message);
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
   }
   function loadExampleWorkout() {
     try { applyBuiltInWorkout(lowerBodyFocusWorkout(), 'Loaded the Lower Body Focus workout.'); }
