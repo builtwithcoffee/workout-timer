@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-A3WGDPIAhwWMnRJeUMDd9tNsMLV8ztVhsWu7fChcPbk='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V9UWu6q1ZfmOBe7oWFXwW9WQsyBcw332N6ytkma1doo='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -41,16 +41,34 @@
   .modes{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:14px}
   .modes button{min-height:46px;padding:0 18px;border-radius:10px;font-size:15px;font-weight:600;color:var(--muted)}
   .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-text)}
-  .util{display:flex;gap:8px}
+  .util{display:flex;gap:8px;margin-left:auto}
   .util button{min-height:46px;padding:0 14px;border-radius:12px;background:var(--card);color:var(--muted);font-size:14px;font-weight:600}
   .util button:hover{background:var(--card2)}
   .util .iconbtn{width:46px;padding:0;display:grid;place-items:center;color:var(--text)}
   .util .iconbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .footbtn{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 14px;border-radius:11px;background:var(--card);color:var(--muted);font-size:14px;font-weight:600;flex:none}
-  .footbtn:hover{background:var(--card2);color:var(--text)}
-  .footbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-  .footbtn[aria-pressed="false"]{color:var(--muted);opacity:.7}
-  .footleft{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .util .iconbtn[aria-pressed="false"]{color:var(--muted);opacity:.72}
+  .built-with-coffee{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .built-with-coffee svg{width:15px;height:15px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .install-dialog{width:min(580px,calc(100vw - 28px));max-height:calc(100dvh - 28px);margin:auto;padding:0;border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:auto}
+  .install-dialog::backdrop{background:rgba(0,0,0,.74);backdrop-filter:blur(4px)}
+  .install-shell{padding:24px}
+  .install-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:4px}
+  .install-head .title{font-size:clamp(27px,5vw,38px);line-height:1.06}
+  .dialog-close{width:42px;height:42px;border-radius:12px;background:var(--card2);color:var(--muted);font-size:25px;line-height:1;flex:none}
+  .dialog-close:hover{color:var(--text)}
+  .install-lead{margin:0 0 20px;color:var(--muted);font-size:15px;line-height:1.55}
+  .install-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .install-step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:13px 14px;border-radius:13px;background:var(--card2)}
+  .install-step-number{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-text);display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:800}
+  .install-step strong{display:block;margin-bottom:3px;font-size:16px}
+  .install-step p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+  .local-note{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card2)}
+  .local-note strong{display:block;margin-bottom:6px;font-size:17px}
+  .local-note p{margin:0;font-size:14px;line-height:1.52}
+  .local-note p+p{margin-top:9px;color:var(--text)}
+  .install-actions{display:flex;justify-content:flex-end;margin-top:18px}
+  .install-actions button{min-height:46px;padding:0 20px;border-radius:12px;background:var(--accent);color:var(--accent-text);font-weight:800}
 
   .panel{display:flex;flex-direction:column;gap:16px;flex:1;min-height:0}
   .panelhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -211,8 +229,6 @@
   .desktop-hint{display:none}
   @media(hover:hover) and (pointer:fine){.desktop-hint{display:inline}}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
-  @media(max-width:560px){ .footleft{width:100%} }
-
   /* ---------- run ---------- */
   .run{position:fixed;inset:0;background:var(--phase);color:var(--phase-text);display:flex;flex-direction:column;
     padding:calc(28px + env(safe-area-inset-top)) calc(30px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(30px + env(safe-area-inset-left));
@@ -330,6 +346,7 @@
     .home{gap:14px}
     .runhead>div{min-width:0;max-width:58%}
     .runhead .mono{font-size:10px;line-height:1.35;letter-spacing:.14em}
+    .install-shell{padding:19px}
   }
   @media(prefers-reduced-motion:reduce){
     .run,.bigtime,.flash{transition:none}
@@ -348,6 +365,8 @@
       <button role="tab" data-mode="intervals" aria-selected="false">Intervals</button>
     </nav>
     <div class="util">
+      <button class="iconbtn" id="soundBtn" type="button" aria-pressed="true" aria-label="Sound on. Tap to mute." title="Sound on"></button>
+      <button class="iconbtn" id="helpBtn" type="button" aria-label="Install and offline help" aria-haspopup="dialog" title="Install and offline help"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.4 2.4 0 0 1 4.6.9c0 1.8-2.3 2-2.3 3.7"></path><path d="M12 17h.01"></path></svg></button>
       <button class="iconbtn" id="fsBtn" type="button" aria-label="Enter fullscreen" title="Fullscreen (F)"></button>
     </div>
   </div>
@@ -388,11 +407,19 @@
           <div class="note" id="wNote"></div>
         </div>
         <div class="card">
+          <span class="mono card-label">Create workout</span>
+          <div class="plan-actions">
+            <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
+            <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
+          </div>
+        </div>
+        <div class="card">
           <span class="mono card-label">Workout plans</span>
           <div class="plan-actions">
             <button class="ghost" id="wExample" type="button">Lower Body Focus</button>
             <button class="ghost" id="wCardioExample" type="button">Optional Cardio · Burpees</button>
             <button class="ghost" id="wPullExample" type="button">Pull Focus Day</button>
+            <button class="ghost" id="wDipExample" type="button">Dip Focus Day</button>
           </div>
         </div>
         <div class="card">
@@ -400,13 +427,11 @@
           <div class="actions">
             <button class="ghost" id="wLoad" type="button">Load</button>
             <button class="ghost" id="wSave" type="button">Save</button>
-            <button class="ghost" id="wReset" type="button">Reset</button>
           </div>
         </div>
         <div class="card">
-          <span class="mono card-label">Share &amp; history</span>
+          <span class="mono card-label">Workout history</span>
           <div class="actions">
-            <button class="ghost" id="wShare" type="button">Share</button>
             <button class="ghost" id="wHistory" type="button">History</button>
           </div>
         </div>
@@ -486,7 +511,6 @@
           <div class="actions">
             <button class="ghost" id="cLoad" type="button">Load</button>
             <button class="ghost" id="cSave" type="button">Save</button>
-            <button class="ghost" id="cShare" type="button">Share</button>
           </div>
         </div>
         <details class="card colour-details">
@@ -581,13 +605,33 @@
   </section>
 
   <div class="foot">
-    <div class="footleft">
-      <button class="footbtn" id="soundBtn" type="button" aria-pressed="true"></button>
-      <span class="note desktop-hint">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
-    </div>
+    <span class="mono built-with-coffee">Built with coffee <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9z"></path><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"></path><path d="M8 6c0-1 1-1 1-2"></path><path d="M12 6c0-1 1-1 1-2"></path></svg></span>
+    <span class="note desktop-hint">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
     <span class="mono" id="appVersion"></span>
   </div>
 </div>
+
+<dialog class="install-dialog" id="installHelp" aria-labelledby="installHelpTitle" aria-describedby="installHelpIntro">
+  <div class="install-shell">
+    <div class="install-head">
+      <div><div class="mono">INSTALLATION</div><h2 class="title" id="installHelpTitle">Add Workout Timer to iPhone or iPad</h2></div>
+      <button class="dialog-close" id="installHelpClose" type="button" aria-label="Close installation help">×</button>
+    </div>
+    <p class="install-lead" id="installHelpIntro">Install it like an app for quick access at the gym. You only need an internet connection for this first visit.</p>
+    <ol class="install-steps">
+      <li class="install-step"><span class="install-step-number">1</span><div><strong>Open this page in your browser</strong><p>Use Chrome, Safari, or your preferred browser on the iPhone or iPad where you want the timer.</p></div></li>
+      <li class="install-step"><span class="install-step-number">2</span><div><strong>Tap the Share button</strong><p>Look for the square with an upward arrow in your browser’s toolbar or menu.</p></div></li>
+      <li class="install-step"><span class="install-step-number">3</span><div><strong>Choose Add to Home Screen</strong><p>You may need to scroll down in the Share menu to find it.</p></div></li>
+      <li class="install-step"><span class="install-step-number">4</span><div><strong>Tap Add</strong><p>Workout Timer will appear on your Home Screen and open in its own window.</p></div></li>
+    </ol>
+    <div class="local-note">
+      <strong>Local and offline by design</strong>
+      <p>Your workout plans, settings, and history stay on this device. They are not uploaded to an account or server, and the installed timer works without gym Wi-Fi or cellular service.</p>
+      <p>When you are connected, the app may check for a newer version. Before clearing browser data or moving devices, use History → Export to make a backup.</p>
+    </div>
+    <div class="install-actions"><button id="installHelpDone" type="button">Got it</button></div>
+  </div>
+</dialog>
 
 <!-- RUN -->
 <div class="run hidden" id="run" aria-live="polite">
@@ -674,7 +718,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.4';
+  const APP_VERSION = '1.0.5';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
@@ -822,6 +866,18 @@
         { type: 'exercise', id: 'curls', label: 'Curls', target: '10–12 reps', sets: 3, restSeconds: 30, tracking: 'weight-reps' }
       ]
     };
+  }
+
+  function defaultStructuredWorkout() {
+    return normalizeWorkout({
+      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
+      name: 'Structured Workout', workoutType: 'workout', prepSeconds: 5,
+      blocks: [{
+        id: 'section-1', title: 'Workout Section', mode: 'sequence', score: '', notes: [],
+        items: [{ type: 'exercise', id: 'section-1-exercise-1', label: 'Exercise', completion: 'manual', tracking: 'reps', target: '10 reps', sets: 1, restSeconds: 30, notes: [] }]
+      }],
+      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
+    });
   }
 
   function defaultCircuit() {
@@ -1117,7 +1173,6 @@
           id: 'density', title: 'Density / Quality Work', mode: 'for-time', rounds: 5, unitLabel: 'cycle',
           restBetweenRoundsSeconds: 30, score: 'elapsed-time',
           notes: [
-            'The source heading says 8 Cycle Rounds; the explicit five-sets-of-each instruction is used here.',
             'Complete five cycles, alternating A then B in each cycle.',
             'Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.',
             'The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.',
@@ -1182,7 +1237,7 @@
             'Every minute on the minute for 21 minutes. Complete the prescribed reps, then rest for the remainder of that minute.',
             'Odd minutes: PR-based reps of Two-Pump Burpees.',
             'Even minutes: PR-based reps of Original Burpees.',
-            'The source screenshots contain PR placeholders rather than a numeric rep formula; use the PR-based prescription from your program.'
+            'Use the prescribed PR-based targets.'
           ],
           items: [
             { type: 'exercise', id: 'emom-two-pump-burpees', label: 'Two-Pump Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Odd minute · complete your PR-based reps, then recover.'] },
@@ -1252,7 +1307,7 @@
           notes: [
             'Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.',
             'Alternate A-B until you complete 10 sets of each. Aim for unbroken sets early, but not every set must be unbroken.',
-            'The source screenshot contains a PR placeholder for dips; use the prescribed PR-based target.',
+            'Use the prescribed PR-based target for dips.',
             'If your squat entry test used additional weight, use that weight for the prisoner squat jumps when appropriate.'
           ],
           items: [
@@ -1270,6 +1325,75 @@
           items: [
             { type: 'exercise', id: 'finisher-toes-to-bar', label: 'Toes to Bar / Hanging Knee Raises', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: [] },
             { type: 'exercise', id: 'finisher-burpees', label: 'Burpees', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: ['Use full burpees when possible; switch to original burpees if needed.'] }
+          ]
+        }
+      ],
+      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
+    });
+  }
+
+  function dipFocusWorkout() {
+    return normalizeWorkout({
+      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
+      name: 'Dip Focus Day', workoutType: 'strength', prepSeconds: 5,
+      blocks: [
+        {
+          id: 'dip-warm-up', title: 'Dip Focus Day · Warm-Up', mode: 'sequence', score: '',
+          notes: [
+            'Prepare the shoulders, elbows and anterior chain for pressing. Move smoothly and keep the warm-up easy.',
+            'Allow about six to eight minutes for this warm-up.'
+          ],
+          items: [
+            { type: 'exercise', id: 'dip-warm-up-shoulder-circles', label: 'Shoulder Circles', completion: 'manual', tracking: 'reps', target: '30 each direction', sets: 1, restSeconds: 0, notes: ['Smooth and controlled.'] },
+            { type: 'exercise', id: 'dip-warm-up-scapula-dips', label: 'Scapula Dips', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '10 reps', restSeconds: 30 }, { target: '10 reps', restSeconds: 0 }
+            ], notes: ['Move only the shoulder blades and keep the arms straight.'] },
+            { type: 'exercise', id: 'dip-warm-up-banded-rotations', label: 'Banded Shoulder Rotations', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '6 per arm', restSeconds: 0 }, { target: '6 per arm', restSeconds: 0 }
+            ], notes: ['Alternate arms without rest. Focus on shoulder engagement and a strong shoulder stretch.'] },
+            { type: 'exercise', id: 'dip-warm-up-position-hold', label: '90° Dip Position Hold', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: '15s + 1–3 dips', restSeconds: 60 }, { target: '15s + 1–3 dips', restSeconds: 0 }
+            ], notes: ['Keep the effort easy. This is activation, not a hard working set.'] },
+            { type: 'exercise', id: 'dip-warm-up-plank', label: 'Straight-Arm Plank Hold', completion: 'timed', setPlan: [
+              { seconds: 30, restSeconds: 30 }, { seconds: 30, restSeconds: 0 }
+            ], notes: ['Brace lightly and avoid shaking.'] }
+          ]
+        },
+        {
+          id: 'main-lift-dips', title: 'Main Lift · Dips', mode: 'sequence', score: 'max-reps',
+          notes: [
+            'Use chest-focused dips or band-supported dips. Focus on full range of motion and clean reps.',
+            'You may move slightly faster on the biggest set, but keep every rep intentional.',
+            'Record your maximum set as the benchmark if you have not already done so.'
+          ],
+          items: [
+            { type: 'exercise', id: 'main-lift-dips', label: 'Dips / Band-Supported Dips', completion: 'manual', tracking: 'reps', setPlan: [
+              { target: 'PR-based reps', restSeconds: 180 }, { target: 'PR-based reps', restSeconds: 180 },
+              { target: 'PR-based reps', restSeconds: 120 }, { target: 'PR-based reps', restSeconds: 0 }
+            ], notes: ['Use the current dip benchmark to choose the set target.'] }
+          ]
+        },
+        {
+          id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 8, unitLabel: 'cycle', restBetweenRoundsSeconds: 0, score: 'elapsed-time',
+          notes: [
+            'Build quality volume without rushing. Perform every rep with intent.',
+            'Alternate A-B until you complete eight sets of each. Aim for unbroken sets early, but not every set must be unbroken.',
+            'Use the prescribed PR-based target for push-ups.'
+          ],
+          items: [
+            { type: 'exercise', id: 'dip-density-push-ups', label: 'Push-Ups', completion: 'manual', tracking: 'reps', target: 'PR-based reps', sets: 1, restSeconds: 0, notes: ['Prioritize controlled, high-quality reps.'] },
+            { type: 'exercise', id: 'dip-density-inverted-rows', label: 'Inverted Rows', completion: 'manual', tracking: 'reps', target: '9 reps', sets: 1, restSeconds: 0, notes: [] }
+          ]
+        },
+        {
+          id: 'dip-core-finisher', title: 'Core · Finisher', mode: 'amrap', durationSeconds: 480, unitLabel: 'round', score: 'rounds-and-reps',
+          notes: [
+            'Perform an 8-minute AMRAP for quality, alternating A-B until time expires.',
+            'Record completed rounds plus any extra reps, for example 4 rounds + 7 reps.'
+          ],
+          items: [
+            { type: 'exercise', id: 'dip-finisher-l-sit-raises', label: 'L-Sit Leg Raises', completion: 'manual', tracking: 'reps', target: '16 overall reps', sets: 1, restSeconds: 0, notes: [] },
+            { type: 'exercise', id: 'dip-finisher-split-squats', label: 'Bulgarian Split Squats', completion: 'manual', tracking: 'reps', target: '9 per leg', sets: 1, restSeconds: 0, notes: [] }
           ]
         }
       ],
@@ -1425,7 +1549,7 @@
     });
     const help = document.createElement('div');
     help.className = 'structured-help';
-    help.textContent = 'This workout keeps its sections, individual sets and coaching notes when you save or share it. Choose Edit workout above to make changes.';
+    help.textContent = 'This workout keeps its sections, individual sets and coaching notes when you save it as a workout file. Choose Edit workout above to make changes.';
     host.appendChild(help);
   }
 
@@ -2802,17 +2926,6 @@
       setPlanMsg(kind, 'Saved ' + fileName(kind));
     } catch (err) { setPlanMsg(kind, err.message || 'Could not save this ' + kind + '.', true); }
   }
-  async function sharePlan(kind) {
-    const data = currentFile(kind), json = JSON.stringify(data, null, 2);
-    try {
-      let file = null, ok = false;
-      try { file = new File([json], fileName(kind), { type: 'application/json' }); ok = !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (_) {}
-      if (ok) { await navigator.share({ files: [file], title: data.name, text: 'Workout Timer ' + kind }); setPlanMsg(kind, (kind === 'circuit' ? 'Circuit' : 'Workout') + ' shared.'); }
-      else { savePlan(kind); setPlanMsg(kind, 'Sharing is unavailable here, so the file was downloaded instead.'); }
-    } catch (err) {
-      setPlanMsg(kind, err && err.name === 'AbortError' ? 'Sharing canceled.' : (err.message || 'Could not share this ' + kind + '.'), true);
-    }
-  }
   let pendingLoadKind = 'workout';
   function chooseFile(kind) { pendingLoadKind = kind; $('#fileInput').value = ''; $('#fileInput').click(); }
   function selectMode(kind) {
@@ -2849,28 +2962,36 @@
     } catch (err) { setPlanMsg(pendingLoadKind, err.message || 'Could not load that file.', true); }
   }
 
-  let resetWorkoutArmed = 0;
-  function disarmWorkoutReset() {
-    if (resetWorkoutArmed) clearTimeout(resetWorkoutArmed);
-    resetWorkoutArmed = 0;
-    $('#wReset').textContent = 'Reset';
-    $('#wReset').classList.remove('reset-confirm');
+  let newWorkoutArmed = '', newWorkoutTimer = 0;
+  function disarmNewWorkout() {
+    if (newWorkoutTimer) clearTimeout(newWorkoutTimer);
+    newWorkoutTimer = 0;
+    newWorkoutArmed = '';
+    $('#wNewBasic').textContent = 'New basic workout';
+    $('#wNewStructured').textContent = 'New structured workout';
+    $('#wNewBasic').classList.remove('reset-confirm');
+    $('#wNewStructured').classList.remove('reset-confirm');
   }
-  async function resetWorkout() {
-    if (!resetWorkoutArmed) {
-      $('#wReset').textContent = 'Reset?';
-      $('#wReset').classList.add('reset-confirm');
-      resetWorkoutArmed = setTimeout(disarmWorkoutReset, 3000);
+  function createWorkout(kind) {
+    const structured = kind === 'structured';
+    const button = structured ? $('#wNewStructured') : $('#wNewBasic');
+    if (newWorkoutArmed !== kind) {
+      disarmNewWorkout();
+      newWorkoutArmed = kind;
+      button.textContent = structured ? 'Create structured?' : 'Create basic?';
+      button.classList.add('reset-confirm');
+      newWorkoutTimer = setTimeout(disarmNewWorkout, 3000);
       return;
     }
-    disarmWorkoutReset();
-    workoutPlan = defaultWorkout();
+    disarmNewWorkout();
+    if (structured) setWorkoutPlan(defaultStructuredWorkout());
+    else workoutPlan = defaultWorkout();
     workoutTheme = defaultTheme();
     cfg.workout.prep = 5;
-    editingStructuredWorkout = false;
+    editingStructuredWorkout = structured;
     $('#wName').value = workoutPlan.name;
     persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
-    setPlanMsg('workout', 'Reset to the basic workout.');
+    setPlanMsg('workout', structured ? 'New structured workout ready to edit.' : 'New basic workout ready to edit.');
   }
 
   function applyBuiltInWorkout(plan, message) {
@@ -2892,6 +3013,10 @@
     try { applyBuiltInWorkout(pullFocusWorkout(), 'Loaded the Pull Focus Day workout.'); }
     catch (err) { setPlanMsg('workout', err.message || 'Could not load the Pull Focus workout.', true); }
   }
+  function loadDipExampleWorkout() {
+    try { applyBuiltInWorkout(dipFocusWorkout(), 'Loaded the Dip Focus Day workout.'); }
+    catch (err) { setPlanMsg('workout', err.message || 'Could not load the Dip Focus workout.', true); }
+  }
 
   /* ---------- wiring ---------- */
   $('#wStart').addEventListener('click', startWorkout);
@@ -2904,14 +3029,14 @@
   $('#cStart').addEventListener('click', startCircuit);
   $('#sStart').addEventListener('click', startStopwatch);
   $('#wSave').addEventListener('click', () => savePlan('workout'));
-  $('#wShare').addEventListener('click', () => sharePlan('workout'));
   $('#wLoad').addEventListener('click', () => chooseFile('workout'));
+  $('#wNewBasic').addEventListener('click', () => createWorkout('basic'));
+  $('#wNewStructured').addEventListener('click', () => createWorkout('structured'));
   $('#wExample').addEventListener('click', loadExampleWorkout);
   $('#wCardioExample').addEventListener('click', loadCardioExampleWorkout);
   $('#wPullExample').addEventListener('click', loadPullExampleWorkout);
-  $('#wReset').addEventListener('click', resetWorkout);
+  $('#wDipExample').addEventListener('click', loadDipExampleWorkout);
   $('#cSave').addEventListener('click', () => savePlan('circuit'));
-  $('#cShare').addEventListener('click', () => sharePlan('circuit'));
   $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
   $('#fileInput').addEventListener('change', loadPlanFile);
 
@@ -2954,11 +3079,12 @@
     const b = $('#soundBtn');
     b.setAttribute('aria-pressed', String(S.sound));
     b.setAttribute('aria-label', S.sound ? 'Sound on. Tap to mute.' : 'Sound off. Tap to unmute.');
+    b.title = S.sound ? 'Sound on' : 'Sound off';
     b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + SPEAKER + '"></path>' +
       (S.sound
         ? '<path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 6a8.5 8.5 0 0 1 0 12"></path>'
         : '<path d="m16 9.5 5 5"></path><path d="m21 9.5-5 5"></path>') +
-      '</svg><span>' + (S.sound ? 'Sound on' : 'Sound off') + '</span>';
+      '</svg>';
   }
 
   function renderFullscreen() {
@@ -2967,6 +3093,20 @@
     b.innerHTML = SVG(on ? 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5');
     b.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
   }
+
+  function closeInstallHelp() {
+    const dialog = $('#installHelp');
+    if (typeof dialog.close === 'function' && dialog.open) dialog.close();
+    else dialog.removeAttribute('open');
+  }
+
+  $('#helpBtn').addEventListener('click', () => {
+    const dialog = $('#installHelp');
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+  });
+  $('#installHelpClose').addEventListener('click', closeInstallHelp);
+  $('#installHelpDone').addEventListener('click', closeInstallHelp);
 
   $('#soundBtn').addEventListener('click', () => {
     S.sound = !S.sound;
@@ -2979,6 +3119,11 @@
   document.addEventListener('fullscreenchange', renderFullscreen);
 
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#installHelp').hasAttribute('open')) {
+      e.preventDefault();
+      closeInstallHelp();
+      return;
+    }
     if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement && document.activeElement.tagName)) return;
     const k = e.key.toLowerCase();
     if (e.code === 'Space') {

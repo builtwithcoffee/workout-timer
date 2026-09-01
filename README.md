@@ -8,8 +8,8 @@ Workout Timer runs as an installable web app. After the first online launch, it 
 
 ## Install on iPhone or iPad
 
-1. Open [Workout Timer](https://builtwithcoffee.github.io/workout-timer/) in **Safari**.
-2. Tap the **Share** button.
+1. Open [Workout Timer](https://builtwithcoffee.github.io/workout-timer/) in Chrome, Safari, or your preferred browser.
+2. Tap the browser’s **Share** button.
 3. Scroll down and tap **Add to Home Screen**.
 4. Leave **Open as Web App** turned on, then tap **Add**.
 5. Launch Workout Timer from the new Home Screen icon once while online. Its files will be cached for offline use.
@@ -28,11 +28,11 @@ The running screen uses large type, strong phase colours, progress animation, co
 
 ## Workouts and your data
 
-Create straightforward workouts in the app or load a saved `.workout.json` or `.circuit.json` plan. Plans can be saved and shared through the device's normal file and share controls.
+Create basic or structured workouts in the app, or load a saved `.workout.json` or `.circuit.json` plan. Plans can be saved as portable files using the device's normal file controls.
 
 Workout history is stored locally in the browser on that device. It is never uploaded. Plan files and workout-history backups are deliberately separate: loading a plan does not bring its previous sessions with it.
 
-Use **Export history** to make a backup or move history to another device. On the second device, use **Import history** to merge the backup without duplicating existing sessions. Export periodically if the history matters to you, especially before clearing Safari website data or changing devices.
+Use **Export history** to make a backup or move history to another device. On the second device, use **Import history** to merge the backup without duplicating existing sessions. Export periodically if the history matters to you, especially before clearing browser website data or changing devices.
 
 ## Example workout
 
