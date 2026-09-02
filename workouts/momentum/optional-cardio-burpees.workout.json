@@ -1,0 +1,151 @@
+{
+  "format": "workout-timer-plan",
+  "version": 7,
+  "kind": "workout",
+  "layout": "blocks",
+  "name": "Optional Cardio · Burpees",
+  "workoutType": "cardio",
+  "prepSeconds": 5,
+  "blocks": [
+    {
+      "id": "structured-warm-up",
+      "title": "Phase 1 · Structured Warm-Up",
+      "mode": "for-time",
+      "rounds": 2,
+      "unitLabel": "round",
+      "restBetweenRoundsSeconds": 0,
+      "score": "elapsed-time",
+      "notes": [
+        "Controlled intensity. Aim to complete both rounds in about 5 minutes.",
+        "Purpose: improve conditioning while maintaining recovery for strength sessions."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "warm-up-slow-squats",
+          "label": "Slow Squats",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Move slowly and with control."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-controlled-burpees",
+          "label": "Controlled Burpees",
+          "completion": "manual",
+          "target": "5 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Step back instead of jumping back."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-plank-hold",
+          "label": "Plank Hold",
+          "completion": "timed",
+          "seconds": 20,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-reverse-lunges",
+          "label": "Alternating Reverse Lunges",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "burpee-test",
+      "title": "Phase 2 · Burpee Test",
+      "mode": "sequence",
+      "score": "max-reps",
+      "notes": [
+        "Perform 1 minute of max-rep original burpees.",
+        "After the timer, record your total as today’s burpee PR, then recover for 3 minutes."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "burpee-test-timer",
+          "label": "Max-Rep Burpees",
+          "completion": "timed",
+          "seconds": 60,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Complete as many quality original burpees as possible."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "burpee-pr-result",
+          "label": "Record Burpee PR",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "Total reps",
+          "sets": 1,
+          "restSeconds": 180,
+          "notes": [
+            "Tap Set done, then enter your total reps during the recovery timer."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "main-session-emom",
+      "title": "Phase 3 · 21-Minute EMOM",
+      "mode": "amrap",
+      "durationSeconds": 1260,
+      "unitLabel": "cycle",
+      "score": "emom",
+      "notes": [
+        "Every minute on the minute for 21 minutes. Complete the prescribed reps, then rest for the remainder of that minute.",
+        "Odd minutes: PR-based reps of Two-Pump Burpees.",
+        "Even minutes: PR-based reps of Original Burpees.",
+        "Use the prescribed PR-based targets."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "emom-two-pump-burpees",
+          "label": "Two-Pump Burpees",
+          "completion": "timed",
+          "seconds": 60,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Odd minute · complete your PR-based reps, then recover."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "emom-original-burpees",
+          "label": "Original Burpees",
+          "completion": "timed",
+          "seconds": 60,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Even minute · complete your PR-based reps, then recover."
+          ]
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "work": "#f04e23",
+    "rest": "#1668c4"
+  }
+}

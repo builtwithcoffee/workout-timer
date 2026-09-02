@@ -1,0 +1,229 @@
+{
+  "format": "workout-timer-plan",
+  "version": 7,
+  "kind": "workout",
+  "layout": "blocks",
+  "name": "Rise · Push Focus Day",
+  "workoutType": "strength",
+  "prepSeconds": 5,
+  "blocks": [
+    {
+      "id": "push-warm-up",
+      "title": "Push Focus Day · Warm-Up",
+      "mode": "sequence",
+      "score": "",
+      "notes": [
+        "Prepare the shoulders, elbows and anterior chain for pressing. Move smoothly and keep the warm-up easy.",
+        "Allow about six to eight minutes for this warm-up."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "push-warm-up-shoulder-circles",
+          "label": "Shoulder Circles",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "30 each direction",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Smooth and controlled."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "push-warm-up-scapula-push-ups",
+          "label": "Scapula Push-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "10 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "10 reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Move only the shoulder blades and keep the arms straight."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "push-warm-up-plank",
+          "label": "Straight-Arm Plank Hold",
+          "completion": "timed",
+          "setPlan": [
+            {
+              "seconds": 30,
+              "restSeconds": 30
+            },
+            {
+              "seconds": 30,
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Focus on shoulder engagement."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "push-warm-up-elevated-push-ups",
+          "label": "Elevated Push-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "6 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "6 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "6 reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use an easy variation. This is activation, not a hard working set."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "main-lift-push-ups",
+      "title": "Main Lift · Push-Ups",
+      "mode": "sequence",
+      "score": "max-reps",
+      "notes": [
+        "Focus on full range of motion and clean reps.",
+        "You may move slightly faster on the biggest set, but keep every rep intentional.",
+        "Record your maximum set as the benchmark if you have not already done so."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "main-lift-push-ups",
+          "label": "Push-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "PR-based reps",
+              "restSeconds": 150
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 150
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 120
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use the current push-up benchmark for all four sets."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "push-density",
+      "title": "Density · Quality Work",
+      "mode": "for-time",
+      "rounds": 8,
+      "unitLabel": "cycle",
+      "restBetweenRoundsSeconds": 0,
+      "score": "elapsed-time",
+      "notes": [
+        "Build quality volume without rushing. Perform every rep with intent and use banded pull-ups if needed.",
+        "Alternate A-B until you complete eight sets of each. Aim for unbroken sets early, but not every set must be unbroken.",
+        "Use the prescribed PR-based target for chin-ups."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "push-density-chin-ups",
+          "label": "Chin-Ups / Banded Chin-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "PR-based reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Prioritize controlled, high-quality reps; use assistance if needed."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "push-density-pike-push-ups",
+          "label": "Pike Push-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "7 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "push-core-finisher",
+      "title": "Core · Finisher",
+      "mode": "amrap",
+      "durationSeconds": 600,
+      "unitLabel": "round",
+      "score": "rounds-and-reps",
+      "notes": [
+        "Perform a 10-minute AMRAP for quality, cycling A-B-C until time expires.",
+        "Record completed rounds plus any extra reps, for example 8 rounds + 7 reps."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "push-finisher-ring-y-raises",
+          "label": "Ring Y-Raises",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "8 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "push-finisher-plank-hold",
+          "label": "Plank Hold",
+          "completion": "timed",
+          "seconds": 40,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "push-finisher-dip-hold",
+          "label": "90° Dip Hold",
+          "completion": "timed",
+          "seconds": 25,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "work": "#f04e23",
+    "rest": "#1668c4"
+  }
+}

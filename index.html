@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LRwWa6K1rVSfIxXD8M7PrDNUoXIKJ026vx7mzS+UdSQ='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/GAgIgqlryTO8yskKK827sKJ0aMuBgSYIlxI7GskTxw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -180,6 +180,8 @@
   .edit-item.exercise-item{border-left:4px solid var(--mode-work)}
   .set-list{display:flex;flex-direction:column;gap:7px}
   .set-row{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(110px,.6fr) auto;gap:8px;align-items:end}
+  .set-row.with-load{grid-template-columns:auto minmax(0,1fr) minmax(150px,.8fr) minmax(110px,.6fr) auto}
+  .set-load-controls{display:grid;grid-template-columns:minmax(0,1fr) 70px;gap:6px}
   .set-number{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 0 12px}
   .small-remove{width:38px;height:42px;border-radius:10px;background:rgba(98,10,28,.62);color:#ffe2e7;font-size:18px}
   .edit-toolbar{justify-content:flex-end;flex-wrap:wrap}
@@ -213,6 +215,7 @@
 
   .start{min-height:64px;padding:0 30px;border-radius:14px;background:var(--accent);color:var(--accent-text);font-size:19px;font-weight:800;letter-spacing:.01em}
   .start:hover{filter:brightness(1.08)}
+  .start:disabled{opacity:.35;cursor:default;filter:none}
   .ghost{min-height:56px;padding:0 18px;border-radius:12px;background:var(--card2);color:var(--text);font-size:15px;font-weight:700}
   .ghost:hover{background:#2e3130}
   .ghost.reset-confirm{background:#7e0c24;color:#fff}
@@ -221,6 +224,18 @@
   .card-label{display:block;margin-bottom:12px}
   .plan-actions{display:grid;grid-template-columns:1fr;gap:8px}
   .plan-actions .ghost{text-align:left}
+  .plan-library{display:flex;flex-direction:column;gap:14px}
+  .plan-library-intro{margin:-3px 0 16px;color:var(--text)}
+  .plan-library-group{display:flex;flex-direction:column;gap:10px}
+  .plan-library-group + .plan-library-group{padding-top:14px;border-top:1px solid var(--line)}
+  .plan-library-heading{color:var(--text);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .plan-track{display:flex;flex-direction:column;gap:8px}
+  .plan-track-name{color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .plan-library-status{margin:0}
+  .workout-empty{min-height:260px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:28px;border:2px dashed var(--line);border-radius:var(--r);background:rgba(255,255,255,.015)}
+  .workout-empty .mono{color:var(--accent);font-size:11px;letter-spacing:.16em}
+  .workout-empty h2{margin:10px 0 8px;font-size:clamp(25px,4vw,38px);line-height:1.08}
+  .workout-empty p{max-width:520px;margin:0;color:var(--muted);font-size:16px;line-height:1.55}
 
   .swatches{display:flex;gap:8px;flex-wrap:wrap}
   .swatch{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
@@ -235,6 +250,8 @@
   .update-notice-copy strong{display:block;margin-bottom:2px}
   .update-notice button{min-height:40px;padding:0 13px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;flex:none}
   .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  .guide-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:var(--muted);text-underline-offset:3px}
+  .guide-link:hover{color:var(--text)}
   .desktop-hint{display:none}
   @media(hover:hover) and (pointer:fine){.desktop-hint{display:inline}}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
@@ -302,6 +319,7 @@
   .done .bigtime{font-size:clamp(88px,22vmin,240px)}
   .done .sub{font-size:clamp(16px,2.4vmin,22px);color:var(--muted)}
   .done .row{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+  .done-copy-msg{margin-top:8px}
 
   /* ---------- logging and history ---------- */
   .log{position:fixed;inset:0;background:var(--bg);z-index:12;overflow:auto;padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
@@ -329,6 +347,10 @@
   .history-block-title{font-weight:800;margin-bottom:5px}
   .history-result{color:var(--muted);font-size:14px;line-height:1.5}
   .history-note{padding:11px 12px;border-radius:10px;background:var(--card2);font-size:14px;line-height:1.45}
+  .history-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:2px}
+  .history-actions .ghost{min-height:46px;padding:0 15px;font-size:14px}
+  .history-copy-feedback{flex:1;min-width:180px;color:var(--accent);font-size:14px;line-height:1.4}
+  .history-copy-feedback.err{color:#ff8f8f}
 
   @media(max-width:900px){
     .layout{grid-template-columns:1fr}
@@ -352,11 +374,15 @@
     .exercise-fields,.add-row{grid-template-columns:1fr}
     .edit-grid{grid-template-columns:1fr}
     .edit-field.wide{grid-column:auto}
-    .set-row{grid-template-columns:auto minmax(0,1fr) auto}
-    .set-row .set-rest{grid-column:2/3}
+    .set-row,.set-row.with-load{grid-template-columns:auto minmax(0,1fr) auto}
+    .set-row .set-load,.set-row .set-rest{grid-column:2/4}
+    .set-row .small-remove{grid-column:3;grid-row:1}
     .log-set{grid-template-columns:1fr 1fr}
     .log-set-plan{grid-column:1/-1;padding-bottom:0}
     .log-score{grid-template-columns:1fr}
+    .history-actions{align-items:stretch;flex-direction:column}
+    .history-actions .ghost{width:100%}
+    .history-copy-feedback{min-width:0}
     .setlogger{padding:11px 12px}
     .setlogger-grid{grid-template-columns:1fr 84px 84px;gap:7px}
     .setlogger-title{font-size:15px}
@@ -450,6 +476,11 @@
       </div>
       <div>
         <div class="card">
+          <span class="mono card-label">Choose a workout</span>
+          <p class="note plan-library-intro">Select the workout that matches your current BuiltSimple track.</p>
+          <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
+        </div>
+        <div class="card">
           <div class="field">
             <span class="mono">Prep</span>
             <div class="chips" data-field="workout.prep" data-fmt="sec">
@@ -463,15 +494,6 @@
         <div class="card">
           <span class="mono card-label">Workout overview</span>
           <div class="note" id="wNote"></div>
-        </div>
-        <div class="card">
-          <span class="mono card-label">Workout plans</span>
-          <div class="plan-actions">
-            <button class="ghost" id="wExample" type="button">Lower Body Focus</button>
-            <button class="ghost" id="wCardioExample" type="button">Optional Cardio · Burpees</button>
-            <button class="ghost" id="wPullExample" type="button">Pull Focus Day</button>
-            <button class="ghost" id="wDipExample" type="button">Dip Focus Day</button>
-          </div>
         </div>
         <div class="card">
           <span class="mono card-label">Create workout</span>
@@ -664,6 +686,7 @@
 
   <div class="foot">
     <span class="mono built-with-coffee">Built with coffee <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9z"></path><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"></path><path d="M8 6c0-1 1-1 1-2"></path><path d="M12 6c0-1 1-1 1-2"></path></svg></span>
+    <a class="mono guide-link" href="./guide.html">Guide</a>
     <span class="note desktop-hint">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
     <span class="mono" id="appVersion"></span>
   </div>
@@ -738,9 +761,11 @@
   <div class="sub" id="doneSub">3 rounds · Workout</div>
   <div class="row">
     <button class="start hidden" id="doneLog" type="button">Log workout</button>
+    <button class="ghost hidden" id="doneCopyOverview" type="button">Copy workout overview</button>
     <button class="ghost" id="doneAgain" type="button">Again</button>
     <button class="ghost" id="doneHome" type="button">Back to setup</button>
   </div>
+  <div class="msg done-copy-msg" id="doneCopyMsg" role="status" aria-live="polite"></div>
 </div>
 
 <!-- POST-WORKOUT LOG -->
@@ -776,7 +801,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.9';
+  const APP_VERSION = '1.0.16';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
@@ -1058,7 +1083,13 @@
               }
               const target = String(set.target || '').trim();
               if (!target || target.length > 40) throw new Error(label + ' set ' + (si + 1) + ' needs a target of 1 to 40 characters.');
-              return { target, restSeconds };
+              const addedWeight = set.addedWeight == null || set.addedWeight === '' ? null : Number(set.addedWeight);
+              if (addedWeight != null && (!Number.isFinite(addedWeight) || addedWeight <= 0 || addedWeight > 10000)) {
+                throw new Error(label + ' set ' + (si + 1) + ' added weight must be greater than 0 and no more than 10000.');
+              }
+              const weightUnit = addedWeight == null ? null : String(set.weightUnit || '').toLowerCase();
+              if (addedWeight != null && !['kg', 'lb'].includes(weightUnit)) throw new Error(label + ' set ' + (si + 1) + ' added weight needs a kg or lb unit.');
+              return { target, restSeconds, addedWeight, weightUnit };
             });
           }
           const sets = setPlan ? setPlan.length : Number(x.sets == null ? 1 : x.sets);
@@ -1196,293 +1227,31 @@
     if (p.theme) workoutTheme = p.theme;
   }
 
-  function lowerBodyFocusWorkout() {
-    return normalizeWorkout({
-      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
-      name: 'Lower Body Focus Day', workoutType: 'strength', prepSeconds: 5,
-      blocks: [
-        {
-          id: 'warm-up', title: 'Warm-Up', mode: 'sequence', score: '',
-          notes: ['Move with control and use the warm-up to prepare for the main lift.'],
-          items: [
-            { type: 'exercise', label: 'Wall Sit', completion: 'timed', setPlan: [
-              { seconds: 30, restSeconds: 30 }, { seconds: 30, restSeconds: 30 }
-            ], notes: ['Hold the wall-sit position.'] },
-            { type: 'exercise', label: 'Bodyweight Squats', completion: 'manual', target: '5 reps', sets: 3, restSeconds: 30, notes: ['Slow descent. Full depth if possible.'] },
-            { type: 'exercise', label: 'Hip Thrust', completion: 'manual', target: '10 reps', sets: 2, restSeconds: 30, notes: ['Pause briefly at the top.'] },
-            { type: 'exercise', label: 'Reverse Lunges', completion: 'manual', target: '10 per side', sets: 2, restSeconds: 30, notes: ['Controlled and balanced.'] },
-            { type: 'exercise', label: 'Deep Squat Position Hold', completion: 'timed', seconds: 20, sets: 1, restSeconds: 20, notes: ['Sit into the squat and stay relaxed but stable.'] }
-          ]
-        },
-        {
-          id: 'main-lift', title: 'Main Lift / Squats', mode: 'sequence', score: 'max-reps',
-          notes: [
-            'Air squats or weighted squats. If you used a weight for your test, keep that weight; otherwise use bodyweight.',
-            'The main lift has no clock. Quality comes first while you are fresh.',
-            'Record the maximum set in the program benchmark when appropriate.'
-          ],
-          items: [
-            { type: 'exercise', id: 'main-lift-squats', label: 'Squats', completion: 'manual', tracking: 'weight-reps', setPlan: [
-              { target: 'PR reps', restSeconds: 180 }, { target: 'PR reps', restSeconds: 150 }, { target: 'PR reps', restSeconds: 0 }
-            ], notes: ['Use the prescribed PR rep target for each set.'] }
-          ]
-        },
-        {
-          id: 'density', title: 'Density / Quality Work', mode: 'for-time', rounds: 5, unitLabel: 'cycle',
-          restBetweenRoundsSeconds: 30, score: 'elapsed-time',
-          notes: [
-            'Complete five cycles, alternating A then B in each cycle.',
-            'Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.',
-            'The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.',
-            'Prioritize quality reps. Sets do not all need to be unbroken; aim to keep the early sets unbroken.',
-            'Use extra weight for the lunges if available and appropriate to your level.'
-          ],
-          items: [
-            { type: 'exercise', label: 'Neutral Grip Rows', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', label: 'Reverse Lunges', completion: 'manual', target: '20 overall reps', sets: 1, restSeconds: 0, notes: [] }
-          ]
-        },
-        {
-          id: 'finisher', title: 'Core / Finisher', mode: 'amrap', durationSeconds: 720, score: 'rounds-and-reps',
-          notes: [
-            'Perform A-B-C repeatedly for 12 minutes, aiming for quality work.',
-            'Record total rounds plus any extra reps when the clock expires.'
-          ],
-          items: [
-            { type: 'exercise', label: 'Side Plank — Left', completion: 'timed', seconds: 35, sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', label: 'Side Plank — Right', completion: 'timed', seconds: 35, sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', label: 'TRX or Ring Hamstring Curls', completion: 'manual', target: '15 reps', sets: 1, restSeconds: 0, notes: [] }
-          ]
-        }
-      ],
-      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
-    });
-  }
-
-  function optionalCardioBurpeeWorkout() {
-    return normalizeWorkout({
-      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
-      name: 'Optional Cardio · Burpees', workoutType: 'cardio', prepSeconds: 5,
-      blocks: [
-        {
-          id: 'structured-warm-up', title: 'Phase 1 · Structured Warm-Up', mode: 'for-time', rounds: 2, unitLabel: 'round',
-          restBetweenRoundsSeconds: 0, score: 'elapsed-time',
-          notes: [
-            'Controlled intensity. Aim to complete both rounds in about 5 minutes.',
-            'Purpose: improve conditioning while maintaining recovery for strength sessions.'
-          ],
-          items: [
-            { type: 'exercise', id: 'warm-up-slow-squats', label: 'Slow Squats', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Move slowly and with control.'] },
-            { type: 'exercise', id: 'warm-up-controlled-burpees', label: 'Controlled Burpees', completion: 'manual', target: '5 reps', sets: 1, restSeconds: 0, notes: ['Step back instead of jumping back.'] },
-            { type: 'exercise', id: 'warm-up-plank-hold', label: 'Plank Hold', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'warm-up-reverse-lunges', label: 'Alternating Reverse Lunges', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] }
-          ]
-        },
-        {
-          id: 'burpee-test', title: 'Phase 2 · Burpee Test', mode: 'sequence', score: 'max-reps',
-          notes: [
-            'Perform 1 minute of max-rep original burpees.',
-            'After the timer, record your total as today’s burpee PR, then recover for 3 minutes.'
-          ],
-          items: [
-            { type: 'exercise', id: 'burpee-test-timer', label: 'Max-Rep Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Complete as many quality original burpees as possible.'] },
-            { type: 'exercise', id: 'burpee-pr-result', label: 'Record Burpee PR', completion: 'manual', tracking: 'reps', target: 'Total reps', sets: 1, restSeconds: 180, notes: ['Tap Set done, then enter your total reps during the recovery timer.'] }
-          ]
-        },
-        {
-          id: 'main-session-emom', title: 'Phase 3 · 21-Minute EMOM', mode: 'amrap', durationSeconds: 1260, unitLabel: 'cycle', score: 'emom',
-          notes: [
-            'Every minute on the minute for 21 minutes. Complete the prescribed reps, then rest for the remainder of that minute.',
-            'Odd minutes: PR-based reps of Two-Pump Burpees.',
-            'Even minutes: PR-based reps of Original Burpees.',
-            'Use the prescribed PR-based targets.'
-          ],
-          items: [
-            { type: 'exercise', id: 'emom-two-pump-burpees', label: 'Two-Pump Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Odd minute · complete your PR-based reps, then recover.'] },
-            { type: 'exercise', id: 'emom-original-burpees', label: 'Original Burpees', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0, notes: ['Even minute · complete your PR-based reps, then recover.'] }
-          ]
-        }
-      ],
-      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
-    });
-  }
-
-  function pullFocusWorkout() {
-    return normalizeWorkout({
-      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
-      name: 'Pull Focus Day', workoutType: 'strength', prepSeconds: 5,
-      blocks: [
-        {
-          id: 'pull-warm-up', title: 'Pull Focus Day · Warm-Up', mode: 'sequence', score: '',
-          notes: [
-            'Move with control and do not rush. This prepares scapular stability, grip strength and core tension without fatigue.',
-            'The explosive pull-up primer is optional; skip its four sets if it is not appropriate today.'
-          ],
-          items: [
-            { type: 'exercise', id: 'warm-up-burpees-round-1', label: 'Original Burpees · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Controlled, not rushed.'] },
-            { type: 'exercise', id: 'warm-up-forward-circles-round-1', label: 'Forward Arm Circles · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'warm-up-backward-circles-round-1', label: 'Backward Arm Circles · Round 1', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'warm-up-burpees-round-2', label: 'Original Burpees · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: ['Controlled, not rushed.'] },
-            { type: 'exercise', id: 'warm-up-forward-circles-round-2', label: 'Forward Arm Circles · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'warm-up-backward-circles-round-2', label: 'Backward Arm Circles · Round 2', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'warm-up-scapula-pull-ups', label: 'Scapula Pull-Ups', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '6 reps', restSeconds: 30 }, { target: '6 reps', restSeconds: 0 }
-            ], notes: ['Move only the shoulder blades. Do not bend the elbows.'] },
-            { type: 'exercise', id: 'warm-up-passive-hang-1', label: 'Passive Dead Hang · Round 1', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: ['Relax the shoulders.'] },
-            { type: 'exercise', id: 'warm-up-active-hang-1', label: 'Active Dead Hang · Round 1', completion: 'timed', seconds: 10, sets: 1, restSeconds: 30, notes: ['Engage the shoulders without bending the elbows.'] },
-            { type: 'exercise', id: 'warm-up-passive-hang-2', label: 'Passive Dead Hang · Round 2', completion: 'timed', seconds: 20, sets: 1, restSeconds: 0, notes: ['Relax the shoulders.'] },
-            { type: 'exercise', id: 'warm-up-active-hang-2', label: 'Active Dead Hang · Round 2', completion: 'timed', seconds: 10, sets: 1, restSeconds: 0, notes: ['Engage the shoulders without bending the elbows.'] },
-            { type: 'exercise', id: 'warm-up-ring-rows', label: 'Overhand Ring Rows', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '5–8 reps', restSeconds: 30 }, { target: '5–8 reps', restSeconds: 0 }
-            ], notes: ['Use an easy high angle and controlled tempo. Do not approach failure.'] },
-            { type: 'exercise', id: 'warm-up-hollow-body-hold', label: 'Hollow Body Hold', completion: 'timed', setPlan: [
-              { seconds: 20, restSeconds: 0 }, { seconds: 20, restSeconds: 0 }
-            ], notes: ['Focus on full-body tension.'] },
-            { type: 'exercise', id: 'warm-up-explosive-pull-up', label: 'Optional Explosive Pull-Up', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '1 rep', restSeconds: 30 }, { target: '1 rep', restSeconds: 30 },
-              { target: '1 rep', restSeconds: 30 }, { target: '1 rep', restSeconds: 0 }
-            ], notes: ['One powerful pull-up per set to activate fast-twitch muscle fibres. Skip if not appropriate today.'] }
-          ]
-        },
-        {
-          id: 'main-lift-pull-ups', title: 'Main Lift · Pull-Ups', mode: 'sequence', score: 'max-reps',
-          notes: [
-            'Use pull-ups or banded pull-ups. Focus on full range of motion and clean reps.',
-            'You may move slightly faster on the biggest set, but keep every rep intentional.',
-            'Record your maximum unbroken set as the benchmark if you have not already done so.',
-            'If the benchmark is 0 or 1 without a band, perform four sets of 1–2 reps.',
-            'Aim to collect 6–8 total reps each time, or remain with the banded variation you currently use.'
-          ],
-          items: [
-            { type: 'exercise', id: 'main-lift-pull-ups', label: 'Pull-Ups / Banded Pull-Ups', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: 'PR-based reps', restSeconds: 180 }, { target: 'PR-based reps', restSeconds: 150 },
-              { target: 'PR-based reps', restSeconds: 150 }, { target: 'PR-based reps', restSeconds: 0 }
-            ], notes: ['Use the current pull-up benchmark to choose the set target.'] }
-          ]
-        },
-        {
-          id: 'pull-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 10, unitLabel: 'cycle', restBetweenRoundsSeconds: 0, score: 'elapsed-time',
-          notes: [
-            'Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.',
-            'Alternate A-B until you complete 10 sets of each. Aim for unbroken sets early, but not every set must be unbroken.',
-            'Use the prescribed PR-based target for dips.',
-            'If your squat entry test used additional weight, use that weight for the prisoner squat jumps when appropriate.'
-          ],
-          items: [
-            { type: 'exercise', id: 'density-dips', label: 'Dips / Banded Dips', completion: 'manual', tracking: 'reps', target: 'PR-based reps', sets: 1, restSeconds: 0, notes: ['Quality reps; use assistance if needed.'] },
-            { type: 'exercise', id: 'density-prisoner-squat-jumps', label: 'Prisoner Squat Jumps', completion: 'manual', tracking: 'weight-reps', target: '8 reps', sets: 1, restSeconds: 0, notes: ['Use your entry-test weight only if appropriate.'] }
-          ]
-        },
-        {
-          id: 'pull-core-finisher', title: 'Core · Finisher', mode: 'amrap', durationSeconds: 480, unitLabel: 'round', score: 'rounds-and-reps',
-          notes: [
-            'Perform an 8-minute AMRAP for quality, alternating A-B until time expires.',
-            'Record completed rounds plus any extra reps, for example 8 rounds + 7 reps.',
-            'Aim for full burpees. If your push muscles are exhausted, use original burpees.'
-          ],
-          items: [
-            { type: 'exercise', id: 'finisher-toes-to-bar', label: 'Toes to Bar / Hanging Knee Raises', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'finisher-burpees', label: 'Burpees', completion: 'manual', tracking: 'reps', target: '7 reps', sets: 1, restSeconds: 0, notes: ['Use full burpees when possible; switch to original burpees if needed.'] }
-          ]
-        }
-      ],
-      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
-    });
-  }
-
-  function dipFocusWorkout() {
-    return normalizeWorkout({
-      format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks',
-      name: 'Dip Focus Day', workoutType: 'strength', prepSeconds: 5,
-      blocks: [
-        {
-          id: 'dip-warm-up', title: 'Dip Focus Day · Warm-Up', mode: 'sequence', score: '',
-          notes: [
-            'Prepare the shoulders, elbows and anterior chain for pressing. Move smoothly and keep the warm-up easy.',
-            'Allow about six to eight minutes for this warm-up.'
-          ],
-          items: [
-            { type: 'exercise', id: 'dip-warm-up-shoulder-circles', label: 'Shoulder Circles', completion: 'manual', tracking: 'reps', target: '30 each direction', sets: 1, restSeconds: 0, notes: ['Smooth and controlled.'] },
-            { type: 'exercise', id: 'dip-warm-up-scapula-dips', label: 'Scapula Dips', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '10 reps', restSeconds: 30 }, { target: '10 reps', restSeconds: 0 }
-            ], notes: ['Move only the shoulder blades and keep the arms straight.'] },
-            { type: 'exercise', id: 'dip-warm-up-banded-rotations', label: 'Banded Shoulder Rotations', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '6 per arm', restSeconds: 0 }, { target: '6 per arm', restSeconds: 0 }
-            ], notes: ['Alternate arms without rest. Focus on shoulder engagement and a strong shoulder stretch.'] },
-            { type: 'exercise', id: 'dip-warm-up-position-hold', label: '90° Dip Position Hold', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: '15s + 1–3 dips', restSeconds: 60 }, { target: '15s + 1–3 dips', restSeconds: 0 }
-            ], notes: ['Keep the effort easy. This is activation, not a hard working set.'] },
-            { type: 'exercise', id: 'dip-warm-up-plank', label: 'Straight-Arm Plank Hold', completion: 'timed', setPlan: [
-              { seconds: 30, restSeconds: 30 }, { seconds: 30, restSeconds: 0 }
-            ], notes: ['Brace lightly and avoid shaking.'] }
-          ]
-        },
-        {
-          id: 'main-lift-dips', title: 'Main Lift · Dips', mode: 'sequence', score: 'max-reps',
-          notes: [
-            'Use chest-focused dips or band-supported dips. Focus on full range of motion and clean reps.',
-            'You may move slightly faster on the biggest set, but keep every rep intentional.',
-            'Record your maximum set as the benchmark if you have not already done so.'
-          ],
-          items: [
-            { type: 'exercise', id: 'main-lift-dips', label: 'Dips / Band-Supported Dips', completion: 'manual', tracking: 'reps', setPlan: [
-              { target: 'PR-based reps', restSeconds: 180 }, { target: 'PR-based reps', restSeconds: 180 },
-              { target: 'PR-based reps', restSeconds: 120 }, { target: 'PR-based reps', restSeconds: 0 }
-            ], notes: ['Use the current dip benchmark to choose the set target.'] }
-          ]
-        },
-        {
-          id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 8, unitLabel: 'cycle', restBetweenRoundsSeconds: 0, score: 'elapsed-time',
-          notes: [
-            'Build quality volume without rushing. Perform every rep with intent.',
-            'Alternate A-B until you complete eight sets of each. Aim for unbroken sets early, but not every set must be unbroken.',
-            'Use the prescribed PR-based target for push-ups.'
-          ],
-          items: [
-            { type: 'exercise', id: 'dip-density-push-ups', label: 'Push-Ups', completion: 'manual', tracking: 'reps', target: 'PR-based reps', sets: 1, restSeconds: 0, notes: ['Prioritize controlled, high-quality reps.'] },
-            { type: 'exercise', id: 'dip-density-inverted-rows', label: 'Inverted Rows', completion: 'manual', tracking: 'reps', target: '9 reps', sets: 1, restSeconds: 0, notes: [] }
-          ]
-        },
-        {
-          id: 'dip-core-finisher', title: 'Core · Finisher', mode: 'amrap', durationSeconds: 480, unitLabel: 'round', score: 'rounds-and-reps',
-          notes: [
-            'Perform an 8-minute AMRAP for quality, alternating A-B until time expires.',
-            'Record completed rounds plus any extra reps, for example 4 rounds + 7 reps.'
-          ],
-          items: [
-            { type: 'exercise', id: 'dip-finisher-l-sit-raises', label: 'L-Sit Leg Raises', completion: 'manual', tracking: 'reps', target: '16 overall reps', sets: 1, restSeconds: 0, notes: [] },
-            { type: 'exercise', id: 'dip-finisher-split-squats', label: 'Bulgarian Split Squats', completion: 'manual', tracking: 'reps', target: '9 per leg', sets: 1, restSeconds: 0, notes: [] }
-          ]
-        }
-      ],
-      theme: { work: WORK_SWATCHES[0], rest: REST_SWATCHES[0] }
-    });
-  }
-
   let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
   let workoutTheme = defaultTheme(), circuitTheme = defaultTheme();
   let editingStructuredWorkout = false;
+  let workoutSelectionPending = true;
   await (async function restorePlans() {
     let restoredWorkout = false, restoredCircuit = false;
     const savedWorkout = store.get('workoutTimerWorkoutPlanV7', null) || store.get('workoutTimerWorkoutPlanV6', null) || store.get('workoutTimerWorkoutPlanV5', null);
     const savedCircuit = store.get('workoutTimerCircuitPlanV7', null) || store.get('workoutTimerCircuitPlanV6', null) || store.get('workoutTimerCircuitPlanV5', null);
     if (savedWorkout) try {
       const normalized = normalizeWorkout(savedWorkout);
-      setWorkoutPlan(normalized); restoredWorkout = true;
+      setWorkoutPlan(normalized); restoredWorkout = true; workoutSelectionPending = false;
     } catch (_) {}
     if (savedCircuit) try { const p = normalizeCircuit(savedCircuit); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; restoredCircuit = true; } catch (_) {}
     if (!restoredWorkout || !restoredCircuit) {
       const legacy = store.get('workoutTimerCustomWorkout', null);
       if (legacy) try {
         const split = splitLegacy(legacy);
-        if (!restoredWorkout && split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); restoredWorkout = true; }
+        if (!restoredWorkout && split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); restoredWorkout = true; workoutSelectionPending = false; }
         if (!restoredCircuit && split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; restoredCircuit = true; }
       } catch (_) {}
     }
   })();
 
   function persistPlans() {
-    store.set('workoutTimerWorkoutPlanV7', workoutFile());
+    if (!workoutSelectionPending) store.set('workoutTimerWorkoutPlanV7', workoutFile());
     store.set('workoutTimerCircuitPlanV7', circuitFile());
   }
 
@@ -1558,11 +1327,16 @@
   const REPS_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 7 2 2 3-3M11 8h10M3 15l2 2 3-3M11 16h10"></path></svg>';
   const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 
+  function setTargetDetail(set) {
+    const target = String(set && set.target || 'Complete set');
+    return set && set.addedWeight != null ? target + ' · +' + Number(set.addedWeight) + ' ' + set.weightUnit : target;
+  }
+
   function structuredItemDetail(item) {
     if (item.type === 'rest') return shortSec(item.seconds);
     const sets = item.setPlan ? item.setPlan.length : item.sets;
     const targets = item.setPlan
-      ? item.setPlan.map(set => item.completion === 'timed' ? shortSec(set.seconds) : set.target)
+      ? item.setPlan.map(set => item.completion === 'timed' ? shortSec(set.seconds) : setTargetDetail(set))
       : [item.completion === 'timed' ? shortSec(item.seconds) : item.target];
     let detail = sets + (sets === 1 ? ' set' : ' sets') + ' · ' + (new Set(targets).size === 1 ? targets[0] : targets.join(' / '));
     const rests = item.setPlan ? item.setPlan.map(set => set.restSeconds).filter(Boolean) : (item.restSeconds ? [item.restSeconds] : []);
@@ -1649,11 +1423,15 @@
             '<label class="edit-field"><span>Duration (seconds)</span><input type="number" min="1" max="3600" value="' + item.seconds + '" data-item-number="seconds"></label>' +
             '<label class="edit-field wide"><span>Notes — one per line</span><textarea maxlength="10000" data-item-field="notes">' + esc(notesText(item.notes)) + '</textarea></label></div></div>';
         }
-        const sets = item.setPlan.map((set, si) => '<div class="set-row" data-si="' + si + '"><span class="set-number">SET ' + (si + 1) + '</span>' +
+        const showAddedWeight = item.completion === 'manual' && item.tracking === 'weight-reps';
+        const sets = item.setPlan.map((set, si) => '<div class="set-row' + (showAddedWeight ? ' with-load' : '') + '" data-si="' + si + '"><span class="set-number">SET ' + (si + 1) + '</span>' +
           '<label class="edit-field"><span>' + (item.completion === 'timed' ? 'Seconds' : 'Target') + '</span>' +
           (item.completion === 'timed'
             ? '<input type="number" min="1" max="3600" value="' + set.seconds + '" data-set-number="seconds">'
             : '<input maxlength="40" value="' + esc(set.target) + '" data-set-field="target">') + '</label>' +
+          (showAddedWeight ? '<div class="edit-field set-load"><span>Added weight (optional)</span><div class="set-load-controls">' +
+            '<input type="number" inputmode="decimal" min="0.5" max="10000" step="0.5" value="' + (set.addedWeight == null ? '' : set.addedWeight) + '" data-set-number="addedWeight" aria-label="Set ' + (si + 1) + ' added weight">' +
+            '<select data-set-choice="weightUnit" aria-label="Set ' + (si + 1) + ' added weight unit"><option value="kg"' + (set.weightUnit !== 'lb' ? ' selected' : '') + '>kg</option><option value="lb"' + (set.weightUnit === 'lb' ? ' selected' : '') + '>lb</option></select></div></div>' : '') +
           '<label class="edit-field set-rest"><span>Rest after (seconds)</span><input type="number" min="0" max="3600" value="' + set.restSeconds + '" data-set-number="restSeconds"></label>' +
           '<button class="small-remove" type="button" data-act="set-remove" aria-label="Remove set"' + (item.setPlan.length === 1 ? ' disabled' : '') + '>×</button></div>').join('');
         return '<div class="edit-item exercise-item" data-ii="' + ii + '">' + toolbar + '<div class="edit-grid">' +
@@ -1733,6 +1511,7 @@
       }
       if (item && e.target.dataset.itemChoice === 'tracking') {
         item.tracking = e.target.value === 'weight-reps' ? 'weight-reps' : 'reps';
+        if (item.tracking === 'reps') item.setPlan.forEach(set => { set.addedWeight = null; set.weightUnit = null; });
         return rerender('Exercise logging updated.');
       }
       if (item && e.target.dataset.itemNumber) {
@@ -1742,8 +1521,18 @@
       if (item && e.target.dataset.setNumber) {
         const setEl = e.target.closest('[data-si]');
         const field = e.target.dataset.setNumber;
+        if (field === 'addedWeight') {
+          item.setPlan[Number(setEl.dataset.si)].addedWeight = e.target.value === '' ? null : clamp(Number(e.target.value) || 0.5, 0.5, 10000);
+          item.setPlan[Number(setEl.dataset.si)].weightUnit = e.target.value === '' ? null : (item.setPlan[Number(setEl.dataset.si)].weightUnit || 'kg');
+          return rerender();
+        }
         const min = field === 'seconds' ? 1 : 0;
         item.setPlan[Number(setEl.dataset.si)][field] = clamp(Math.round(Number(e.target.value) || min), min, 3600);
+        return rerender();
+      }
+      if (item && e.target.dataset.setChoice === 'weightUnit') {
+        const setEl = e.target.closest('[data-si]');
+        item.setPlan[Number(setEl.dataset.si)].weightUnit = e.target.value === 'lb' ? 'lb' : 'kg';
         return rerender();
       }
     };
@@ -1805,7 +1594,19 @@
   function renderWorkoutExercises() {
     const host = $('#wExercises');
     host.innerHTML = '';
+    if (workoutSelectionPending) {
+      host.className = 'workout-empty';
+      host.innerHTML = '<span class="mono">Get started</span><h2>Choose today’s workout</h2><p>Select the workout that matches your current BuiltSimple track. You can also create or load your own workout below.</p>';
+      $('#wEdit').classList.add('hidden');
+      $('#wStart').disabled = true;
+      $('#wName').disabled = true;
+      $('#wName').value = 'Choose a workout';
+      return;
+    }
     host.className = workoutPlan.layout === 'blocks' ? 'structured-list' : 'tiles';
+    $('#wStart').disabled = false;
+    $('#wName').disabled = false;
+    $('#wName').value = workoutPlan.name;
     $('#wEdit').classList.toggle('hidden', workoutPlan.layout !== 'blocks');
     $('#wEdit').textContent = editingStructuredWorkout ? 'Done editing' : 'Edit workout';
     if (workoutPlan.layout === 'blocks') return editingStructuredWorkout ? renderStructuredWorkoutEditor(host) : renderStructuredWorkout(host);
@@ -2001,7 +1802,9 @@
   }
 
   function renderSummaries() {
-    if (workoutPlan.layout === 'blocks') {
+    if (workoutSelectionPending) {
+      $('#wNote').textContent = 'No workout selected yet.';
+    } else if (workoutPlan.layout === 'blocks') {
       const blocks = workoutPlan.blocks;
       const exercises = blocks.reduce((sum, block) => sum + block.items.filter(x => x.type === 'exercise').length, 0);
       const timedBlocks = blocks.filter(block => block.mode === 'amrap').length;
@@ -2121,7 +1924,7 @@
   /* ---------- queue building ---------- */
   const isManualItem = (it) => it && it.phase === 'work' && it.completion === 'manual';
   const isBlockTransition = (it) => it && it.phase === 'transition';
-  const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? it.target : shortSec(it.seconds);
+  const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? setTargetDetail(it) : shortSec(it.seconds);
 
   function blockTransitionDetails(block) {
     const exercises = block.items.filter(item => item.type === 'exercise').map(item => item.label);
@@ -2147,7 +1950,7 @@
     if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING',
       blockIndex: workoutPlan.layout === 'blocks' ? 1 : 0, blockCount: workoutPlan.layout === 'blocks' ? workoutPlan.blocks.length : 0 });
     if (workoutPlan.layout === 'blocks') {
-      const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds) => {
+      const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds, addedWeight, weightUnit) => {
         const base = { label: exercise.label, phase: 'work', completion: exercise.completion, set, sets, notes: exercise.notes,
           exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps', liveLog: block.mode === 'sequence' && exercise.completion === 'manual',
           round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
@@ -2155,7 +1958,11 @@
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
           meta: block.title.toUpperCase() };
         if (exercise.completion === 'timed') base.seconds = targetOrSeconds;
-        else base.target = targetOrSeconds;
+        else {
+          base.target = targetOrSeconds;
+          base.addedWeight = addedWeight == null ? null : Number(addedWeight);
+          base.weightUnit = addedWeight == null ? null : weightUnit;
+        }
         items.push(base);
         if (restSeconds > 0) items.push({ label: 'Rest', phase: 'rest', seconds: restSeconds,
           contextLabel: exercise.label, set, sets, round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
@@ -2185,7 +1992,7 @@
               ? { seconds: item.seconds, restSeconds: item.restSeconds }
               : { target: item.target, restSeconds: item.restSeconds });
             setPlan.forEach((set, si) => addExerciseSet(block, blockIndex, item, si + 1, setPlan.length, round, rounds,
-              item.completion === 'timed' ? set.seconds : set.target, set.restSeconds));
+              item.completion === 'timed' ? set.seconds : set.target, set.restSeconds, set.addedWeight, set.weightUnit));
           });
           if (block.mode === 'for-time' && block.restBetweenRoundsSeconds > 0 && round < rounds) {
             items.push({ label: 'Rest', phase: 'rest', seconds: block.restBetweenRoundsSeconds, round, rounds,
@@ -2310,6 +2117,13 @@
     const weight = set.weight == null ? '' : set.weight + ' ' + unit;
     return [weight, reps].filter(Boolean).join(' × ');
   }
+  function convertedAddedWeight(value, fromUnit, toUnit) {
+    const weight = Number(value);
+    if (!Number.isFinite(weight) || weight <= 0) return null;
+    if (fromUnit === toUnit) return weight;
+    const converted = fromUnit === 'kg' ? weight * 2.2046226218 : weight / 2.2046226218;
+    return Math.round(converted * 2) / 2;
+  }
   function recordManualSet(item, nextItem) {
     if (!item || !item.liveLog || !item.exerciseId) { S.restLogKey = null; return; }
     const key = setResultKey(item.exerciseId, item.set);
@@ -2317,10 +2131,11 @@
     const priorToday = Object.values(S.sessionSetResults).filter(result => result.exerciseId === item.exerciseId && result.set < item.set).sort((a, b) => b.set - a.set)[0];
     const existing = S.sessionSetResults[key];
     const result = existing || {
-      exerciseId: item.exerciseId, label: item.label, set: Number(item.set) || 1, target: String(item.target || 'Complete set'),
+      exerciseId: item.exerciseId, label: item.label, set: Number(item.set) || 1, target: setTargetDetail(item),
       tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps', actualReps: previous && previous.set && previous.set.actualReps != null ? previous.set.actualReps : targetReps(item.target),
       weight: item.tracking === 'weight-reps'
-        ? (priorToday && priorToday.weight != null ? priorToday.weight : previous && previous.set && previous.set.weight != null ? previous.set.weight : null) : null,
+        ? (item.addedWeight != null ? convertedAddedWeight(item.addedWeight, item.weightUnit, S.sessionUnit)
+          : priorToday && priorToday.weight != null ? priorToday.weight : previous && previous.set && previous.set.weight != null ? previous.set.weight : null) : null,
       previousReps: previous && previous.set ? previous.set.actualReps : null,
       previousWeight: previous && previous.set ? previous.set.weight : null,
       previousUnit: previous ? previous.unit : S.sessionUnit
@@ -2366,8 +2181,8 @@
       ? { set: index + 1, completion: 'timed', plannedSeconds: Number(set.seconds) || 1, actualSeconds: Number(set.seconds) || 1 }
       : (() => {
           const live = S.sessionSetResults[setResultKey(exercisePlanId, index + 1)];
-          return { set: index + 1, completion: 'manual', target: String(set.target || 'Complete set'), plannedReps: targetReps(set.target),
-            actualReps: live ? live.actualReps : targetReps(set.target), weight: live ? live.weight : null };
+          return { set: index + 1, completion: 'manual', target: setTargetDetail(set), plannedReps: targetReps(set.target),
+            actualReps: live ? live.actualReps : targetReps(set.target), weight: live ? live.weight : convertedAddedWeight(set.addedWeight, set.weightUnit, S.sessionUnit) };
         })());
   }
   function buildPendingSession() {
@@ -2452,9 +2267,13 @@
     $$('[data-log-extra]').forEach(input => { session.blocks[Number(input.dataset.bi)].extraReps = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000); });
     $('#logSave').disabled = true; $('#logSave').textContent = 'Saving…';
     try {
+      const normalizedSession = normalizeHistorySession(session);
       await historyPut(session);
+      S.pendingSession = normalizedSession;
       $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
       $('#doneLog').textContent = 'Logged'; $('#doneLog').disabled = true;
+      $('#doneCopyOverview').classList.toggle('hidden', !formatWorkoutOverview(normalizedSession));
+      $('#doneCopyMsg').textContent = ''; $('#doneCopyMsg').classList.remove('err');
       $('#doneSub').textContent += ' · saved to history';
     } catch (err) { $('#logMsg').textContent = err.message || 'Could not save this workout.'; }
     finally { $('#logSave').disabled = false; $('#logSave').textContent = 'Save to history'; }
@@ -2480,9 +2299,194 @@
     });
     return lines;
   }
+
+  /* ---------- workout overview ---------- */
+  function overviewPlural(count, word) {
+    return Number(count) === 1 || String(word).endsWith('s') ? String(word) : String(word) + 's';
+  }
+  function overviewNumber(value) {
+    return String(Number(value));
+  }
+  function overviewDuration(seconds) {
+    const value = Math.max(0, Math.round(Number(seconds) || 0));
+    if (value < 60) return value + 's';
+    const hours = Math.floor(value / 3600), minutes = Math.floor((value % 3600) / 60), remainder = value % 60;
+    return (hours ? hours + ':' + String(minutes).padStart(2, '0') : minutes) + ':' + String(remainder).padStart(2, '0');
+  }
+  function overviewClock(seconds) {
+    const value = Math.max(0, Math.round(Number(seconds) || 0));
+    const hours = Math.floor(value / 3600), minutes = Math.floor((value % 3600) / 60), remainder = value % 60;
+    return (hours ? hours + ':' + String(minutes).padStart(2, '0') : minutes) + ':' + String(remainder).padStart(2, '0');
+  }
+  function overviewRepQualifier(target) {
+    const value = String(target || '').toLowerCase();
+    if (/\boverall\b/.test(value)) return '';
+    for (const part of ['side', 'leg', 'arm', 'direction']) {
+      if (new RegExp('(?:\\b(?:per|each)\\s+' + part + '\\b|/' + part + '\\b)').test(value)) return '/' + part;
+    }
+    return '';
+  }
+  function overviewWeightSuffix(weight, unit) {
+    return weight == null ? '' : ' @ ' + overviewNumber(weight) + ' ' + unit;
+  }
+  function overviewManualSetDetail(set, unit, showBodyweight) {
+    const qualifier = overviewRepQualifier(set.target);
+    let value = set.actualReps == null ? 'reps not entered' : overviewNumber(set.actualReps) + (qualifier || ' reps');
+    if (set.weight != null) value += overviewWeightSuffix(set.weight, unit);
+    else if (showBodyweight) value += ' · bodyweight';
+    return value;
+  }
+  function overviewManualResult(exercise, unit, repeatCount, repeatUnit) {
+    const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+    if (!sets.length) return 'completed';
+    const repsKnown = sets.every(set => set.actualReps != null);
+    const reps = sets.map(set => set.actualReps);
+    const qualifiers = sets.map(set => overviewRepQualifier(set.target));
+    const weights = sets.map(set => set.weight == null ? null : Number(set.weight));
+    const sameReps = reps.every(value => value === reps[0]);
+    const sameQualifier = qualifiers.every(value => value === qualifiers[0]);
+    const sameWeight = weights.every(value => value === weights[0]);
+    const repetitions = Math.max(1, Number(repeatCount) || 1);
+    const totalSets = sets.length * repetitions;
+    if (repsKnown && sameReps && sameQualifier && sameWeight) {
+      const repsText = overviewNumber(reps[0]) + qualifiers[0];
+      return (totalSets === 1 ? repsText + (qualifiers[0] ? '' : ' reps') : totalSets + ' × ' + repsText) + overviewWeightSuffix(weights[0], unit);
+    }
+    if (repsKnown && sameQualifier && sameWeight) {
+      const values = reps.map(overviewNumber).join(', ') + (qualifiers[0] ? ' reps' + qualifiers[0] : ' reps');
+      if (repetitions > 1) return repetitions + ' ' + overviewPlural(repetitions, repeatUnit) + ' × (' + values + ')' + overviewWeightSuffix(weights[0], unit);
+      return values + overviewWeightSuffix(weights[0], unit);
+    }
+    const showBodyweight = weights.some(weight => weight != null);
+    const details = sets.map((set, index) => 'set ' + (set.set || index + 1) + ': ' + overviewManualSetDetail(set, unit, showBodyweight)).join('; ');
+    return repetitions > 1 ? repetitions + ' ' + overviewPlural(repetitions, repeatUnit) + '; each ' + repeatUnit + ': ' + details : details;
+  }
+  function overviewTimedResult(exercise, repeatCount, repeatUnit) {
+    const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+    if (!sets.length) return 'completed';
+    const durations = sets.map(set => Number(set.actualSeconds || set.plannedSeconds || 0));
+    const repetitions = Math.max(1, Number(repeatCount) || 1);
+    const totalSets = sets.length * repetitions;
+    if (durations.every(value => value === durations[0])) {
+      return totalSets === 1 ? overviewDuration(durations[0]) : totalSets + ' × ' + overviewDuration(durations[0]);
+    }
+    const values = durations.map(overviewDuration).join(', ');
+    return repetitions > 1 ? repetitions + ' ' + overviewPlural(repetitions, repeatUnit) + ' × (' + values + ')' : values;
+  }
+  function overviewExerciseLine(exercise, unit, repeatCount, repeatUnit) {
+    const result = exercise.completion === 'timed'
+      ? overviewTimedResult(exercise, repeatCount, repeatUnit)
+      : overviewManualResult(exercise, unit, repeatCount, repeatUnit);
+    return '• ' + exercise.label + ' — ' + result;
+  }
+  function overviewPlanBlock(session, block) {
+    const plan = session && session.planSnapshot;
+    if (!plan || plan.layout !== 'blocks' || !Array.isArray(plan.blocks)) return null;
+    return plan.blocks.find(candidate => candidate.id === block.id) || plan.blocks.find(candidate => candidate.title === block.title) || null;
+  }
+  function overviewBlockHeading(title, workoutName) {
+    const heading = String(title || 'Workout section').trim();
+    const name = String(workoutName || '').trim();
+    if (name && heading.toLowerCase() === name.toLowerCase()) return 'WORKOUT';
+    if (name && heading.toLowerCase().startsWith(name.toLowerCase())) {
+      const match = heading.slice(name.length).match(/^\s*(?:·|:|—|–|\||\/|-\s)\s*(.+)$/);
+      if (match) return match[1].trim().toUpperCase();
+    }
+    return heading.toUpperCase();
+  }
+  function overviewAmrapScore(block) {
+    let score = '';
+    if (block.rounds != null) {
+      score = block.rounds + ' ' + overviewPlural(block.rounds, 'round');
+      if (block.extraReps != null) score += ' + ' + block.extraReps + ' ' + overviewPlural(block.extraReps, 'rep');
+    } else if (block.extraReps != null) score = block.extraReps + ' extra ' + overviewPlural(block.extraReps, 'rep');
+    else score = 'AMRAP completed';
+    if (block.stoppedEarly) score += ' (ended early' + (block.elapsedSeconds ? ' after ' + overviewClock(block.elapsedSeconds) : '') + ')';
+    return score;
+  }
+  function formatWorkoutOverview(session) {
+    const blocks = Array.isArray(session && session.blocks) ? session.blocks : [];
+    const unit = session && session.unit === 'kg' ? 'kg' : 'lb';
+    if (session && session.workoutKind === 'simple') {
+      const exerciseLines = blocks.flatMap(block => (block.exercises || []).map(exercise => overviewExerciseLine(exercise, unit, 1, 'set')));
+      return exerciseLines.length ? ['WORKOUT', ...exerciseLines].join('\n') : '';
+    }
+    return blocks.map(block => {
+      const planBlock = overviewPlanBlock(session, block);
+      const repeatUnit = String(planBlock && planBlock.unitLabel || 'round');
+      const lines = [overviewBlockHeading(block.title, session.workoutName)];
+      let repeatCount = 1;
+      if (block.mode === 'for-time') {
+        const completed = planBlock && Number.isInteger(planBlock.rounds) ? planBlock.rounds : 0;
+        if (completed) {
+          lines.push('• ' + completed + ' ' + overviewPlural(completed, repeatUnit) + (block.elapsedSeconds ? ' in ' + overviewClock(block.elapsedSeconds) : ''));
+          repeatCount = completed;
+        } else if (block.elapsedSeconds) lines.push('• Completed in ' + overviewClock(block.elapsedSeconds));
+      } else if (block.mode === 'amrap') {
+        lines.push('• ' + overviewAmrapScore(block));
+        repeatCount = Math.max(0, Number(block.rounds) || 0);
+      }
+      if (block.mode !== 'amrap' || repeatCount > 0) {
+        (block.exercises || []).forEach(exercise => lines.push(overviewExerciseLine(exercise, unit, repeatCount || 1, repeatUnit)));
+      }
+      return lines.join('\n');
+    }).filter(Boolean).join('\n\n');
+  }
+  /* ---------- end workout overview ---------- */
+
+  function fallbackCopyPlainText(text) {
+    const active = document.activeElement;
+    const field = document.createElement('textarea');
+    field.value = text;
+    field.setAttribute('readonly', '');
+    field.setAttribute('aria-hidden', 'true');
+    Object.assign(field.style, { position: 'fixed', top: '0', left: '0', width: '1px', height: '1px', padding: '0', border: '0', opacity: '0', fontSize: '16px' });
+    document.body.appendChild(field);
+    try {
+      field.focus({ preventScroll: true });
+      field.select();
+      field.setSelectionRange(0, field.value.length);
+      return typeof document.execCommand === 'function' && document.execCommand('copy');
+    } catch (_) {
+      return false;
+    } finally {
+      field.remove();
+      if (active && typeof active.focus === 'function') {
+        try { active.focus({ preventScroll: true }); } catch (_) { active.focus(); }
+      }
+    }
+  }
+  async function copyPlainText(text) {
+    let clipboardError = null;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      try { await navigator.clipboard.writeText(text); return; }
+      catch (err) { clipboardError = err; }
+    }
+    if (fallbackCopyPlainText(text)) return;
+    throw clipboardError || new Error('Clipboard access is unavailable.');
+  }
+  async function copyWorkoutOverview(session, button, feedback) {
+    if (!session || !button || button.dataset.copying === 'true') return;
+    const label = button.textContent;
+    button.dataset.copying = 'true'; button.setAttribute('aria-busy', 'true'); button.textContent = 'Copying…';
+    feedback.textContent = ''; feedback.classList.remove('err');
+    try {
+      const overview = formatWorkoutOverview(session);
+      if (!overview) throw new Error('This session has no completed workout details to copy.');
+      await copyPlainText(overview);
+      feedback.textContent = 'Workout overview copied.';
+    } catch (_) {
+      feedback.textContent = 'Could not copy workout overview.'; feedback.classList.add('err');
+    } finally {
+      delete button.dataset.copying; button.removeAttribute('aria-busy'); button.textContent = label;
+    }
+  }
+
+  let renderedHistorySessions = new Map();
   async function renderHistory() {
     const host = $('#historyList'); host.innerHTML = '<div class="card note">Loading history…</div>';
     const sessions = await historyAll();
+    renderedHistorySessions = new Map(sessions.map(session => [session.id, session]));
     if (!sessions.length) { host.innerHTML = '<div class="card"><div class="title" style="font-size:24px">No workouts logged yet</div><div class="note" style="margin-top:8px">Complete a workout and choose Log workout to create your first entry.</div></div>'; return; }
     host.innerHTML = sessions.map(session => {
       const blocks = (session.blocks || []).map(block => {
@@ -2492,7 +2496,9 @@
       }).join('');
       return '<details class="history-card"><summary><div><div class="history-name">' + esc(session.workoutName || 'Workout') + '</div><div class="history-meta">' +
         esc(historyDate(session.completedAt)) + ' · ' + esc(fmtElapsed(Number(session.durationSeconds) || 0)) + '</div></div><span class="history-arrow">⌄</span></summary>' +
-        '<div class="history-body">' + blocks + (session.notes ? '<div class="history-note">' + esc(session.notes) + '</div>' : '') + '</div></details>';
+        '<div class="history-body">' + blocks + (session.notes ? '<div class="history-note">' + esc(session.notes) + '</div>' : '') +
+        '<div class="history-actions"><button class="ghost" type="button" data-copy-session="' + esc(session.id) + '">Copy workout overview</button>' +
+        '<span class="history-copy-feedback" role="status" aria-live="polite"></span></div></div></details>';
     }).join('');
   }
   async function openHistory() {
@@ -2727,7 +2733,7 @@
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
     } else if (manual) {
-      t.textContent = it.target;
+      t.textContent = setTargetDetail(it);
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
     }
@@ -2782,7 +2788,7 @@
     }
 
     if (isManualItem(it)) {
-      $('#runTime').textContent = it.target;
+      $('#runTime').textContent = setTargetDetail(it);
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
       if (it.blockMode !== 'for-time' && it.blockMode !== 'amrap') return;
@@ -2917,6 +2923,7 @@
     S.blockId = queue[0].blockId || null; S.blockAccum = 0; S.blockFrom = performance.now();
     S.variableDuration = queue.some(isManualItem);
     $('#home').classList.add('hidden'); $('#done').classList.add('hidden'); $('#run').classList.remove('hidden', 'paused');
+    $('#doneCopyOverview').classList.add('hidden'); $('#doneCopyMsg').textContent = ''; $('#doneCopyMsg').classList.remove('err');
     $('#runRestPresets').classList.toggle('hidden', S.mode !== 'rest');
     if (S.mode === 'rest') renderRunRestPresets();
     $('#btnPause').textContent = 'Pause';
@@ -2926,6 +2933,7 @@
   }
 
   async function startWorkout() {
+    if (workoutSelectionPending) return setPlanMsg('workout', 'Choose or create a workout before starting.', true);
     try {
       assertWorkoutQueueBudget(workoutPlan, cfg.workout.prep);
       primeAudio();
@@ -3033,13 +3041,13 @@
       let loaded = [];
       if ([5, 6, PLAN_VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
         if (raw.kind === 'workout') {
-          setWorkoutPlan(normalizeWorkout(raw)); loaded.push('workout');
+          setWorkoutPlan(normalizeWorkout(raw)); workoutSelectionPending = false; loaded.push('workout');
         } else if (raw.kind === 'circuit') {
           const p = normalizeCircuit(raw); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; loaded.push('circuit');
         }
       } else {
         const split = splitLegacy(raw);
-        if (split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); loaded.push('workout'); }
+        if (split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
         if (split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; loaded.push('circuit'); }
       }
       if (!loaded.length) throw new Error('No usable exercises or timed circuit stations were found.');
@@ -3077,6 +3085,7 @@
     disarmNewWorkout();
     if (structured) setWorkoutPlan(defaultStructuredWorkout());
     else workoutPlan = defaultWorkout();
+    workoutSelectionPending = false;
     workoutTheme = defaultTheme();
     cfg.workout.prep = 5;
     editingStructuredWorkout = structured;
@@ -3087,6 +3096,7 @@
 
   function applyBuiltInWorkout(plan, message) {
     setWorkoutPlan(plan);
+    workoutSelectionPending = false;
     editingStructuredWorkout = false;
     $('#wName').value = workoutPlan.name;
     persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
@@ -3094,21 +3104,100 @@
     const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
   }
-  function loadExampleWorkout() {
-    try { applyBuiltInWorkout(lowerBodyFocusWorkout(), 'Loaded the Lower Body Focus workout.'); }
-    catch (err) { setPlanMsg('workout', err.message || 'Could not load the example workout.', true); }
+  function normalizeWorkoutCatalog(raw) {
+    if (!raw || raw.format !== 'workout-timer-catalog' || Number(raw.version) !== 1 || !Array.isArray(raw.tracks) || !raw.tracks.length || raw.tracks.length > 20) {
+      throw new Error('The workout catalog is invalid.');
+    }
+    const planIds = new Set();
+    const normalizePlans = (plans, groupName) => plans.map((plan, planIndex) => {
+      const planId = String(plan && plan.id || '').trim().toLowerCase();
+      const planName = String(plan && plan.name || '').trim();
+      const file = String(plan && plan.file || '').trim();
+      if (!/^[a-z0-9-]{1,80}$/.test(planId) || planIds.has(planId) || !planName || planName.length > 80 ||
+          !/^\.\/workouts\/[a-z0-9/_-]+\.workout\.json$/.test(file) || file.includes('..')) {
+        throw new Error(groupName + ' workout ' + (planIndex + 1) + ' is invalid.');
+      }
+      planIds.add(planId);
+      return { id: planId, name: planName, file };
+    });
+    const trackIds = new Set();
+    const tracks = raw.tracks.map((track, trackIndex) => {
+      const id = String(track && track.id || '').trim().toLowerCase();
+      const name = String(track && track.name || '').trim();
+      if (!/^[a-z0-9-]{1,40}$/.test(id) || trackIds.has(id) || !name || name.length > 60 || !Array.isArray(track.plans) || !track.plans.length || track.plans.length > 50) {
+        throw new Error('Workout catalog track ' + (trackIndex + 1) + ' is invalid.');
+      }
+      trackIds.add(id);
+      return { id, name, plans: normalizePlans(track.plans, name) };
+    });
+    const optional = raw.optional == null ? [] : raw.optional;
+    if (!Array.isArray(optional) || optional.length > 50) throw new Error('The optional workout catalog is invalid.');
+    return { tracks, optional: normalizePlans(optional, 'Optional') };
   }
-  function loadCardioExampleWorkout() {
-    try { applyBuiltInWorkout(optionalCardioBurpeeWorkout(), 'Loaded the Optional Cardio Burpee workout.'); }
-    catch (err) { setPlanMsg('workout', err.message || 'Could not load the cardio workout.', true); }
+  async function fetchSmallJson(file, description) {
+    const response = await fetch(file);
+    if (!response.ok) throw new Error('Could not load ' + description + '.');
+    const text = await response.text();
+    if (text.length > 102400) throw new Error(description + ' is larger than 100 KB.');
+    return JSON.parse(text.replace(/^\uFEFF/, ''));
   }
-  function loadPullExampleWorkout() {
-    try { applyBuiltInWorkout(pullFocusWorkout(), 'Loaded the Pull Focus Day workout.'); }
-    catch (err) { setPlanMsg('workout', err.message || 'Could not load the Pull Focus workout.', true); }
+  async function loadCatalogWorkout(plan, button) {
+    const original = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Loading…';
+    try {
+      const raw = await fetchSmallJson(plan.file, plan.name);
+      applyBuiltInWorkout(normalizeWorkout(raw), 'Loaded ' + plan.name + '. You can edit it or save your own copy.');
+    } catch (err) {
+      setPlanMsg('workout', err.message || 'Could not load ' + plan.name + '.', true);
+    } finally {
+      button.disabled = false;
+      button.textContent = original;
+    }
   }
-  function loadDipExampleWorkout() {
-    try { applyBuiltInWorkout(dipFocusWorkout(), 'Loaded the Dip Focus Day workout.'); }
-    catch (err) { setPlanMsg('workout', err.message || 'Could not load the Dip Focus workout.', true); }
+  async function renderWorkoutCatalog() {
+    const host = $('#wPlanLibrary');
+    try {
+      const catalog = normalizeWorkoutCatalog(await fetchSmallJson('./workouts/catalog.json', 'the workout catalog'));
+      host.innerHTML = '';
+      const buildPlanGroup = (headingText, groups, showGroupNames = true) => {
+        const group = document.createElement('div');
+        group.className = 'plan-library-group';
+        const groupHeading = document.createElement('div');
+        groupHeading.className = 'mono plan-library-heading';
+        groupHeading.textContent = headingText;
+        group.appendChild(groupHeading);
+        groups.forEach(track => {
+          const section = document.createElement('section');
+          section.className = 'plan-track';
+          const actions = document.createElement('div');
+          actions.className = 'plan-actions';
+          track.plans.forEach(plan => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'ghost';
+            button.textContent = plan.name;
+            button.addEventListener('click', () => loadCatalogWorkout(plan, button));
+            actions.appendChild(button);
+          });
+          if (showGroupNames) {
+            const heading = document.createElement('div');
+            heading.className = 'mono plan-track-name';
+            heading.textContent = track.name;
+            section.appendChild(heading);
+          }
+          section.appendChild(actions);
+          group.appendChild(section);
+        });
+        host.appendChild(group);
+      };
+      buildPlanGroup('Workout tracks', catalog.tracks);
+      if (catalog.optional.length) {
+        buildPlanGroup('Optional', [{ plans: catalog.optional }], false);
+      }
+    } catch (_) {
+      host.innerHTML = '<p class="note plan-library-status">Workout plans are available from the hosted app or when this folder is served by a local web server.</p>';
+    }
   }
 
   /* ---------- wiring ---------- */
@@ -3125,10 +3214,7 @@
   $('#wLoad').addEventListener('click', () => chooseFile('workout'));
   $('#wNewBasic').addEventListener('click', () => createWorkout('basic'));
   $('#wNewStructured').addEventListener('click', () => createWorkout('structured'));
-  $('#wExample').addEventListener('click', loadExampleWorkout);
-  $('#wCardioExample').addEventListener('click', loadCardioExampleWorkout);
-  $('#wPullExample').addEventListener('click', loadPullExampleWorkout);
-  $('#wDipExample').addEventListener('click', loadDipExampleWorkout);
+  await renderWorkoutCatalog();
   $('#cSave').addEventListener('click', () => savePlan('circuit'));
   $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
   $('#fileInput').addEventListener('change', loadPlanFile);
@@ -3157,6 +3243,7 @@
   $('#doneAgain').addEventListener('click', startCurrentMode);
   $('#doneHome').addEventListener('click', goHome);
   $('#doneLog').addEventListener('click', openSessionLog);
+  $('#doneCopyOverview').addEventListener('click', () => copyWorkoutOverview(S.pendingSession, $('#doneCopyOverview'), $('#doneCopyMsg')));
   $('#logCancel').addEventListener('click', closeSessionLog);
   $('#logSave').addEventListener('click', saveSessionLog);
   $('#wHistory').addEventListener('click', openHistory);
@@ -3164,6 +3251,13 @@
   $('#hImport').addEventListener('click', chooseHistoryFile);
   $('#hExport').addEventListener('click', exportHistory);
   $('#historyFileInput').addEventListener('change', importHistoryFile);
+  $('#historyList').addEventListener('click', e => {
+    const button = e.target.closest('button[data-copy-session]');
+    if (!button) return;
+    const session = renderedHistorySessions.get(button.dataset.copySession);
+    const feedback = button.parentElement.querySelector('.history-copy-feedback');
+    copyWorkoutOverview(session, button, feedback);
+  });
 
   const SVG = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"></path></svg>';
   const SPEAKER = 'M11 5 6 9H3v6h3l5 4V5z';

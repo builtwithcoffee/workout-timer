@@ -1,0 +1,60 @@
+{
+  "format": "workout-timer-catalog",
+  "version": 1,
+  "tracks": [
+    {
+      "id": "momentum",
+      "name": "Momentum",
+      "plans": [
+        {
+          "id": "momentum-lower-body-focus",
+          "name": "Lower Body Focus",
+          "file": "./workouts/momentum/lower-body-focus.workout.json"
+        },
+        {
+          "id": "momentum-dip-focus",
+          "name": "Dip Focus Day",
+          "file": "./workouts/momentum/dip-focus.workout.json"
+        },
+        {
+          "id": "momentum-pull-focus",
+          "name": "Pull Focus Day",
+          "file": "./workouts/momentum/pull-focus.workout.json"
+        }
+      ]
+    },
+    {
+      "id": "rise",
+      "name": "Rise",
+      "plans": [
+        {
+          "id": "rise-lower-body-focus",
+          "name": "Lower Body Focus",
+          "file": "./workouts/rise/lower-body-focus.workout.json"
+        },
+        {
+          "id": "rise-dip-focus",
+          "name": "Dip Focus Day",
+          "file": "./workouts/rise/dip-focus.workout.json"
+        },
+        {
+          "id": "rise-pull-focus",
+          "name": "Pull Focus Day",
+          "file": "./workouts/rise/pull-focus.workout.json"
+        },
+        {
+          "id": "rise-push-focus",
+          "name": "Push Focus Day",
+          "file": "./workouts/rise/push-focus.workout.json"
+        }
+      ]
+    }
+  ],
+  "optional": [
+    {
+      "id": "optional-cardio-burpees",
+      "name": "Optional Cardio · Burpees",
+      "file": "./workouts/momentum/optional-cardio-burpees.workout.json"
+    }
+  ]
+}

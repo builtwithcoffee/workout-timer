@@ -21,10 +21,18 @@
           "label": "Wall Sit",
           "completion": "timed",
           "setPlan": [
-            { "seconds": 30, "restSeconds": 30 },
-            { "seconds": 30, "restSeconds": 30 }
+            {
+              "seconds": 30,
+              "restSeconds": 30
+            },
+            {
+              "seconds": 30,
+              "restSeconds": 30
+            }
           ],
-          "notes": ["Hold the wall-sit position."]
+          "notes": [
+            "Hold the wall-sit position."
+          ]
         },
         {
           "type": "exercise",
@@ -33,7 +41,9 @@
           "target": "5 reps",
           "sets": 3,
           "restSeconds": 30,
-          "notes": ["Slow descent. Full depth if possible."]
+          "notes": [
+            "Slow descent. Full depth if possible."
+          ]
         },
         {
           "type": "exercise",
@@ -42,7 +52,9 @@
           "target": "10 reps",
           "sets": 2,
           "restSeconds": 30,
-          "notes": ["Pause briefly at the top."]
+          "notes": [
+            "Pause briefly at the top."
+          ]
         },
         {
           "type": "exercise",
@@ -51,7 +63,9 @@
           "target": "10 per side",
           "sets": 2,
           "restSeconds": 30,
-          "notes": ["Controlled and balanced."]
+          "notes": [
+            "Controlled and balanced."
+          ]
         },
         {
           "type": "exercise",
@@ -60,7 +74,9 @@
           "seconds": 20,
           "sets": 1,
           "restSeconds": 20,
-          "notes": ["Sit into the squat and stay relaxed but stable."]
+          "notes": [
+            "Sit into the squat and stay relaxed but stable."
+          ]
         }
       ]
     },
@@ -82,11 +98,22 @@
           "completion": "manual",
           "tracking": "weight-reps",
           "setPlan": [
-            { "target": "PR reps", "restSeconds": 180 },
-            { "target": "PR reps", "restSeconds": 150 },
-            { "target": "PR reps", "restSeconds": 0 }
+            {
+              "target": "PR reps",
+              "restSeconds": 180
+            },
+            {
+              "target": "PR reps",
+              "restSeconds": 150
+            },
+            {
+              "target": "PR reps",
+              "restSeconds": 0
+            }
           ],
-          "notes": ["Use the prescribed PR rep target for each set."]
+          "notes": [
+            "Use the prescribed PR rep target for each set."
+          ]
         }
       ]
     },
@@ -99,7 +126,6 @@
       "restBetweenRoundsSeconds": 30,
       "score": "elapsed-time",
       "notes": [
-        "The source heading says 8 Cycle Rounds; the explicit five-sets-of-each instruction is used here.",
         "Complete five cycles, alternating A then B in each cycle.",
         "Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.",
         "The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.",

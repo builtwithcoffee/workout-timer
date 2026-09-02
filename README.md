@@ -34,11 +34,12 @@ Workout history is stored locally in the browser on that device. It is never upl
 
 Use **Export history** to make a backup or move history to another device. On the second device, use **Import history** to merge the backup without duplicating existing sessions. Export periodically if the history matters to you, especially before clearing browser website data or changing devices.
 
-## Example workout
+## Included workout plans
 
-The repository includes a structured plan that can be downloaded and loaded into the app:
+The in-app workout picker groups editable plans by Momentum and Rise track, with shared optional workouts listed once. Each supplied workout is stored as an individual JSON file, so it can be selected in the app, edited, and saved as a personal copy.
 
-- [Structured lower-body workout](lower-body-focus-day.workout.json)
+- [Momentum workout files](workouts/momentum/)
+- [Rise workout files](workouts/rise/)
 
 ## About the project
 
@@ -51,9 +52,9 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.1**.
+- Current application release: **1.0.16**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.
 
-For quick desktop iteration, open `index.html` directly. Installation and service-worker testing require the app to be served over HTTP or HTTPS.
+For full local testing, including the supplied workout library, serve the repository over HTTP. Installation and service-worker testing require HTTP or HTTPS as well.
