@@ -3,13 +3,13 @@
   "version": 7,
   "kind": "workout",
   "layout": "blocks",
-  "name": "Dip Focus Day",
+  "name": "Push Focus Day",
   "workoutType": "strength",
   "prepSeconds": 5,
   "blocks": [
     {
-      "id": "dip-warm-up",
-      "title": "Dip Focus Day · Warm-Up",
+      "id": "push-warm-up",
+      "title": "Push Focus Day · Warm-Up",
       "mode": "sequence",
       "score": "",
       "notes": [
@@ -19,7 +19,7 @@
       "items": [
         {
           "type": "exercise",
-          "id": "dip-warm-up-shoulder-circles",
+          "id": "push-warm-up-shoulder-circles",
           "label": "Shoulder Circles",
           "completion": "manual",
           "tracking": "reps",
@@ -32,8 +32,8 @@
         },
         {
           "type": "exercise",
-          "id": "dip-warm-up-scapula-dips",
-          "label": "Scapula Dips",
+          "id": "push-warm-up-scapula-push-ups",
+          "label": "Scapula Push-Ups",
           "completion": "manual",
           "tracking": "reps",
           "setPlan": [
@@ -52,47 +52,7 @@
         },
         {
           "type": "exercise",
-          "id": "dip-warm-up-banded-rotations",
-          "label": "Banded Shoulder Rotations",
-          "completion": "manual",
-          "tracking": "reps",
-          "setPlan": [
-            {
-              "target": "6 per arm",
-              "restSeconds": 0
-            },
-            {
-              "target": "6 per arm",
-              "restSeconds": 0
-            }
-          ],
-          "notes": [
-            "Alternate arms without rest. Focus on shoulder engagement and a strong shoulder stretch."
-          ]
-        },
-        {
-          "type": "exercise",
-          "id": "dip-warm-up-position-hold",
-          "label": "90° Dip Position Hold",
-          "completion": "manual",
-          "tracking": "reps",
-          "setPlan": [
-            {
-              "target": "1–3 dips after a 15-second hold",
-              "restSeconds": 60
-            },
-            {
-              "target": "1–3 dips after a 15-second hold",
-              "restSeconds": 0
-            }
-          ],
-          "notes": [
-            "Keep the effort easy. This is activation, not a hard working set."
-          ]
-        },
-        {
-          "type": "exercise",
-          "id": "dip-warm-up-plank",
+          "id": "push-warm-up-plank",
           "label": "Straight-Arm Plank Hold",
           "completion": "timed",
           "setPlan": [
@@ -106,36 +66,60 @@
             }
           ],
           "notes": [
-            "Brace lightly and avoid shaking."
+            "Focus on shoulder engagement."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "push-warm-up-elevated-push-ups",
+          "label": "Elevated Push-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "6 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "6 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "6 reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use an easy variation. This is activation, not a hard working set."
           ]
         }
       ]
     },
     {
-      "id": "main-lift-dips",
-      "title": "Main Lift · Dips",
+      "id": "main-lift-push-ups",
+      "title": "Main Lift · Push-Ups",
       "mode": "sequence",
       "score": "max-reps",
       "notes": [
-        "Use chest-focused dips or band-supported dips. Focus on full range of motion and clean reps.",
+        "Focus on full range of motion and clean reps.",
         "You may move slightly faster on the biggest set, but keep every rep intentional.",
         "Record your maximum set as the benchmark if you have not already done so."
       ],
       "items": [
         {
           "type": "exercise",
-          "id": "main-lift-dips",
-          "label": "Dips / Band-Supported Dips",
+          "id": "main-lift-push-ups",
+          "label": "Push-Ups",
           "completion": "manual",
           "tracking": "reps",
           "setPlan": [
             {
               "target": "PR-based reps",
-              "restSeconds": 180
+              "restSeconds": 150
             },
             {
               "target": "PR-based reps",
-              "restSeconds": 180
+              "restSeconds": 150
             },
             {
               "target": "PR-based reps",
@@ -147,13 +131,13 @@
             }
           ],
           "notes": [
-            "Use the current dip benchmark to choose the set target."
+            "Use the current push-up benchmark for all four sets."
           ]
         }
       ]
     },
     {
-      "id": "dip-density",
+      "id": "push-density",
       "title": "Density · Quality Work",
       "mode": "for-time",
       "rounds": 8,
@@ -161,31 +145,31 @@
       "restBetweenRoundsSeconds": 0,
       "score": "elapsed-time",
       "notes": [
-        "Build quality volume without rushing. Perform every rep with intent.",
+        "Build quality volume without rushing. Perform every rep with intent and use banded pull-ups if needed.",
         "Alternate A-B until you complete eight sets of each. Aim for unbroken sets early, but not every set must be unbroken.",
-        "Use the prescribed PR-based target for push-ups."
+        "Use the prescribed PR-based target for chin-ups."
       ],
       "items": [
         {
           "type": "exercise",
-          "id": "dip-density-push-ups",
-          "label": "Push-Ups",
+          "id": "push-density-chin-ups",
+          "label": "Chin-Ups / Banded Chin-Ups",
           "completion": "manual",
           "tracking": "reps",
           "target": "PR-based reps",
           "sets": 1,
           "restSeconds": 0,
           "notes": [
-            "Prioritize controlled, high-quality reps."
+            "Prioritize controlled, high-quality reps; use assistance if needed."
           ]
         },
         {
           "type": "exercise",
-          "id": "dip-density-inverted-rows",
-          "label": "Inverted Rows",
+          "id": "push-density-pike-push-ups",
+          "label": "Pike Push-Ups",
           "completion": "manual",
           "tracking": "reps",
-          "target": "9 reps",
+          "target": "6 reps",
           "sets": 1,
           "restSeconds": 0,
           "notes": []
@@ -193,35 +177,44 @@
       ]
     },
     {
-      "id": "dip-core-finisher",
+      "id": "push-core-finisher",
       "title": "Core · Finisher",
       "mode": "amrap",
-      "durationSeconds": 480,
+      "durationSeconds": 600,
       "unitLabel": "round",
       "score": "rounds-and-reps",
       "notes": [
-        "Perform an 8-minute AMRAP for quality, alternating A-B until time expires.",
-        "Record completed rounds plus any extra reps, for example 4 rounds + 7 reps."
+        "Perform a 10-minute AMRAP for quality, cycling A-B-C until time expires.",
+        "Record completed rounds plus any extra reps, for example 8 rounds + 7 reps."
       ],
       "items": [
         {
           "type": "exercise",
-          "id": "dip-finisher-l-sit-raises",
-          "label": "L-Sit Leg Raises",
+          "id": "push-finisher-ring-y-raises",
+          "label": "Ring Y-Raises",
           "completion": "manual",
           "tracking": "reps",
-          "target": "16 overall reps",
+          "target": "7 reps",
           "sets": 1,
           "restSeconds": 0,
           "notes": []
         },
         {
           "type": "exercise",
-          "id": "dip-finisher-split-squats",
-          "label": "Bulgarian Split Squats",
-          "completion": "manual",
-          "tracking": "reps",
-          "target": "9 per leg",
+          "id": "push-finisher-plank-hold",
+          "label": "Plank Hold",
+          "completion": "timed",
+          "seconds": 30,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "push-finisher-dip-hold",
+          "label": "90° Dip Hold",
+          "completion": "timed",
+          "seconds": 20,
           "sets": 1,
           "restSeconds": 0,
           "notes": []

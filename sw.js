@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.16';
+const APP_VERSION = '1.0.36';
 const CACHE_PREFIX = 'workout-timer-v';
 const CACHE = `${CACHE_PREFIX}${APP_VERSION}`;
 const ASSETS = [
@@ -11,6 +11,7 @@ const ASSETS = [
   './workouts/momentum/optional-cardio-burpees.workout.json',
   './workouts/momentum/pull-focus.workout.json',
   './workouts/momentum/dip-focus.workout.json',
+  './workouts/momentum/push-focus.workout.json',
   './workouts/rise/dip-focus.workout.json',
   './workouts/rise/pull-focus.workout.json',
   './workouts/rise/push-focus.workout.json',

@@ -36,7 +36,7 @@ Use **Export history** to make a backup or move history to another device. On th
 
 ## Included workout plans
 
-The in-app workout picker groups editable plans by Momentum and Rise track, with shared optional workouts listed once. Each supplied workout is stored as an individual JSON file, so it can be selected in the app, edited, and saved as a personal copy.
+On first use, the workout picker asks you to select Momentum or Rise and then shows the workout days for that track. It remembers your track on the device, while shared optional workouts are listed once. Each supplied workout is stored as an individual JSON file, so it can be selected in the app, edited, and saved as a personal copy.
 
 - [Momentum workout files](workouts/momentum/)
 - [Rise workout files](workouts/rise/)
@@ -52,7 +52,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.16**.
+- Current application release: **1.0.36**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.

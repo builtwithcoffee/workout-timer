@@ -77,8 +77,8 @@ MAIN LIFT / SQUATS
 
 DENSITY / QUALITY WORK
 • 5 cycles in 12:34
-• Neutral-Grip Rows — 5 × 10
-• Reverse Lunges — 5 × 20
+• Neutral-Grip Rows — 5 × 10 reps
+• Reverse Lunges — 5 × 20 overall reps
 
 CORE / FINISHER
 • 8 rounds + 6 reps
@@ -87,6 +87,17 @@ CORE / FINISHER
 for (const excluded of [structured.workoutName, structured.completedAt, String(structured.durationSeconds), structured.notes, 'SKIPPED BLOCK']) {
   assert.equal(structuredOverview.includes(excluded), false, `Overview must exclude ${excluded}.`);
 }
+
+const prDensity = {
+  workoutName: 'Dip Focus Day', workoutKind: 'structured', unit: 'lb',
+  blocks: [{ id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', elapsedSeconds: 600,
+    exercises: [manual('Push-Ups', [null], ['PR-based reps']), manual('Inverted Rows', [9], ['9 reps'])] }],
+  planSnapshot: { layout: 'blocks', blocks: [{ id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 8, unitLabel: 'cycle' }] }
+};
+assert.equal(formatWorkoutOverview(prDensity), `DENSITY · QUALITY WORK
+• 8 cycles in 10:00
+• Push-Ups — 8 × PR-based reps
+• Inverted Rows — 8 × 9 reps`);
 
 const basic = {
   workoutName: 'Basic Strength', workoutKind: 'simple', unit: 'kg', completedAt: '2026-09-01T12:00:00.000Z', durationSeconds: 999, notes: 'Do not copy',
@@ -116,6 +127,13 @@ noRounds.blocks[0].rounds = 0;
 noRounds.blocks[0].extraReps = 6;
 assert.equal(formatWorkoutOverview(noRounds), `FAST FINISHER
 • 0 rounds + 6 reps (ended early after 4:12)`);
+
+const weightConversionSource = html.match(/\/\* ---------- workout weight unit conversion ---------- \*\/([\s\S]*?)\/\* ---------- end workout weight unit conversion ---------- \*\//)?.[1];
+if (!weightConversionSource) throw new Error('Could not find the workout weight unit conversion helpers in index.html.');
+const { convertedAddedWeight, convertedWeightInputValues } = Function(weightConversionSource + '\nreturn { convertedAddedWeight, convertedWeightInputValues };')();
+assert.deepEqual(convertedWeightInputValues(['', '22', '100'], 'lb', 'kg'), ['', '10', '45.5']);
+assert.deepEqual(convertedWeightInputValues(['', '10', '45.5'], 'kg', 'lb'), ['', '22', '100.5']);
+assert.equal(convertedAddedWeight(10, 'kg', 'kg'), 10);
 
 const clipboardSource = html.match(/  function fallbackCopyPlainText[\s\S]*?(?=\n  let renderedHistorySessions)/)?.[0];
 if (!clipboardSource) throw new Error('Could not find the clipboard helpers in index.html.');

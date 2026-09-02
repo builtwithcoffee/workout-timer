@@ -5,46 +5,61 @@
     {
       "id": "momentum",
       "name": "Momentum",
+      "blurb": "Squats, dips, pull-ups, and push-ups. Almost entirely bodyweight.",
       "plans": [
         {
           "id": "momentum-lower-body-focus",
-          "name": "Lower Body Focus",
+          "name": "Lower Body Focus Day",
+          "summary": "SQUATS · 4 BLOCKS · 11 EXERCISES",
           "file": "./workouts/momentum/lower-body-focus.workout.json"
         },
         {
           "id": "momentum-dip-focus",
           "name": "Dip Focus Day",
+          "summary": "DIPS · 4 BLOCKS · 10 EXERCISES",
           "file": "./workouts/momentum/dip-focus.workout.json"
         },
         {
           "id": "momentum-pull-focus",
           "name": "Pull Focus Day",
+          "summary": "PULL-UPS · 4 BLOCKS · 19 EXERCISES",
           "file": "./workouts/momentum/pull-focus.workout.json"
+        },
+        {
+          "id": "momentum-push-focus",
+          "name": "Push Focus Day",
+          "summary": "PUSH-UPS · 4 BLOCKS · 10 EXERCISES",
+          "file": "./workouts/momentum/push-focus.workout.json"
         }
       ]
     },
     {
       "id": "rise",
       "name": "Rise",
+      "blurb": "Builds on Momentum with added weight prescribed across more of the main lifts.",
       "plans": [
         {
           "id": "rise-lower-body-focus",
-          "name": "Lower Body Focus",
+          "name": "Lower Body Focus Day",
+          "summary": "SQUATS · 4 BLOCKS · 11 EXERCISES",
           "file": "./workouts/rise/lower-body-focus.workout.json"
         },
         {
           "id": "rise-dip-focus",
           "name": "Dip Focus Day",
+          "summary": "DIPS · 4 BLOCKS · 10 EXERCISES",
           "file": "./workouts/rise/dip-focus.workout.json"
         },
         {
           "id": "rise-pull-focus",
           "name": "Pull Focus Day",
+          "summary": "PULL-UPS · 4 BLOCKS · 19 EXERCISES",
           "file": "./workouts/rise/pull-focus.workout.json"
         },
         {
           "id": "rise-push-focus",
           "name": "Push Focus Day",
+          "summary": "PUSH-UPS · 4 BLOCKS · 10 EXERCISES",
           "file": "./workouts/rise/push-focus.workout.json"
         }
       ]
@@ -53,7 +68,8 @@
   "optional": [
     {
       "id": "optional-cardio-burpees",
-      "name": "Optional Cardio · Burpees",
+      "name": "Cardio · Burpees",
+      "summary": "3 PHASES · 21:00 EMOM",
       "file": "./workouts/momentum/optional-cardio-burpees.workout.json"
     }
   ]

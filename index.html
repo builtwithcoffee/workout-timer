@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/GAgIgqlryTO8yskKK827sKJ0aMuBgSYIlxI7GskTxw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Q8zJB1zfcTQLq0QZP5YvIyTj9eOlRF8DbHQ0v/7khlE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -76,12 +76,14 @@
   .local-note strong{display:block;margin-bottom:6px;font-size:17px}
   .local-note p{margin:0;font-size:14px;line-height:1.52}
   .local-note p+p{margin-top:9px;color:var(--text)}
-  .install-actions{display:flex;justify-content:flex-end;margin-top:18px}
+  .install-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px;margin-top:18px}
+  .install-guide-link{margin-right:auto;color:var(--muted);font-size:14px;font-weight:700;text-underline-offset:3px}
+  .install-guide-link:hover{color:var(--text)}
   .install-actions button{min-height:46px;padding:0 20px;border-radius:12px;background:var(--accent);color:var(--accent-text);font-weight:800}
 
   .panel{display:flex;flex-direction:column;gap:16px;flex:1;min-height:0}
   .panelhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .title{font-size:clamp(30px,4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1}
+  .title{font-size:clamp(29px,4vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1}
   input.title{background:transparent;border:none;outline:none;width:min(520px,100%);padding:0}
   .layout{display:grid;grid-template-columns:1fr 296px;gap:18px;align-items:start}
   .card{background:var(--card);border-radius:var(--r);padding:18px}
@@ -95,6 +97,14 @@
   .colour-details summary::after{content:'▾';margin-left:auto;font-size:18px;line-height:1;color:var(--muted)}
   .colour-details[open] summary::after{content:'▴'}
   .colour-details .colour-body{padding:0 18px 18px}
+  .workout-tools-card{padding:0}
+  .workout-tools-card>summary{display:flex;align-items:center;gap:10px;padding:18px;cursor:pointer;list-style:none}
+  .workout-tools-card>summary::-webkit-details-marker{display:none}
+  .workout-tools-card>summary::after{content:'▾';margin-left:auto;font-size:18px;line-height:1;color:var(--muted)}
+  .workout-tools-card[open]>summary::after{content:'▴'}
+  .workout-tools-body{padding:0 12px 12px}
+  .workout-tools-body>.card{background:var(--card2)}
+  .workout-tools-body>.card + .card{margin-top:8px}
 
   .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:10px}
   .tile{border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:148px;color:#fff}
@@ -162,7 +172,6 @@
   .block-notes summary::after{content:' ▾'}
   .block-notes[open] summary::after{content:' ▴'}
   .block-notes ul{margin:0;padding:0 36px 16px 42px;color:var(--muted);font-size:14px;line-height:1.55}
-  .structured-help{padding:14px 16px;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted);font-size:13px;line-height:1.5}
   .structured-editor{display:flex;flex-direction:column;gap:14px}
   .edit-block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
   .edit-block-head,.edit-item-head,.edit-toolbar{display:flex;align-items:center;gap:8px}
@@ -224,18 +233,58 @@
   .card-label{display:block;margin-bottom:12px}
   .plan-actions{display:grid;grid-template-columns:1fr;gap:8px}
   .plan-actions .ghost{text-align:left}
-  .plan-library{display:flex;flex-direction:column;gap:14px}
-  .plan-library-intro{margin:-3px 0 16px;color:var(--text)}
-  .plan-library-group{display:flex;flex-direction:column;gap:10px}
-  .plan-library-group + .plan-library-group{padding-top:14px;border-top:1px solid var(--line)}
-  .plan-library-heading{color:var(--text);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-  .plan-track{display:flex;flex-direction:column;gap:8px}
-  .plan-track-name{color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .plan-library-card{padding:0}
+  .plan-library-card>summary{display:flex;align-items:center;gap:10px;padding:18px;cursor:pointer;list-style:none}
+  .plan-library-card>summary::-webkit-details-marker{display:none}
+  .plan-library-card>summary::after{content:'▾';margin-left:auto;font-size:18px;line-height:1;color:var(--muted)}
+  .plan-library-card[open]>summary{border-bottom:1px solid var(--line)}
+  .plan-library-card[open]>summary::after{content:'▴'}
+  .plan-library-body{padding:18px}
+  .plan-library{display:flex;flex-direction:column;gap:20px}
   .plan-library-status{margin:0}
-  .workout-empty{min-height:260px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:28px;border:2px dashed var(--line);border-radius:var(--r);background:rgba(255,255,255,.015)}
-  .workout-empty .mono{color:var(--accent);font-size:11px;letter-spacing:.16em}
-  .workout-empty h2{margin:10px 0 8px;font-size:clamp(25px,4vw,38px);line-height:1.08}
-  .workout-empty p{max-width:520px;margin:0;color:var(--muted);font-size:16px;line-height:1.55}
+  .track-choose,.track-days{display:flex;flex-direction:column;gap:20px}
+  .track-choose-copy{display:flex;flex-direction:column;gap:10px}
+  .track-choose h2{margin:0;font-size:26px;letter-spacing:-.02em;line-height:1.08}
+  .track-choose p{margin:0;color:var(--muted);font-size:15px;line-height:1.5;max-width:520px}
+  .track-list{display:flex;flex-direction:column;gap:11px}
+  .track-card{display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:center;gap:10px;width:100%;text-align:left;padding:19px 18px;border-radius:var(--r);background:var(--card);box-shadow:inset 3px 0 0 0 var(--line);color:var(--text)}
+  .track-card:hover{box-shadow:inset 3px 0 0 0 var(--accent)}
+  .track-card>span:first-child,.track-card-name,.track-card-meta,.track-card-blurb,.day-row-name,.day-row-meta{display:block}
+  .track-card-name{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .track-card-meta{margin-top:7px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .track-card-blurb{margin-top:7px;font-size:14px;line-height:1.45;color:var(--muted)}
+  .track-card-chevron,.day-row-chevron{font-size:26px;color:var(--muted);line-height:1;text-align:right}
+  .track-chip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:46px;padding:0 14px;border-radius:12px;background:var(--card);box-shadow:inset 3px 0 0 0 var(--accent);color:var(--text)}
+  .track-chip:hover{background:var(--card2)}
+  .track-chip-name{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;text-transform:uppercase}
+  .track-chip-change{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
+  .day-list{display:flex;flex-direction:column;background:var(--card);border-radius:var(--r);overflow:hidden}
+  .day-row{display:grid;grid-template-columns:minmax(0,1fr) 20px;align-items:center;gap:10px;width:100%;min-height:74px;padding:14px 16px;text-align:left;color:var(--text)}
+  .day-row + .day-row{border-top:1px solid var(--line)}
+  .day-row:hover{background:var(--card2)}
+  .day-row:disabled{opacity:.62;cursor:wait}
+  .day-row-name{font-size:18px;font-weight:750;letter-spacing:-.01em}
+  .day-row-meta{margin-top:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .day-optional{display:flex;flex-direction:column;gap:9px}
+  .day-optional-heading{color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+  .day-optional .day-list{background:none;border-radius:0;overflow:visible}
+  .day-optional .day-row{border:1px solid var(--line);border-radius:14px;min-height:66px;background:none}
+  .day-optional .day-row:hover{background:var(--card2)}
+  .track-card:focus-visible,.track-chip:focus-visible,.day-row:focus-visible,.track-custom-toggle:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+  .track-custom-toggle{display:none;width:100%;margin-top:20px}
+  .workout-selecting .panelhead,.workout-selecting .workout-primary{display:none}
+  .workout-selecting .layout{display:block}
+  .workout-selecting .workout-sidebar{width:min(720px,100%);margin:24px auto 0}
+  .workout-selecting .plan-library-card{padding:0;background:transparent}
+  .workout-selecting .plan-library-card>summary{display:none}
+  .workout-selecting .plan-library-card[open]>summary{border-bottom:0}
+  .workout-selecting .plan-library-body{padding:0}
+  .workout-selecting .track-custom-toggle{display:block}
+  .workout-selecting .workout-setup-card,.workout-selecting .workout-tools-card{display:none}
+  .workout-selecting.custom-tools-open .workout-tools-card{display:block;padding:0;background:transparent}
+  .workout-selecting.custom-tools-open .workout-tools-card>summary{display:none}
+  .workout-selecting.custom-tools-open .workout-tools-body{padding:0}
+  .workout-selecting.custom-tools-open .workout-colour-card{display:none}
 
   .swatches{display:flex;gap:8px;flex-wrap:wrap}
   .swatch{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
@@ -245,15 +294,18 @@
   .note{font-size:14px;line-height:1.5;color:var(--muted)}
   .msg{font-size:14px;color:var(--accent);min-height:1.3em}
   .msg.err{color:#ff8f8f}
+  #wMsg:empty{display:none}
+  .plan-library-message{margin-top:12px}
+  .plan-library-message:empty{display:none}
   .update-notice{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 15px;border:1px solid rgba(240,78,35,.45);border-radius:13px;background:rgba(240,78,35,.1)}
   .update-notice-copy{font-size:14px;line-height:1.45;color:var(--text)}
   .update-notice-copy strong{display:block;margin-bottom:2px}
   .update-notice button{min-height:40px;padding:0 13px;border-radius:10px;background:var(--card2);font-size:13px;font-weight:700;flex:none}
-  .foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
-  .guide-link{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:var(--muted);text-underline-offset:3px}
+  .foot{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:14px;border-top:1px solid var(--line);padding-top:14px}
+  .foot .built-with-coffee{justify-self:start}
+  .guide-link{display:inline-flex;align-items:center;justify-self:center;min-height:44px;padding:0 4px;color:var(--muted);text-underline-offset:3px}
   .guide-link:hover{color:var(--text)}
-  .desktop-hint{display:none}
-  @media(hover:hover) and (pointer:fine){.desktop-hint{display:inline}}
+  #appVersion{justify-self:end;text-align:right;white-space:nowrap}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #fff;outline-offset:3px}
   /* ---------- run ---------- */
   .run{position:fixed;inset:0;background:var(--phase);color:var(--phase-text);display:flex;flex-direction:column;
@@ -383,6 +435,14 @@
     .history-actions{align-items:stretch;flex-direction:column}
     .history-actions .ghost{width:100%}
     .history-copy-feedback{min-width:0}
+    #panel-workout>.panelhead .actions{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%}
+    #panel-workout>.panelhead .start{width:100%;min-height:58px}
+    #panel-workout>.panelhead .ghost{min-height:46px;padding:0 12px;background:transparent;color:var(--muted);font-size:13px}
+    #panel-workout>.panelhead .ghost:hover{background:var(--card2);color:var(--text)}
+    .foot{gap:8px}
+    .foot .mono{font-size:8px;letter-spacing:.12em}
+    .foot .built-with-coffee{gap:4px}
+    .foot .built-with-coffee svg{width:12px;height:12px}
     .setlogger{padding:11px 12px}
     .setlogger-grid{grid-template-columns:1fr 84px 84px;gap:7px}
     .setlogger-title{font-size:15px}
@@ -465,68 +525,72 @@
     <div class="panelhead">
       <input class="title" id="wName" maxlength="80" value="Workout" aria-label="Workout name" />
       <div class="actions">
-        <button class="ghost hidden" id="wEdit" type="button">Edit workout</button>
         <button class="start" id="wStart" type="button">Start workout</button>
+        <button class="ghost hidden" id="wEdit" type="button">Edit workout</button>
       </div>
     </div>
     <div class="layout">
-      <div>
+      <div class="workout-primary">
         <div class="tiles" id="wExercises"></div>
         <div class="msg" id="wMsg" aria-live="polite" style="margin-top:12px"></div>
       </div>
-      <div>
-        <div class="card">
-          <span class="mono card-label">Choose a workout</span>
-          <p class="note plan-library-intro">Select the workout that matches your current BuiltSimple track.</p>
-          <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
-        </div>
-        <div class="card">
-          <div class="field">
-            <span class="mono">Prep</span>
-            <div class="chips" data-field="workout.prep" data-fmt="sec">
-              <button type="button" data-val="0">None</button>
-              <button type="button" data-val="5">5s</button>
-              <button type="button" data-val="10">10s</button>
-              <button type="button" data-val="15">15s</button>
+      <div class="workout-sidebar">
+        <details class="card plan-library-card" id="wPlanLibraryCard" open>
+          <summary><span class="mono">Choose another workout</span></summary>
+          <div class="plan-library-body">
+            <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
+            <div class="msg plan-library-message" id="wCatalogMsg" aria-live="polite"></div>
+            <button class="ghost track-custom-toggle" id="wCustomToolsToggle" type="button" aria-expanded="false">Create or load my own workout</button>
+          </div>
+        </details>
+        <details class="card workout-tools-card" id="wWorkoutTools">
+          <summary><span class="mono">More workout tools</span></summary>
+          <div class="workout-tools-body">
+            <div class="card custom-workout-card">
+              <span class="mono card-label">Create workout</span>
+              <div class="plan-actions">
+                <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
+                <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="card">
-          <span class="mono card-label">Workout overview</span>
-          <div class="note" id="wNote"></div>
-        </div>
-        <div class="card">
-          <span class="mono card-label">Create workout</span>
-          <div class="plan-actions">
-            <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
-            <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
-          </div>
-        </div>
-        <div class="card">
-          <span class="mono card-label">Workout files</span>
-          <div class="actions">
-            <button class="ghost" id="wLoad" type="button">Load</button>
-            <button class="ghost" id="wSave" type="button">Save</button>
-          </div>
-        </div>
-        <div class="card">
-          <span class="mono card-label">Workout history</span>
-          <div class="actions">
-            <button class="ghost" id="wHistory" type="button">History</button>
-          </div>
-        </div>
-        <details class="card colour-details">
-          <summary><span class="mono">Workout colours</span></summary>
-          <div class="colour-body">
-            <div class="field">
-              <span class="note">Exercise</span>
-              <div class="swatches" id="wSwWork"></div>
+            <div class="card custom-workout-card">
+              <span class="mono card-label">Workout files</span>
+              <div class="actions">
+                <button class="ghost" id="wLoad" type="button">Load</button>
+                <button class="ghost" id="wSave" type="button">Save</button>
+              </div>
             </div>
-            <div class="field">
-              <span class="note">Rest</span>
-              <div class="swatches" id="wSwRest"></div>
+            <div class="card custom-workout-card workout-setup-card">
+              <div class="field">
+                <span class="mono">Workout start delay</span>
+                <div class="chips" data-field="workout.prep" data-fmt="sec">
+                  <button type="button" data-val="0">None</button>
+                  <button type="button" data-val="5">5s</button>
+                  <button type="button" data-val="10">10s</button>
+                  <button type="button" data-val="15">15s</button>
+                </div>
+              </div>
             </div>
-            <div class="note" style="margin-top:12px">These colours affect this workout only and are included in saved workout files.</div>
+            <details class="card colour-details workout-colour-card">
+              <summary><span class="mono">Workout colours</span></summary>
+              <div class="colour-body">
+                <div class="field">
+                  <span class="note">Exercise</span>
+                  <div class="swatches" id="wSwWork"></div>
+                </div>
+                <div class="field">
+                  <span class="note">Rest</span>
+                  <div class="swatches" id="wSwRest"></div>
+                </div>
+                <div class="note" style="margin-top:12px">These colours affect this workout only and are included in saved workout files.</div>
+              </div>
+            </details>
+            <div class="card custom-workout-card">
+              <span class="mono card-label">Workout history</span>
+              <div class="actions">
+                <button class="ghost" id="wHistory" type="button">History</button>
+              </div>
+            </div>
           </div>
         </details>
       </div>
@@ -687,7 +751,6 @@
   <div class="foot">
     <span class="mono built-with-coffee">Built with coffee <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9z"></path><path d="M16 11h1.5a2.5 2.5 0 0 1 0 5H16"></path><path d="M8 6c0-1 1-1 1-2"></path><path d="M12 6c0-1 1-1 1-2"></path></svg></span>
     <a class="mono guide-link" href="./guide.html">Guide</a>
-    <span class="note desktop-hint">Keyboard: Space start/pause · S skip · R end · F fullscreen</span>
     <span class="mono" id="appVersion"></span>
   </div>
 </div>
@@ -695,7 +758,7 @@
 <dialog class="install-dialog" id="installHelp" aria-labelledby="installHelpTitle" aria-describedby="installHelpIntro">
   <div class="install-shell">
     <div class="install-head">
-      <div><div class="mono">INSTALLATION</div><h2 class="title" id="installHelpTitle">Add Workout Timer to iPhone or iPad</h2></div>
+      <div><div class="mono">INSTALLATION</div><h2 class="title" id="installHelpTitle">Install on iPhone or iPad</h2></div>
       <button class="dialog-close" id="installHelpClose" type="button" aria-label="Close installation help">×</button>
     </div>
     <p class="install-lead" id="installHelpIntro">Install it like an app for quick access at the gym. You only need an internet connection for this first visit.</p>
@@ -710,7 +773,7 @@
       <p>Your workout plans, settings, and history stay on this device. They are not uploaded to an account or server, and the installed timer works without gym Wi-Fi or cellular service.</p>
       <p>When you are connected, the app may check for a newer version. Before clearing browser data or moving devices, use History → Export to make a backup.</p>
     </div>
-    <div class="install-actions"><button id="installHelpDone" type="button">Got it</button></div>
+    <div class="install-actions"><a class="install-guide-link" href="./guide.html">Read the Guide first</a><button id="installHelpDone" type="button">Got it</button></div>
   </div>
 </dialog>
 
@@ -763,7 +826,7 @@
     <button class="start hidden" id="doneLog" type="button">Log workout</button>
     <button class="ghost hidden" id="doneCopyOverview" type="button">Copy workout overview</button>
     <button class="ghost" id="doneAgain" type="button">Again</button>
-    <button class="ghost" id="doneHome" type="button">Back to setup</button>
+    <button class="ghost" id="doneHome" type="button">Done</button>
   </div>
   <div class="msg done-copy-msg" id="doneCopyMsg" role="status" aria-live="polite"></div>
 </div>
@@ -775,7 +838,7 @@
       <div><div class="mono">SAVE SESSION</div><div class="title" id="logTitle">Workout</div></div>
       <label class="edit-field" style="min-width:130px"><span>Weight unit</span><select id="logUnit"><option value="lb">lb</option><option value="kg">kg</option></select></label>
     </div>
-    <div class="note">Planned reps are filled in when possible. Adjust anything that differed, and leave weight blank for bodyweight exercises.</div>
+    <div class="note">Warm-up exercises are recorded as prescribed. For other exercises, adjust anything that differed and leave weight blank for bodyweight exercises.</div>
     <div id="logBlocks"></div>
     <label class="edit-field"><span>Workout notes</span><textarea id="logNotes" maxlength="2000" placeholder="Optional notes about this session"></textarea></label>
     <div class="msg" id="logMsg" aria-live="polite"></div>
@@ -801,9 +864,10 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.16';
+  const APP_VERSION = '1.0.36';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
+  const TRACK_KEY = 'workoutTimerTrackId';
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
   const AMRAP_QUEUE_ROUNDS = 200;
   const HEX = /^#[0-9a-f]{6}$/i;
@@ -811,7 +875,8 @@
 
   const store = {
     get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (_) { return fallback; } },
-    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} },
+    remove(key) { try { localStorage.removeItem(key); } catch (_) {} }
   };
 
   const HISTORY_FORMAT = 'workout-timer-history';
@@ -1379,10 +1444,6 @@
         (block.mode === 'sequence' ? '' : '<span class="block-mode">' + esc(modeLabel) + '</span>') + '</div><div class="block-steps">' + steps + '</div>' + notes;
       host.appendChild(card);
     });
-    const help = document.createElement('div');
-    help.className = 'structured-help';
-    help.textContent = 'This workout keeps its sections, individual sets and coaching notes when you save it as a workout file. Choose Edit workout above to make changes.';
-    host.appendChild(help);
   }
 
   function prepareStructuredForEditing() {
@@ -1593,16 +1654,24 @@
 
   function renderWorkoutExercises() {
     const host = $('#wExercises');
+    const panel = $('#panel-workout');
+    const libraryCard = $('#wPlanLibraryCard');
     host.innerHTML = '';
+    panel.classList.toggle('workout-selecting', workoutSelectionPending);
     if (workoutSelectionPending) {
-      host.className = 'workout-empty';
-      host.innerHTML = '<span class="mono">Get started</span><h2>Choose today’s workout</h2><p>Select the workout that matches your current BuiltSimple track. You can also create or load your own workout below.</p>';
+      libraryCard.open = true;
+      host.className = 'tiles';
       $('#wEdit').classList.add('hidden');
       $('#wStart').disabled = true;
       $('#wName').disabled = true;
       $('#wName').value = 'Choose a workout';
       return;
     }
+    libraryCard.open = !(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+    panel.classList.remove('custom-tools-open');
+    $('#wWorkoutTools').open = false;
+    $('#wCustomToolsToggle').setAttribute('aria-expanded', 'false');
+    $('#wCustomToolsToggle').textContent = 'Create or load my own workout';
     host.className = workoutPlan.layout === 'blocks' ? 'structured-list' : 'tiles';
     $('#wStart').disabled = false;
     $('#wName').disabled = false;
@@ -1802,33 +1871,6 @@
   }
 
   function renderSummaries() {
-    if (workoutSelectionPending) {
-      $('#wNote').textContent = 'No workout selected yet.';
-    } else if (workoutPlan.layout === 'blocks') {
-      const blocks = workoutPlan.blocks;
-      const exercises = blocks.reduce((sum, block) => sum + block.items.filter(x => x.type === 'exercise').length, 0);
-      const timedBlocks = blocks.filter(block => block.mode === 'amrap').length;
-      const scoredBlocks = blocks.filter(block => block.mode === 'for-time').length;
-      $('#wNote').textContent = blocks.length + ' workout blocks with ' + exercises + ' exercises.' +
-        (timedBlocks ? ' Includes ' + timedBlocks + ' timed cap' + (timedBlocks === 1 ? '' : 's') + '.' : '') +
-        (scoredBlocks ? ' Includes ' + scoredBlocks + ' for-time block' + (scoredBlocks === 1 ? '' : 's') + '.' : '') +
-        (cfg.workout.prep ? ' Starts with ' + cfg.workout.prep + ' seconds of prep.' : '');
-    } else {
-    const exercises = workoutPlan.items.filter(x => x.type === 'exercise');
-    const standaloneRests = workoutPlan.items.filter(x => x.type === 'rest');
-    const sets = exercises.reduce((sum, x) => sum + x.sets, 0);
-    const linkedRest = workoutPlan.items.reduce((sum, x, i) => {
-      if (x.type !== 'exercise') return sum;
-      const nextIsStandaloneRest = workoutPlan.items[i + 1] && workoutPlan.items[i + 1].type === 'rest';
-      const finalSetUsesLinkedRest = i < workoutPlan.items.length - 1 && !nextIsStandaloneRest;
-      return sum + x.restSeconds * (x.sets - (finalSetUsesLinkedRest ? 0 : 1));
-    }, 0);
-    const standaloneRest = standaloneRests.reduce((sum, x) => sum + x.seconds, 0);
-    const rests = linkedRest + standaloneRest;
-    $('#wNote').textContent = exercises.length + ' exercise' + (exercises.length === 1 ? '' : 's') + ' across ' + sets + ' set' + (sets === 1 ? '' : 's') + '.' +
-      (standaloneRests.length ? ' Includes ' + standaloneRests.length + ' standalone rest' + (standaloneRests.length === 1 ? '' : 's') + '.' : '') +
-      (rests ? ' Plans ' + fmtPad(rests) + ' of rest.' : '') + (cfg.workout.prep ? ' Starts with ' + cfg.workout.prep + ' seconds of prep.' : '');
-    }
     const oneCircuit = circuitPlan.segments.reduce((sum, s) => sum + s.seconds, 0);
     $('#cTotal').textContent = fmtPad(oneCircuit * cfg.circuit.rounds + cfg.circuit.prep);
     $('#cNote').textContent = circuitPlan.segments.length + ' timed steps × ' + cfg.circuit.rounds + ' circuit round' + (cfg.circuit.rounds === 1 ? '' : 's') +
@@ -1926,6 +1968,14 @@
   const isBlockTransition = (it) => it && it.phase === 'transition';
   const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? setTargetDetail(it) : shortSec(it.seconds);
 
+  /* ---------- timed setup transition ---------- */
+  const TIMED_SETUP_SECONDS = 3;
+  function needsTimedSetup(previous, block, exercise) {
+    return !!previous && previous.phase === 'work' && previous.completion === 'manual' &&
+      previous.blockId === block.id && block.mode === 'sequence' && exercise.completion === 'timed';
+  }
+  /* ---------- end timed setup transition ---------- */
+
   function blockTransitionDetails(block) {
     const exercises = block.items.filter(item => item.type === 'exercise').map(item => item.label);
     const mode = structuredBlockModeLabel(block).replace(' · ', ' ');
@@ -1952,7 +2002,8 @@
     if (workoutPlan.layout === 'blocks') {
       const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds, addedWeight, weightUnit) => {
         const base = { label: exercise.label, phase: 'work', completion: exercise.completion, set, sets, notes: exercise.notes,
-          exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps', liveLog: block.mode === 'sequence' && exercise.completion === 'manual',
+          exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps',
+          liveLog: block.mode === 'sequence' && exercise.completion === 'manual' && !isWarmupBlock(block),
           round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
           blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
@@ -1962,6 +2013,13 @@
           base.target = targetOrSeconds;
           base.addedWeight = addedWeight == null ? null : Number(addedWeight);
           base.weightUnit = addedWeight == null ? null : weightUnit;
+        }
+        if (needsTimedSetup(items[items.length - 1], block, exercise)) {
+          items.push({ label: 'Get ready', phase: 'prep', seconds: TIMED_SETUP_SECONDS, setupFor: exercise.label,
+            notes: ['Move into position for ' + exercise.label + '.'],
+            blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
+            blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: 0,
+            meta: block.title.toUpperCase() + ' · GET READY' });
         }
         items.push(base);
         if (restSeconds > 0) items.push({ label: 'Rest', phase: 'rest', seconds: restSeconds,
@@ -2104,6 +2162,9 @@
     });
     return result;
   }
+  function isWarmupBlock(block) {
+    return /\bwarm[\s-]*up\b/i.test(String(block && block.id || '') + ' ' + String(block && block.title || ''));
+  }
   const setResultKey = (exercisePlanId, set) => exercisePlanId + '::' + Number(set || 1);
   function previousSetForItem(item) {
     const previous = S.previousExercises[item.exerciseId];
@@ -2117,6 +2178,7 @@
     const weight = set.weight == null ? '' : set.weight + ' ' + unit;
     return [weight, reps].filter(Boolean).join(' × ');
   }
+  /* ---------- workout weight unit conversion ---------- */
   function convertedAddedWeight(value, fromUnit, toUnit) {
     const weight = Number(value);
     if (!Number.isFinite(weight) || weight <= 0) return null;
@@ -2124,6 +2186,14 @@
     const converted = fromUnit === 'kg' ? weight * 2.2046226218 : weight / 2.2046226218;
     return Math.round(converted * 2) / 2;
   }
+  function convertedWeightInputValues(values, fromUnit, toUnit) {
+    return values.map(value => {
+      if (value === '') return '';
+      const converted = convertedAddedWeight(value, fromUnit, toUnit);
+      return converted == null ? '' : String(converted);
+    });
+  }
+  /* ---------- end workout weight unit conversion ---------- */
   function recordManualSet(item, nextItem) {
     if (!item || !item.liveLog || !item.exerciseId) { S.restLogKey = null; return; }
     const key = setResultKey(item.exerciseId, item.set);
@@ -2215,31 +2285,55 @@
       planSnapshot: JSON.parse(JSON.stringify(plan))
     };
   }
+  function forTimeDetails(session, block) {
+    const planBlock = overviewPlanBlock(session, block);
+    const count = Math.max(0, Number(block && block.rounds != null ? block.rounds : planBlock && planBlock.rounds) || 0);
+    const unit = String(planBlock && planBlock.unitLabel || 'round');
+    return { count, unit, label: count ? count + ' ' + overviewPlural(count, unit) : 'Completed' };
+  }
   function renderSessionLog() {
     const session = S.pendingSession;
     if (!session) return;
     $('#logTitle').textContent = session.workoutName;
     $('#logUnit').value = session.unit;
+    $('#logUnit').dataset.valueUnit = session.unit;
     $('#logNotes').value = session.notes || '';
     $('#logMsg').textContent = '';
     $('#logBlocks').innerHTML = session.blocks.map((block, bi) => {
+      const warmup = isWarmupBlock(block);
+      const forTime = block.mode === 'for-time' ? forTimeDetails(session, block) : null;
       const score = block.mode === 'amrap'
         ? '<div class="log-score"><label class="edit-field"><span>Completed rounds</span><input type="number" min="0" max="10000" value="' + (block.rounds == null ? '' : block.rounds) + '" data-log-rounds data-bi="' + bi + '"></label>' +
           '<label class="edit-field"><span>Extra reps</span><input type="number" min="0" max="10000" value="' + (block.extraReps == null ? '' : block.extraReps) + '" data-log-extra data-bi="' + bi + '"></label></div>'
         : block.mode === 'for-time'
-          ? '<div class="log-score"><div><span class="mono">Elapsed time</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(fmtElapsed(block.elapsedSeconds)) + '</div></div></div>' : '';
+          ? '<div class="log-score"><div><span class="mono">Completed</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(forTime.label) + '</div></div>' +
+            '<div><span class="mono">Elapsed time</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(fmtElapsed(block.elapsedSeconds)) + '</div></div></div>' : '';
       const exercises = block.exercises.map((exercise, ei) => {
-        const sets = exercise.sets.map((set, si) => set.completion === 'timed'
-          ? '<div class="history-result">Set ' + set.set + ' · timed ' + esc(shortSec(set.actualSeconds)) + '</div>'
-          : '<div class="log-set"><div class="log-set-plan"><strong>Set ' + set.set + '</strong><br>Planned: ' + esc(set.target) + '</div>' +
-            '<label class="edit-field"><span>Actual reps</span><input type="number" min="0" max="10000" value="' + (set.actualReps == null ? '' : set.actualReps) + '" data-log-reps data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label>' +
-            '<label class="edit-field"><span>Weight</span><input type="number" min="0" max="10000" step="0.5" value="' + (set.weight == null ? '' : set.weight) + '" data-log-weight data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label></div>').join('');
+        const sets = forTime
+          ? '<div class="history-result">' + esc(forTimeExerciseResult(exercise, forTime.count)) + '</div>'
+          : exercise.sets.map((set, si) => set.completion === 'timed'
+            ? '<div class="history-result">Set ' + set.set + ' · timed ' + esc(shortSec(set.actualSeconds)) + '</div>'
+            : warmup
+              ? '<div class="history-result">Set ' + set.set + ' · completed as prescribed · ' + esc(set.target) + '</div>'
+              : '<div class="log-set"><div class="log-set-plan"><strong>Set ' + set.set + '</strong><br>Planned: ' + esc(set.target) + '</div>' +
+                '<label class="edit-field"><span>Actual reps</span><input type="number" min="0" max="10000" value="' + (set.actualReps == null ? '' : set.actualReps) + '" data-log-reps data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label>' +
+                '<label class="edit-field"><span>Weight</span><input type="number" min="0" max="10000" step="0.5" value="' + (set.weight == null ? '' : set.weight) + '" data-log-weight data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label></div>').join('');
         return '<div class="log-exercise"><div class="log-exercise-name">' + esc(exercise.label) + '</div>' + sets + '</div>';
       }).join('');
       return '<section class="log-block"><div class="log-block-head"><div><div class="mono">' + esc(block.mode) + '</div><div class="log-block-title">' + esc(block.title) + '</div></div>' +
-        (block.elapsedSeconds ? '<span class="mono">' + (block.stoppedEarly ? 'Stopped early · ' : '') + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
+        (block.elapsedSeconds && block.mode !== 'for-time' ? '<span class="mono">' + (block.stoppedEarly ? 'Stopped early · ' : '') + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
     }).join('');
   }
+  $('#logUnit').addEventListener('change', (event) => {
+    const nextUnit = event.target.value === 'kg' ? 'kg' : 'lb';
+    const previousUnit = event.target.dataset.valueUnit === 'kg' ? 'kg' : 'lb';
+    if (nextUnit === previousUnit) return;
+    const inputs = $$('[data-log-weight]');
+    const values = convertedWeightInputValues(inputs.map(input => input.value), previousUnit, nextUnit);
+    inputs.forEach((input, index) => { input.value = values[index]; });
+    event.target.dataset.valueUnit = nextUnit;
+    if (S.pendingSession) S.pendingSession.unit = nextUnit;
+  });
   function openSessionLog() {
     S.pendingSession = buildPendingSession();
     if (!S.pendingSession) return;
@@ -2271,7 +2365,8 @@
       await historyPut(session);
       S.pendingSession = normalizedSession;
       $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
-      $('#doneLog').textContent = 'Logged'; $('#doneLog').disabled = true;
+      $('#doneLog').classList.add('hidden');
+      $('#doneHome').textContent = 'Done';
       $('#doneCopyOverview').classList.toggle('hidden', !formatWorkoutOverview(normalizedSession));
       $('#doneCopyMsg').textContent = ''; $('#doneCopyMsg').classList.remove('err');
       $('#doneSub').textContent += ' · saved to history';
@@ -2283,12 +2378,17 @@
     try { return new Date(value).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }); }
     catch (_) { return String(value || ''); }
   }
-  function historyBlockLines(block, unit) {
+  function historyBlockLines(session, block, unit) {
     const lines = [];
-    if (block.mode === 'for-time' && block.elapsedSeconds) lines.push('Elapsed · ' + fmtElapsed(block.elapsedSeconds));
+    const forTime = block.mode === 'for-time' ? forTimeDetails(session, block) : null;
+    if (forTime) lines.push((forTime.count ? forTime.label + ' completed' : 'Completed') + (block.elapsedSeconds ? ' · ' + fmtElapsed(block.elapsedSeconds) : ''));
     if (block.mode === 'amrap' && block.elapsedSeconds) lines.push((block.stoppedEarly ? 'Stopped early · ' : 'Time worked · ') + fmtElapsed(block.elapsedSeconds));
     if (block.mode === 'amrap' && block.rounds != null) lines.push(block.rounds + ' rounds' + (block.extraReps != null ? ' + ' + block.extraReps + ' reps' : ''));
     (block.exercises || []).forEach(exercise => {
+      if (forTime) {
+        lines.push(exercise.label + ' · ' + forTimeExerciseResult(exercise, forTime.count));
+        return;
+      }
       const sets = (exercise.sets || []).map(set => {
         if (set.completion === 'timed') return 'Set ' + set.set + ': ' + shortSec(set.actualSeconds || set.plannedSeconds || 0);
         let value = set.actualReps == null ? 'not entered' : set.actualReps + ' reps';
@@ -2301,6 +2401,15 @@
   }
 
   /* ---------- workout overview ---------- */
+  function forTimeExerciseResult(exercise, count) {
+    const sets = Array.isArray(exercise && exercise.sets) ? exercise.sets : [];
+    const targets = sets.map(set => set.completion === 'timed'
+      ? overviewDuration(set.actualSeconds || set.plannedSeconds || 0)
+      : String(set.target || 'Complete set'));
+    const result = targets.length === 1 ? targets[0] : '(' + targets.join(' / ') + ')';
+    if (!targets.length) return count ? count + ' × completed' : 'completed';
+    return (count ? count + ' × ' : '') + result;
+  }
   function overviewPlural(count, word) {
     return Number(count) === 1 || String(word).endsWith('s') ? String(word) : String(word) + 's';
   }
@@ -2427,7 +2536,9 @@
         repeatCount = Math.max(0, Number(block.rounds) || 0);
       }
       if (block.mode !== 'amrap' || repeatCount > 0) {
-        (block.exercises || []).forEach(exercise => lines.push(overviewExerciseLine(exercise, unit, repeatCount || 1, repeatUnit)));
+        (block.exercises || []).forEach(exercise => lines.push(block.mode === 'for-time'
+          ? '• ' + exercise.label + ' — ' + forTimeExerciseResult(exercise, repeatCount || 1)
+          : overviewExerciseLine(exercise, unit, repeatCount || 1, repeatUnit)));
       }
       return lines.join('\n');
     }).filter(Boolean).join('\n\n');
@@ -2490,7 +2601,7 @@
     if (!sessions.length) { host.innerHTML = '<div class="card"><div class="title" style="font-size:24px">No workouts logged yet</div><div class="note" style="margin-top:8px">Complete a workout and choose Log workout to create your first entry.</div></div>'; return; }
     host.innerHTML = sessions.map(session => {
       const blocks = (session.blocks || []).map(block => {
-        const lines = historyBlockLines(block, session.unit || 'lb');
+        const lines = historyBlockLines(session, block, session.unit || 'lb');
         return '<div><div class="history-block-title">' + esc(block.title || 'Workout section') + '</div>' +
           (lines.length ? lines.map(line => '<div class="history-result">' + esc(line) + '</div>').join('') : '<div class="history-result">Completed</div>') + '</div>';
       }).join('');
@@ -2672,7 +2783,7 @@
   function structuredRunPosition(it) {
     if (!it || !it.blockCount) return it && it.meta || '';
     const parts = ['Block ' + it.blockIndex + ' of ' + it.blockCount];
-    if (it.phase === 'prep') return parts.concat('Starting').join(' · ');
+    if (it.phase === 'prep') return parts.concat(it.setupFor ? 'Get ready' : 'Starting').join(' · ');
     if (isBlockTransition(it)) return parts.concat('Up next').join(' · ');
     const contextLabel = it.contextLabel || (it.label !== 'Rest' ? it.label : '');
     if (contextLabel) parts.push(contextLabel);
@@ -2989,7 +3100,9 @@
     const name = S.mode === 'workout' ? workoutPlan.name : S.mode === 'circuit' ? circuitPlan.name : S.mode === 'intervals' ? 'Intervals' : S.mode === 'rest' ? 'Rest' : 'Stopwatch';
     const rounds = S.mode === 'circuit' ? cfg.circuit.rounds : S.mode === 'intervals' ? cfg.intervals.rounds : 0;
     $('#doneSub').textContent = (rounds ? rounds + (rounds === 1 ? ' round · ' : ' rounds · ') : '') + name + (S.variableDuration ? ' · variable duration' : '');
-    $('#doneLog').classList.toggle('hidden', S.mode !== 'workout' || !S.sessionPlan);
+    const canLogWorkout = S.mode === 'workout' && !!S.sessionPlan;
+    $('#doneLog').classList.toggle('hidden', !canLogWorkout);
+    $('#doneHome').textContent = canLogWorkout ? 'Skip logging' : 'Done';
   }
 
   function goHome() {
@@ -3094,41 +3207,54 @@
     setPlanMsg('workout', structured ? 'New structured workout ready to edit.' : 'New basic workout ready to edit.');
   }
 
-  function applyBuiltInWorkout(plan, message) {
+  function applyBuiltInWorkout(plan) {
     setWorkoutPlan(plan);
     workoutSelectionPending = false;
     editingStructuredWorkout = false;
     $('#wName').value = workoutPlan.name;
     persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
-    setPlanMsg('workout', message);
+    setPlanMsg('workout', '');
     const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
   }
+  let workoutCatalog = null;
+  let selectedTrackId = store.get(TRACK_KEY, '');
+  if (typeof selectedTrackId !== 'string') selectedTrackId = '';
+
   function normalizeWorkoutCatalog(raw) {
     if (!raw || raw.format !== 'workout-timer-catalog' || Number(raw.version) !== 1 || !Array.isArray(raw.tracks) || !raw.tracks.length || raw.tracks.length > 20) {
       throw new Error('The workout catalog is invalid.');
     }
+    const optionalText = (value, max, label) => {
+      if (value == null) return '';
+      if (typeof value !== 'string') throw new Error(label + ' is invalid.');
+      const text = value.trim();
+      if (text.length > max) throw new Error(label + ' is too long.');
+      return text;
+    };
     const planIds = new Set();
     const normalizePlans = (plans, groupName) => plans.map((plan, planIndex) => {
       const planId = String(plan && plan.id || '').trim().toLowerCase();
       const planName = String(plan && plan.name || '').trim();
       const file = String(plan && plan.file || '').trim();
+      const summary = optionalText(plan && plan.summary, 48, groupName + ' workout ' + (planIndex + 1) + ' summary');
       if (!/^[a-z0-9-]{1,80}$/.test(planId) || planIds.has(planId) || !planName || planName.length > 80 ||
           !/^\.\/workouts\/[a-z0-9/_-]+\.workout\.json$/.test(file) || file.includes('..')) {
         throw new Error(groupName + ' workout ' + (planIndex + 1) + ' is invalid.');
       }
       planIds.add(planId);
-      return { id: planId, name: planName, file };
+      return { id: planId, name: planName, file, summary };
     });
     const trackIds = new Set();
     const tracks = raw.tracks.map((track, trackIndex) => {
       const id = String(track && track.id || '').trim().toLowerCase();
       const name = String(track && track.name || '').trim();
+      const blurb = optionalText(track && track.blurb, 120, 'Workout catalog track ' + (trackIndex + 1) + ' blurb');
       if (!/^[a-z0-9-]{1,40}$/.test(id) || trackIds.has(id) || !name || name.length > 60 || !Array.isArray(track.plans) || !track.plans.length || track.plans.length > 50) {
         throw new Error('Workout catalog track ' + (trackIndex + 1) + ' is invalid.');
       }
       trackIds.add(id);
-      return { id, name, plans: normalizePlans(track.plans, name) };
+      return { id, name, blurb, plans: normalizePlans(track.plans, name) };
     });
     const optional = raw.optional == null ? [] : raw.optional;
     if (!Array.isArray(optional) || optional.length > 50) throw new Error('The optional workout catalog is invalid.');
@@ -3142,60 +3268,145 @@
     return JSON.parse(text.replace(/^\uFEFF/, ''));
   }
   async function loadCatalogWorkout(plan, button) {
-    const original = button.textContent;
+    const original = button.innerHTML;
+    setCatalogMsg('');
     button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
     button.textContent = 'Loading…';
     try {
       const raw = await fetchSmallJson(plan.file, plan.name);
-      applyBuiltInWorkout(normalizeWorkout(raw), 'Loaded ' + plan.name + '. You can edit it or save your own copy.');
+      applyBuiltInWorkout(normalizeWorkout(raw));
     } catch (err) {
-      setPlanMsg('workout', err.message || 'Could not load ' + plan.name + '.', true);
+      setCatalogMsg(err.message || 'Could not load ' + plan.name + '.', true);
     } finally {
       button.disabled = false;
-      button.textContent = original;
+      button.removeAttribute('aria-busy');
+      button.innerHTML = original;
     }
+  }
+  function setCatalogMsg(text, isError) {
+    const element = $('#wCatalogMsg');
+    element.textContent = text || '';
+    element.classList.toggle('err', !!isError);
+  }
+  function addCatalogText(parent, tag, className, value) {
+    const element = document.createElement(tag);
+    element.className = className;
+    element.textContent = value;
+    parent.appendChild(element);
+    return element;
+  }
+  function makeDayRow(plan) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'day-row';
+    button.setAttribute('aria-label', 'Load ' + plan.name + (plan.summary ? '. ' + plan.summary : ''));
+    const copy = document.createElement('span');
+    addCatalogText(copy, 'span', 'day-row-name', plan.name);
+    if (plan.summary) addCatalogText(copy, 'span', 'day-row-meta', plan.summary);
+    button.appendChild(copy);
+    const chevron = addCatalogText(button, 'span', 'day-row-chevron', '›');
+    chevron.setAttribute('aria-hidden', 'true');
+    button.addEventListener('click', () => loadCatalogWorkout(plan, button));
+    return button;
+  }
+  function focusCatalogTarget(selector) {
+    requestAnimationFrame(() => {
+      const target = $(selector);
+      if (target) target.focus();
+    });
+  }
+  function renderTrackChooser(catalog, host, focusHeading = false) {
+    const view = document.createElement('div');
+    view.className = 'track-choose';
+    const copy = document.createElement('div');
+    copy.className = 'track-choose-copy';
+    const heading = addCatalogText(copy, 'h2', '', 'Which track are you on?');
+    heading.tabIndex = -1;
+    addCatalogText(copy, 'p', '', 'The app opens on your track until you change it.');
+    view.appendChild(copy);
+    const list = document.createElement('div');
+    list.className = 'track-list';
+    catalog.tracks.forEach(track => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'track-card';
+      const cardCopy = document.createElement('span');
+      addCatalogText(cardCopy, 'span', 'track-card-name', track.name);
+      const optionalCount = catalog.optional.length;
+      const meta = track.plans.length + ' training day' + (track.plans.length === 1 ? '' : 's') +
+        (optionalCount ? ' · ' + optionalCount + ' optional cardio' : '');
+      addCatalogText(cardCopy, 'span', 'track-card-meta', meta);
+      if (track.blurb) addCatalogText(cardCopy, 'span', 'track-card-blurb', track.blurb);
+      button.appendChild(cardCopy);
+      const chevron = addCatalogText(button, 'span', 'track-card-chevron', '›');
+      chevron.setAttribute('aria-hidden', 'true');
+      button.addEventListener('click', () => {
+        selectedTrackId = track.id;
+        store.set(TRACK_KEY, selectedTrackId);
+        renderWorkoutCatalogView(true);
+      });
+      list.appendChild(button);
+    });
+    view.appendChild(list);
+    host.appendChild(view);
+    if (focusHeading) focusCatalogTarget('.track-choose h2');
+  }
+  function renderTrackDays(catalog, track, host, focusHeading = false) {
+    const view = document.createElement('div');
+    view.className = 'track-days';
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'track-chip';
+    chip.setAttribute('aria-label', 'Change track. Currently ' + track.name + '.');
+    addCatalogText(chip, 'span', 'track-chip-name', track.name + ' track');
+    addCatalogText(chip, 'span', 'track-chip-change', 'Change');
+    chip.addEventListener('click', () => {
+      selectedTrackId = '';
+      store.remove(TRACK_KEY);
+      renderWorkoutCatalogView(true);
+    });
+    view.appendChild(chip);
+    const list = document.createElement('div');
+    list.className = 'day-list';
+    track.plans.forEach(plan => list.appendChild(makeDayRow(plan)));
+    view.appendChild(list);
+    if (catalog.optional.length) {
+      const optional = document.createElement('section');
+      optional.className = 'day-optional';
+      addCatalogText(optional, 'div', 'day-optional-heading', 'Optional');
+      const optionalList = document.createElement('div');
+      optionalList.className = 'day-list';
+      catalog.optional.forEach(plan => optionalList.appendChild(makeDayRow(plan)));
+      optional.appendChild(optionalList);
+      view.appendChild(optional);
+    }
+    host.appendChild(view);
+    if (focusHeading) focusCatalogTarget('.day-row');
+  }
+  function renderWorkoutCatalogView(focusHeading = false) {
+    const host = $('#wPlanLibrary');
+    setCatalogMsg('');
+    if (!workoutCatalog) return;
+    host.innerHTML = '';
+    const selectedTrack = workoutCatalog.tracks.find(track => track.id === selectedTrackId);
+    if (!selectedTrack) {
+      if (selectedTrackId) {
+        selectedTrackId = '';
+        store.remove(TRACK_KEY);
+      }
+      renderTrackChooser(workoutCatalog, host, focusHeading);
+      return;
+    }
+    renderTrackDays(workoutCatalog, selectedTrack, host, focusHeading);
   }
   async function renderWorkoutCatalog() {
     const host = $('#wPlanLibrary');
     try {
-      const catalog = normalizeWorkoutCatalog(await fetchSmallJson('./workouts/catalog.json', 'the workout catalog'));
-      host.innerHTML = '';
-      const buildPlanGroup = (headingText, groups, showGroupNames = true) => {
-        const group = document.createElement('div');
-        group.className = 'plan-library-group';
-        const groupHeading = document.createElement('div');
-        groupHeading.className = 'mono plan-library-heading';
-        groupHeading.textContent = headingText;
-        group.appendChild(groupHeading);
-        groups.forEach(track => {
-          const section = document.createElement('section');
-          section.className = 'plan-track';
-          const actions = document.createElement('div');
-          actions.className = 'plan-actions';
-          track.plans.forEach(plan => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'ghost';
-            button.textContent = plan.name;
-            button.addEventListener('click', () => loadCatalogWorkout(plan, button));
-            actions.appendChild(button);
-          });
-          if (showGroupNames) {
-            const heading = document.createElement('div');
-            heading.className = 'mono plan-track-name';
-            heading.textContent = track.name;
-            section.appendChild(heading);
-          }
-          section.appendChild(actions);
-          group.appendChild(section);
-        });
-        host.appendChild(group);
-      };
-      buildPlanGroup('Workout tracks', catalog.tracks);
-      if (catalog.optional.length) {
-        buildPlanGroup('Optional', [{ plans: catalog.optional }], false);
-      }
+      workoutCatalog = normalizeWorkoutCatalog(await fetchSmallJson('./workouts/catalog.json', 'the workout catalog'));
+      renderWorkoutCatalogView();
     } catch (_) {
+      workoutCatalog = null;
       host.innerHTML = '<p class="note plan-library-status">Workout plans are available from the hosted app or when this folder is served by a local web server.</p>';
     }
   }
@@ -3214,6 +3425,15 @@
   $('#wLoad').addEventListener('click', () => chooseFile('workout'));
   $('#wNewBasic').addEventListener('click', () => createWorkout('basic'));
   $('#wNewStructured').addEventListener('click', () => createWorkout('structured'));
+  $('#wCustomToolsToggle').addEventListener('click', () => {
+    const panel = $('#panel-workout');
+    const opening = !panel.classList.contains('custom-tools-open');
+    panel.classList.toggle('custom-tools-open', opening);
+    $('#wWorkoutTools').open = opening;
+    $('#wCustomToolsToggle').setAttribute('aria-expanded', String(opening));
+    $('#wCustomToolsToggle').textContent = opening ? 'Hide my workout tools' : 'Create or load my own workout';
+    if (opening) requestAnimationFrame(() => $('#wNewBasic').focus());
+  });
   await renderWorkoutCatalog();
   $('#cSave').addEventListener('click', () => savePlan('circuit'));
   $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
@@ -3363,14 +3583,17 @@
     });
   }
 
+  async function registerServiceWorker() {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js');
+      if (registration.waiting && navigator.serviceWorker.controller) showUpdateNotice();
+      registration.addEventListener('updatefound', () => watchInstallingWorker(registration.installing));
+    } catch (_) {}
+  }
+
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', async () => {
-      try {
-        const registration = await navigator.serviceWorker.register('./sw.js');
-        if (registration.waiting && navigator.serviceWorker.controller) showUpdateNotice();
-        registration.addEventListener('updatefound', () => watchInstallingWorker(registration.installing));
-      } catch (_) {}
-    });
+    if (document.readyState === 'complete') registerServiceWorker();
+    else window.addEventListener('load', registerServiceWorker, { once: true });
   }
 
   $('#wName').value = workoutPlan.name;
