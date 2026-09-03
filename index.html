@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fY/ptPlPMU7Zm80yfZPbsooG7s+jvp3JyPQJzBzszhE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-r9X/mkznVc+MGijv3w+NFSFzqHCnuat3FM5b3Zjz3I4='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -319,6 +319,7 @@
   .runhead>div:first-child{min-width:0}
   #runName,#runPos{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .runhead-status{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .runhead-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}
   #runLeft{white-space:nowrap;text-align:right}
   .block-skip{min-height:32px;padding:0 10px;border-radius:9px;color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.34);font-family:var(--mono);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;opacity:.62}
   .block-skip:hover{background:rgba(255,255,255,.12);opacity:1}
@@ -811,7 +812,10 @@
     </div>
     <div class="runhead-status">
       <div class="mono" id="runLeft">06:00 LEFT</div>
-      <button class="block-skip hidden" id="btnSkipBlock" type="button">Skip block</button>
+      <div class="runhead-actions">
+        <button class="block-skip hidden" id="btnSkipBlock" type="button">Skip block</button>
+        <button class="block-skip hidden" id="btnEndWorkout" type="button">End workout</button>
+      </div>
     </div>
   </div>
   <div class="runbody">
@@ -890,7 +894,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.54';
+  const APP_VERSION = '1.0.57';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -2941,7 +2945,7 @@
     if ((it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0 && !(it.roundGroup && it.blockMode === 'amrap')) {
       const unit = String(it.progressLabel || 'round');
       parts.push(unit.charAt(0).toUpperCase() + unit.slice(1) + ' ' + it.round + (Number(it.rounds) > 0 ? ' of ' + it.rounds : ''));
-    } else if (Number(it.sets) > 1) parts.push('Set ' + it.set + ' of ' + it.sets);
+    }
     return parts.join(' · ');
   }
 
@@ -3022,8 +3026,13 @@
       $('#wipe').style.width = '0%';
     }
     $('#btnPause').textContent = amrapResult ? (it.next === 'Finish' ? 'Finish workout' : 'Continue') : blockTransition ? 'Start block' : groupedAmrap ? 'Complete round' : roundGroup ? 'Round done' : manual ? 'Set done' : 'Pause';
-    $('#btnSkip').classList.toggle('hidden', amrapResult || blockTransition || manual || it.blockMode === 'emom' || S.mode === 'rest');
-    $('#btnEnd').classList.toggle('hidden', amrapResult);
+    const exerciseSkip = !!it.exerciseId && !roundGroup && it.blockMode !== 'emom';
+    const ordinarySkip = !manual && !roundGroup && it.blockMode !== 'emom' && S.mode !== 'rest';
+    $('#btnSkip').textContent = exerciseSkip ? 'Skip exercise' : it.phase === 'rest' ? 'Skip rest' : 'Skip';
+    $('#btnSkip').classList.toggle('hidden', amrapResult || blockTransition || (!exerciseSkip && !ordinarySkip));
+    const structuredWorkoutRun = S.mode === 'workout' && S.sessionPlan && S.sessionPlan.layout === 'blocks';
+    $('#btnEndWorkout').classList.toggle('hidden', amrapResult || !structuredWorkoutRun);
+    $('#btnEnd').classList.toggle('hidden', amrapResult || structuredWorkoutRun);
     resetBlockAction();
     t.style.transform = 'scale(1.05)';
     setTimeout(() => { t.style.transform = 'scale(1)'; }, 40);
@@ -3202,6 +3211,36 @@
     moveToQueueIndex(S.qi + 1);
   }
 
+  function nextExerciseQueueIndex(current) {
+    let setupIndex = -1;
+    for (let i = S.qi + 1; i < S.queue.length; i++) {
+      const candidate = S.queue[i];
+      if (isBlockTransition(candidate) || isAmrapResult(candidate) || candidate.blockId !== current.blockId) return i;
+      if (candidate.phase === 'prep' && candidate.setupFor && candidate.setupFor !== current.label) {
+        if (setupIndex < 0) setupIndex = i;
+        continue;
+      }
+      if (candidate.exerciseId && candidate.exerciseId !== current.exerciseId) return setupIndex >= 0 ? setupIndex : i;
+    }
+    return S.queue.length;
+  }
+
+  function skipCurrent() {
+    const current = S.queue[S.qi];
+    if (!current) return;
+    S.restLogKey = null;
+    let next = S.qi + 1;
+    if (current.exerciseId) {
+      delete S.sessionSetResults[setResultKey(current.exerciseId, current.set)];
+      next = nextExerciseQueueIndex(current);
+    }
+    if (next >= S.queue.length) {
+      S.doneTotal = 0;
+      return finish();
+    }
+    moveToQueueIndex(next);
+  }
+
   function launch(queue) {
     if (!queue) return;
     resetBlockAction();
@@ -3247,8 +3286,18 @@
   function resetEnd() {
     if (endArmed) clearTimeout(endArmed);
     endArmed = 0;
-    const b = $('#btnEnd');
-    b.textContent = 'End'; b.classList.remove('confirm');
+    const timerEnd = $('#btnEnd');
+    const workoutEnd = $('#btnEndWorkout');
+    timerEnd.textContent = 'End'; timerEnd.classList.remove('confirm');
+    workoutEnd.textContent = 'End workout'; workoutEnd.classList.remove('confirm');
+  }
+
+  function requestEnd(button) {
+    if (endArmed) { clearTimeout(endArmed); resetEnd(); return goHome(); }
+    const workoutEnd = button.id === 'btnEndWorkout';
+    button.textContent = workoutEnd ? 'End workout?' : 'End?';
+    button.classList.add('confirm');
+    endArmed = setTimeout(resetEnd, 2600);
   }
 
   function togglePause() {
@@ -3641,15 +3690,10 @@
     e.stopPropagation();
     if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi]) || isAmrapResult(S.queue[S.qi])) advance(); else togglePause();
   });
-  $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) advance(); });
+  $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) skipCurrent(); });
   $('#btnSkipBlock').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) runBlockAction(); });
-  $('#btnEnd').addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (endArmed) { clearTimeout(endArmed); resetEnd(); return goHome(); }
-    const b = $('#btnEnd');
-    b.textContent = 'End?'; b.classList.add('confirm');
-    endArmed = setTimeout(resetEnd, 2600);
-  });
+  $('#btnEnd').addEventListener('click', (e) => { e.stopPropagation(); requestEnd(e.currentTarget); });
+  $('#btnEndWorkout').addEventListener('click', (e) => { e.stopPropagation(); requestEnd(e.currentTarget); });
   $('#doneAgain').addEventListener('click', startCurrentMode);
   $('#doneHome').addEventListener('click', goHome);
   $('#doneLog').addEventListener('click', openSessionLog);
