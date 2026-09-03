@@ -74,9 +74,15 @@ assert.equal(f.saved.get('workoutTimerHistoryFallbackV1'),history);
 assert.deepEqual(f.availableWorkoutCatalog().tracks.map(t=>t.id),['momentum','rise','forge']);
 const forge=()=>f.availableWorkoutCatalog().tracks.find(t=>t.id==='forge');
 assert.deepEqual(f.trackWorkoutPlans(forge()).map(p=>p.name),['Lower Body Focus Day','Dip Focus Day','Pull Focus Day','Push Focus Day']);
+assert.deepEqual(f.trackWorkoutPlans(forge()).map(p=>p.summary),catalog.tracks[0].plans.map(p=>p.summary),'Imported day descriptions match the included tracks');
+assert.deepEqual(f.availableWorkoutCatalog().optional,catalog.optional,'Forge uses the same shared Optional Cardio entry');
+
 let rendered=f.walk(f.elements.get('#wPlanLibrary'));
 assert.equal(rendered.filter(el=>el.className==='day-row').length,5,'Four days plus existing optional cardio');
 assert.ok(rendered.some(el=>el.id==='wPackEdition'));
+assert.deepEqual(rendered.filter(el=>el.className==='day-row-meta').map(el=>el.textContent),[...catalog.tracks[0].plans.map(p=>p.summary),catalog.optional[0].summary]);
+assert.equal(rendered.filter(el=>el.className==='day-optional').length,1,'Only one Optional section is displayed');
+
 const push=f.trackWorkoutPlans(forge())[3];
 await f.loadCatalogWorkout(push,{innerHTML:'Push',setAttribute(){},removeAttribute(){}});
 assert.equal(f.fetches,0,'Imported day must not fetch a file');

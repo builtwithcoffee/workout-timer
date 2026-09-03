@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-S25P9LZCAF8Cak0RCc5wCz1E3E4MIfmO0jz2/8ejSXw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6WlazXiqskjMEQeUsvqf6GTx2YNaDQQidjqoJZqqsTI='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -897,7 +897,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.58';
+  const APP_VERSION = '1.0.59';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3602,11 +3602,24 @@
       (track.plans.length ? null : track.packs[track.packs.length - 1]);
   }
 
+  function importedWorkoutSummary(workout) {
+    const blocks = workout.blocks || [];
+    const items = blocks.length ? blocks.flatMap(block => block.items) : workout.items || [];
+    const exerciseCount = items.filter(item => item.type === 'exercise').length;
+    const mainLift = blocks.find(block => /^main lift\s*[·/]/i.test(block.title));
+    const focus = mainLift ? mainLift.title.replace(/^main lift\s*[·/]\s*/i, '').trim().toUpperCase() : '';
+    const parts = [];
+    if (focus) parts.push(focus);
+    if (blocks.length) parts.push(blocks.length + (blocks.length === 1 ? ' BLOCK' : ' BLOCKS'));
+    parts.push(exerciseCount + (exerciseCount === 1 ? ' EXERCISE' : ' EXERCISES'));
+    return parts.join(' · ');
+  }
+
   function trackWorkoutPlans(track) {
     const entry = selectedTrackPack(track);
     return entry ? entry.pack.workouts.map(item => {
       const workout = Object.hasOwn(entry.edits, item.id) ? entry.edits[item.id] : item.workout;
-      return { id: item.id, name: workout.name, summary: '', workout, source: { packId: entry.pack.id, workoutId: item.id } };
+      return { id: item.id, name: workout.name, summary: importedWorkoutSummary(workout), workout, source: { packId: entry.pack.id, workoutId: item.id } };
     }) : track.plans;
   }
 
