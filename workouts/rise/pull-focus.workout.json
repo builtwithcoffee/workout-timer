@@ -273,12 +273,12 @@
       "title": "Density · Quality Work",
       "mode": "for-time",
       "rounds": 10,
-      "unitLabel": "cycle",
+      "unitLabel": "round",
       "restBetweenRoundsSeconds": 0,
       "score": "elapsed-time",
       "notes": [
         "Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.",
-        "Alternate A-B until you complete 10 sets of each. Aim for unbroken sets early, but not every set must be unbroken.",
+        "Complete A then B in each round until you finish 10 rounds. Aim for unbroken sets early, but not every set must be unbroken.",
         "Use the prescribed PR-based target for dips.",
         "If your squat entry test used additional weight, use that weight for the squats when appropriate."
       ],
@@ -320,7 +320,7 @@
       "score": "rounds-and-reps",
       "notes": [
         "Perform a 9-minute AMRAP for quality, alternating A-B until time expires.",
-        "Record completed rounds plus any extra reps, for example 8 rounds + 7 reps.",
+        "Count completed full rounds only.",
         "Aim for full burpees. If your push muscles are exhausted, use original burpees."
       ],
       "items": [

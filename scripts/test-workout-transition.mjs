@@ -15,7 +15,7 @@ const forTime = { id: 'warm-up', mode: 'for-time' };
 const timedExercise = { completion: 'timed' };
 const manualExercise = { completion: 'manual' };
 
-assert.equal(TIMED_SETUP_SECONDS, 3);
+assert.equal(TIMED_SETUP_SECONDS, 5);
 assert.equal(needsTimedSetup(manual, sequence, timedExercise), true, 'manual to timed sequence step needs setup');
 assert.equal(needsTimedSetup(rest, sequence, timedExercise), false, 'an explicit rest already provides setup time');
 assert.equal(needsTimedSetup(timed, sequence, timedExercise), false, 'timed to timed does not add setup');

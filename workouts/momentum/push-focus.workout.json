@@ -141,12 +141,12 @@
       "title": "Density · Quality Work",
       "mode": "for-time",
       "rounds": 8,
-      "unitLabel": "cycle",
+      "unitLabel": "round",
       "restBetweenRoundsSeconds": 0,
       "score": "elapsed-time",
       "notes": [
         "Build quality volume without rushing. Perform every rep with intent and use banded pull-ups if needed.",
-        "Alternate A-B until you complete eight sets of each. Aim for unbroken sets early, but not every set must be unbroken.",
+        "Complete A then B in each round until you finish eight rounds. Aim for unbroken sets early, but not every set must be unbroken.",
         "Use the prescribed PR-based target for chin-ups."
       ],
       "items": [
@@ -185,7 +185,7 @@
       "score": "rounds-and-reps",
       "notes": [
         "Perform a 10-minute AMRAP for quality, cycling A-B-C until time expires.",
-        "Record completed rounds plus any extra reps, for example 8 rounds + 7 reps."
+        "Count completed full rounds only."
       ],
       "items": [
         {

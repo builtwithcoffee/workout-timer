@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Q8zJB1zfcTQLq0QZP5YvIyTj9eOlRF8DbHQ0v/7khlE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fY/ptPlPMU7Zm80yfZPbsooG7s+jvp3JyPQJzBzszhE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -326,7 +326,11 @@
   .runbody{position:relative;flex:1;display:grid;grid-template-rows:minmax(60px,1fr) clamp(120px,30vmin,320px) minmax(60px,1fr);text-align:center;min-height:0}
   .run-context{min-height:0;display:flex;flex-direction:column;align-items:center;width:100%}
   .run-context-top{justify-content:flex-end;padding-bottom:clamp(8px,1.5vmin,16px)}
+  .run.emom .run-context-top{padding-bottom:clamp(18px,3vmin,34px)}
   .run-clock-band{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+  .blockclock{display:flex;align-items:baseline;justify-content:center;gap:12px;margin-bottom:clamp(8px,1.8vmin,18px);padding:8px 15px;border-radius:13px;background:rgba(0,0,0,.2)}
+  .blockclock-label{font-family:var(--mono);font-size:clamp(10px,1.7vmin,14px);font-weight:750;letter-spacing:.16em;opacity:.72;text-transform:uppercase}
+  .blockclock-value{font-size:clamp(38px,8vmin,82px);font-weight:850;line-height:.9;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
   .run-context-bottom{justify-content:flex-start;gap:clamp(8px,1.4vmin,14px);padding-top:clamp(8px,1.5vmin,16px);overflow-y:auto;overscroll-behavior:contain}
   .run-gate-meta{margin-bottom:clamp(7px,1.2vmin,12px);font-family:var(--mono);font-size:clamp(10px,1.5vmin,13px);font-weight:750;letter-spacing:.14em;text-transform:uppercase;opacity:.72}
   .run-gate-exercises{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 10px;list-style:none;margin:0;padding:0;max-width:min(620px,84vw)}
@@ -340,9 +344,17 @@
   .bigtime .cln{display:inline-block;transform:translateY(-.085em)}
   .bigtime.manual{font-size:clamp(26px,5.5vmin,58px);line-height:1.08;text-transform:none;letter-spacing:-.01em;padding:.34em .64em;border-radius:14px;background:rgba(0,0,0,.2)}
   .bigtime.block-ready{font-size:clamp(22px,4.5vmin,46px);padding:.45em .8em}
+  .bigtime.round-exercises{display:flex;flex-direction:column;gap:clamp(10px,2vmin,18px);width:min(820px,92vw);padding:0;background:transparent;font-size:clamp(26px,5.5vmin,58px);line-height:1.08}
+  .round-exercise{display:flex;flex-direction:column;align-items:center;gap:.13em;padding:.34em .58em;border-radius:14px;background:rgba(0,0,0,.2);font-weight:800;text-wrap:balance}
+  .round-exercise-name,.round-exercise-detail{font-size:1em;line-height:1.05}
+  .run.round-group .runbody{grid-template-rows:minmax(80px,.9fr) clamp(190px,45vmin,420px) minmax(80px,.9fr)}
+  .run.amrap-round-group .runbody{grid-template-rows:minmax(70px,.75fr) clamp(250px,58vmin,520px) minmax(70px,.75fr)}
   .runnote{max-width:min(620px,84vw);font-size:clamp(14px,2vmin,20px);line-height:1.42;font-weight:600;opacity:.82;text-wrap:balance}
   .run-tap-hint{position:absolute;left:0;right:0;bottom:4px;font-family:var(--mono);font-size:clamp(9px,1.4vmin,12px);font-weight:750;letter-spacing:.12em;text-transform:uppercase;opacity:.62}
   .runprevious{padding:9px 14px;border-radius:999px;background:rgba(0,0,0,.2);font-family:var(--mono);font-size:clamp(11px,1.8vmin,15px);font-weight:750;letter-spacing:.08em}
+  .amrap-completed{display:flex;align-items:baseline;justify-content:center;gap:12px;padding:8px 16px;border-radius:13px;background:rgba(0,0,0,.2)}
+  .amrap-completed-label{font-family:var(--mono);font-size:clamp(10px,1.5vmin,13px);font-weight:750;letter-spacing:.15em;text-transform:uppercase;opacity:.72}
+  .amrap-completed-value{font-size:clamp(34px,6vmin,62px);font-weight:850;line-height:.9;font-variant-numeric:tabular-nums}
   .next{display:inline-flex;align-items:center;gap:12px;background:rgba(0,0,0,.22);border-radius:999px;padding:11px 22px;max-width:90vw}
   .next .cap{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.72}
   .next .txt{font-size:clamp(15px,2.2vmin,22px);font-weight:700}
@@ -359,6 +371,7 @@
   .setlogger{position:relative;width:min(680px,100%);padding:12px 14px;border-radius:15px;background:rgba(0,0,0,.25);color:currentColor;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
   .setlogger-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(94px,.65fr) minmax(94px,.65fr);gap:10px;align-items:end}
   .setlogger-grid.reps-only{grid-template-columns:minmax(0,1fr) minmax(94px,.45fr)}
+  .setlogger-grid.amrap-result-grid{grid-template-columns:minmax(0,1.4fr) minmax(130px,.6fr)}
   .setlogger-title{font-size:17px;font-weight:850;line-height:1.2}
   .setlogger-previous{margin-top:5px;font-family:var(--mono);font-size:10px;line-height:1.35;letter-spacing:.08em;opacity:.72}
   .setlogger label{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;opacity:.96}
@@ -372,6 +385,8 @@
   .done .sub{font-size:clamp(16px,2.4vmin,22px);color:var(--muted)}
   .done .row{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
   .done-copy-msg{margin-top:8px}
+  .done-motto{width:min(360px,82vw);margin-top:24px;padding-top:17px;border-top:1px solid var(--line);font-size:clamp(13px,2vmin,16px);font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+  .done-motto-accent{color:var(--accent)}
 
   /* ---------- logging and history ---------- */
   .log{position:fixed;inset:0;background:var(--bg);z-index:12;overflow:auto;padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left))}
@@ -381,6 +396,7 @@
   .log-block-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line)}
   .log-block-title{font-size:21px;font-weight:800}
   .log-score{padding:14px 16px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .log-score.rounds-only{grid-template-columns:minmax(0,1fr)}
   .log-exercise{padding:14px 16px;border-bottom:1px solid var(--line)}
   .log-exercise:last-child{border-bottom:none}
   .log-exercise-name{font-size:17px;font-weight:750;margin-bottom:9px}
@@ -445,6 +461,8 @@
     .foot .built-with-coffee svg{width:12px;height:12px}
     .setlogger{padding:11px 12px}
     .setlogger-grid{grid-template-columns:1fr 84px 84px;gap:7px}
+    .setlogger-grid.amrap-result-grid{grid-template-columns:1fr}
+    .amrap-result-copy{grid-column:1/-1}
     .setlogger-title{font-size:15px}
     .home{gap:14px}
     .runhead>div{min-width:0;max-width:58%}
@@ -457,6 +475,9 @@
     .runhead>div:first-child{max-width:28vw}
     .runhead .mono{font-size:10px;line-height:1.35;letter-spacing:.14em}
     .runbody{margin-top:8px;grid-template-rows:minmax(64px,1fr) clamp(96px,28vmin,190px) minmax(52px,1fr)}
+    .run.emom .run-context-top{padding-bottom:clamp(10px,2vmin,18px)}
+    .run.round-group .runbody{grid-template-rows:minmax(54px,.75fr) clamp(130px,42vmin,190px) minmax(54px,.75fr)}
+    .run.amrap-round-group .runbody{grid-template-rows:minmax(48px,.65fr) clamp(200px,55vmin,300px) minmax(48px,.65fr)}
     .steplabel{font-size:clamp(24px,5.2vmin,46px);max-width:52vw}
     .setstatus{margin-top:clamp(9px,1.8vmin,18px)}
     .run-context-bottom{padding-top:4px;gap:4px}
@@ -474,6 +495,8 @@
     .setlogger label{gap:3px}
     .setlogger input{min-height:38px;padding:6px 8px;font-size:16px}
     .setlogger-saved{font-size:8px}
+    .bigtime.round-exercises{gap:6px;font-size:clamp(20px,5vmin,34px)}
+    .round-exercise{padding:.28em .48em}
   }
   @media(max-width:360px){
     .home{padding-left:calc(12px + env(safe-area-inset-left));padding-right:calc(12px + env(safe-area-inset-right))}
@@ -798,6 +821,7 @@
       <div class="setstatus hidden" id="runSet"><span class="word" id="runSetLabel">SET</span><span class="current" id="runSetCurrent">1</span><span class="word" id="runSetOf">OF</span><span id="runSetTotal">3</span></div>
     </div>
     <div class="run-clock-band">
+      <div class="blockclock hidden" id="runBlockClock"><span class="blockclock-label">Time left</span><span class="blockclock-value" id="runBlockClockValue">08:00</span></div>
       <div class="bigtime num" id="runTime">0<span class="cln">:</span>45</div>
       <div class="run-tap-hint hidden" id="runTapHint">Tap timer to pause</div>
     </div>
@@ -805,6 +829,7 @@
       <ul class="run-gate-exercises hidden" id="runGateExercises"></ul>
       <div class="runnote hidden" id="runNote"></div>
       <div class="runprevious hidden" id="runPrevious"></div>
+      <div class="amrap-completed hidden" id="runAmrapCompleted"><span class="amrap-completed-label">Completed rounds</span><span class="amrap-completed-value" id="runAmrapCompletedValue">0</span></div>
       <div class="next" id="runNextWrap"><span class="cap">NEXT</span><span class="txt" id="runNext">Rest · 15s</span></div>
       <div class="setlogger hidden" id="setLogger" aria-live="polite"></div>
       <div class="runpresets hidden" id="runRestPresets" aria-label="Restart rest timer"></div>
@@ -823,12 +848,13 @@
   <div class="bigtime num" id="doneTime">18<span class="cln">:</span>00</div>
   <div class="sub" id="doneSub">3 rounds · Workout</div>
   <div class="row">
-    <button class="start hidden" id="doneLog" type="button">Log workout</button>
+    <button class="start hidden" id="doneLog" type="button">Log result</button>
     <button class="ghost hidden" id="doneCopyOverview" type="button">Copy workout overview</button>
     <button class="ghost" id="doneAgain" type="button">Again</button>
     <button class="ghost" id="doneHome" type="button">Done</button>
   </div>
   <div class="msg done-copy-msg" id="doneCopyMsg" role="status" aria-live="polite"></div>
+  <div class="done-motto hidden" id="doneMotto"><span class="done-motto-accent">1%</span> better every day</div>
 </div>
 
 <!-- POST-WORKOUT LOG -->
@@ -864,7 +890,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.36';
+  const APP_VERSION = '1.0.54';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -1057,6 +1083,7 @@
     if (plan.layout === 'blocks') {
       total += Math.max(0, plan.blocks.length - 1);
       plan.blocks.forEach(block => {
+        if (block.mode === 'emom') { total += block.durationSeconds / 60; return; }
         const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
         const perRound = block.items.reduce((sum, item) => {
           if (item.type === 'rest') return sum + 1;
@@ -1105,18 +1132,21 @@
         if (!block || typeof block !== 'object' || Array.isArray(block)) throw new Error('Workout block ' + (bi + 1) + ' is invalid.');
         const title = String(block.title || '').trim();
         const id = String(block.id || ('block-' + (bi + 1))).trim().slice(0, 60);
-        const mode = String(block.mode || 'sequence').toLowerCase();
+        const legacyScore = String(block.score || '').trim().toLowerCase();
+        const requestedMode = String(block.mode || 'sequence').toLowerCase();
+        const mode = requestedMode === 'amrap' && legacyScore === 'emom' ? 'emom' : requestedMode;
         if (!title || title.length > 80) throw new Error('Workout block ' + (bi + 1) + ' needs a title of 1 to 80 characters.');
         if (!id) throw new Error(title + ' needs a block id.');
-        if (!['sequence', 'for-time', 'amrap'].includes(mode)) throw new Error('Workout block ' + (bi + 1) + ' mode must be sequence, for-time or amrap.');
+        if (!['sequence', 'for-time', 'amrap', 'emom'].includes(mode)) throw new Error('Workout block ' + (bi + 1) + ' mode must be sequence, for-time, amrap or emom.');
         const rounds = mode === 'for-time' ? Number(block.rounds) : 1;
-        const durationSeconds = mode === 'amrap' ? Number(block.durationSeconds) : 0;
+        const durationSeconds = mode === 'amrap' || mode === 'emom' ? Number(block.durationSeconds) : 0;
         const unitLabel = String(block.unitLabel || 'round').trim().toLowerCase();
         const restBetweenRoundsSeconds = mode === 'for-time' ? Number(block.restBetweenRoundsSeconds || 0) : 0;
         if (!/^[a-z][a-z -]{0,11}$/.test(unitLabel)) throw new Error(title + ' progress label must be 1 to 12 letters.');
         if (mode === 'for-time' && (!Number.isInteger(rounds) || rounds < 1 || rounds > 100)) throw new Error(title + ' rounds must be 1 to 100.');
         if (!Number.isInteger(restBetweenRoundsSeconds) || restBetweenRoundsSeconds < 0 || restBetweenRoundsSeconds > 3600) throw new Error(title + ' between-round rest must be 0 to 3600 seconds.');
         if (mode === 'amrap' && (!Number.isInteger(durationSeconds) || durationSeconds < 5 || durationSeconds > 7200)) throw new Error(title + ' duration must be 5 to 7200 seconds.');
+        if (mode === 'emom' && (!Number.isInteger(durationSeconds) || durationSeconds < 60 || durationSeconds > 7200 || durationSeconds % 60 !== 0)) throw new Error(title + ' EMOM duration must be 1 to 120 whole minutes.');
         if (!Array.isArray(block.items) || !block.items.length || block.items.length > 100) throw new Error(title + ' needs 1 to 100 items.');
         const items = block.items.map((x, ii) => {
           if (!x || typeof x !== 'object' || Array.isArray(x)) throw new Error(title + ' item ' + (ii + 1) + ' is invalid.');
@@ -1171,8 +1201,12 @@
           return { type: 'exercise', id: exercisePlanId, label, completion, target, sets, restSeconds, setPlan, notes, tracking };
         });
         if (!items.some(x => x.type === 'exercise')) throw new Error(title + ' needs at least one exercise.');
+        if (mode === 'emom' && items.some(item => item.type !== 'exercise' || item.completion !== 'timed' ||
+          (item.setPlan || [{ seconds: item.seconds, restSeconds: item.restSeconds }]).some(set => set.seconds !== 60 || set.restSeconds !== 0))) {
+          throw new Error(title + ' EMOM items must be 60-second timed exercises without additional rests.');
+        }
         return { id, title, mode, rounds, durationSeconds, unitLabel, restBetweenRoundsSeconds,
-          score: String(block.score || '').trim().slice(0, 40), notes: cleanNotes(block.notes, title), items };
+          score: mode === 'emom' ? '' : String(block.score || '').trim().slice(0, 40), notes: cleanNotes(block.notes, title), items };
       });
       if (new Set(blocks.map(block => block.id)).size !== blocks.length) throw new Error('Every workout block needs a unique id.');
       const exerciseIds = blocks.flatMap(block => block.items.filter(item => item.type === 'exercise').map(item => item.id));
@@ -1361,7 +1395,7 @@
   const S = { mode: 'workout', sound: true, screen: 'home', running: false, paused: false, queue: [], qi: 0, accum: 0, from: 0,
     blockId: null, blockAccum: 0, blockFrom: 0, raf: 0, lastBeep: null, lastBlockBeep: null, wakeLock: null, doneTotal: 0, variableDuration: false,
     sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, sessionSkippedBlocks: {}, sessionEarlyEndedBlocks: {}, pendingSession: null,
-    sessionSetResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb', pauseHintEligible: false, pauseHintShown: false, pauseHintTimer: 0 };
+    sessionSetResults: {}, sessionAmrapResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb', pauseHintEligible: false, pauseHintShown: false, pauseHintTimer: 0 };
 
   /* ---------- audio ---------- */
   let ac = null;
@@ -1410,7 +1444,8 @@
   }
 
   function structuredBlockModeLabel(block) {
-    if (block.mode === 'amrap') return fmtPad(block.durationSeconds) + (block.score === 'emom' ? ' EMOM' : ' AMRAP');
+    if (block.mode === 'emom') return Math.round(block.durationSeconds / 60) + ':00 EMOM';
+    if (block.mode === 'amrap') return fmtPad(block.durationSeconds) + ' AMRAP';
     if (block.mode === 'for-time') {
       const unit = block.unitLabel || 'round';
       return block.rounds + ' ' + (block.rounds === 1 ? unit : unit + 's') + ' · for time';
@@ -1465,14 +1500,16 @@
     workoutPlan.blocks.forEach((block, bi) => {
       const card = document.createElement('section');
       card.className = 'edit-block';
-      const modeOptions = [['sequence', 'Sequence'], ['for-time', 'Rounds for time'], ['amrap', 'AMRAP']]
+      const modeOptions = [['sequence', 'Sequence'], ['for-time', 'Rounds for time'], ['amrap', 'AMRAP'], ['emom', 'EMOM']]
         .map(([value, label]) => '<option value="' + value + '"' + (block.mode === value ? ' selected' : '') + '>' + label + '</option>').join('');
       const modeFields = block.mode === 'for-time'
         ? '<label class="edit-field"><span>Cycles / rounds</span><input type="number" min="1" max="100" value="' + block.rounds + '" data-block-number="rounds"></label>' +
           '<label class="edit-field"><span>Progress label</span><input maxlength="12" value="' + esc(block.unitLabel || 'round') + '" data-block-field="unitLabel"></label>' +
           '<label class="edit-field"><span>Rest between rounds (seconds)</span><input type="number" min="0" max="3600" value="' + block.restBetweenRoundsSeconds + '" data-block-number="restBetweenRoundsSeconds"></label>'
         : block.mode === 'amrap'
-          ? '<label class="edit-field"><span>Time cap (seconds)</span><input type="number" min="5" max="7200" value="' + block.durationSeconds + '" data-block-number="durationSeconds"></label>' : '';
+          ? '<label class="edit-field"><span>Time cap (seconds)</span><input type="number" min="5" max="7200" value="' + block.durationSeconds + '" data-block-number="durationSeconds"></label>'
+          : block.mode === 'emom'
+            ? '<label class="edit-field"><span>Duration (minutes)</span><input type="number" min="1" max="120" value="' + Math.round(block.durationSeconds / 60) + '" data-block-minutes="durationSeconds"></label>' : '';
       const items = block.items.map((item, ii) => {
         const toolbar = '<div class="edit-item-head"><span class="mono">' + (item.type === 'rest' ? 'REST' : 'EXERCISE') + ' ' + String(ii + 1).padStart(2, '0') + '</span>' +
           '<button class="move" type="button" data-act="item-up" aria-label="Move item earlier"' + (ii === 0 ? ' disabled' : '') + '>↑</button>' +
@@ -1488,16 +1525,16 @@
         const sets = item.setPlan.map((set, si) => '<div class="set-row' + (showAddedWeight ? ' with-load' : '') + '" data-si="' + si + '"><span class="set-number">SET ' + (si + 1) + '</span>' +
           '<label class="edit-field"><span>' + (item.completion === 'timed' ? 'Seconds' : 'Target') + '</span>' +
           (item.completion === 'timed'
-            ? '<input type="number" min="1" max="3600" value="' + set.seconds + '" data-set-number="seconds">'
+            ? '<input type="number" min="1" max="3600" value="' + set.seconds + '" data-set-number="seconds"' + (block.mode === 'emom' ? ' disabled' : '') + '>'
             : '<input maxlength="40" value="' + esc(set.target) + '" data-set-field="target">') + '</label>' +
           (showAddedWeight ? '<div class="edit-field set-load"><span>Added weight (optional)</span><div class="set-load-controls">' +
             '<input type="number" inputmode="decimal" min="0.5" max="10000" step="0.5" value="' + (set.addedWeight == null ? '' : set.addedWeight) + '" data-set-number="addedWeight" aria-label="Set ' + (si + 1) + ' added weight">' +
             '<select data-set-choice="weightUnit" aria-label="Set ' + (si + 1) + ' added weight unit"><option value="kg"' + (set.weightUnit !== 'lb' ? ' selected' : '') + '>kg</option><option value="lb"' + (set.weightUnit === 'lb' ? ' selected' : '') + '>lb</option></select></div></div>' : '') +
-          '<label class="edit-field set-rest"><span>Rest after (seconds)</span><input type="number" min="0" max="3600" value="' + set.restSeconds + '" data-set-number="restSeconds"></label>' +
+          '<label class="edit-field set-rest"><span>Rest after (seconds)</span><input type="number" min="0" max="3600" value="' + set.restSeconds + '" data-set-number="restSeconds"' + (block.mode === 'emom' ? ' disabled' : '') + '></label>' +
           '<button class="small-remove" type="button" data-act="set-remove" aria-label="Remove set"' + (item.setPlan.length === 1 ? ' disabled' : '') + '>×</button></div>').join('');
         return '<div class="edit-item exercise-item" data-ii="' + ii + '">' + toolbar + '<div class="edit-grid">' +
           '<label class="edit-field"><span>Name</span><input maxlength="60" value="' + esc(item.label) + '" data-item-field="label"></label>' +
-          '<label class="edit-field"><span>Completion</span><select data-item-choice="completion"><option value="manual"' + (item.completion === 'manual' ? ' selected' : '') + '>Reps / manual</option><option value="timed"' + (item.completion === 'timed' ? ' selected' : '') + '>Timed</option></select></label>' +
+          '<label class="edit-field"><span>Completion</span><select data-item-choice="completion"><option value="manual"' + (item.completion === 'manual' ? ' selected' : '') + (block.mode === 'emom' ? ' disabled' : '') + '>Reps / manual</option><option value="timed"' + (item.completion === 'timed' ? ' selected' : '') + '>Timed</option></select></label>' +
           (item.completion === 'manual' ? '<label class="edit-field"><span>Logging</span><select data-item-choice="tracking"><option value="reps"' + (item.tracking !== 'weight-reps' ? ' selected' : '') + '>Reps only</option><option value="weight-reps"' + (item.tracking === 'weight-reps' ? ' selected' : '') + '>Weight + reps</option></select></label>' : '') +
           '<label class="edit-field wide"><span>Notes — one per line</span><textarea maxlength="10000" data-item-field="notes">' + esc(notesText(item.notes)) + '</textarea></label></div>' +
           '<div class="set-list">' + sets + '</div><button class="add-compact" type="button" data-act="set-add">＋ Add set</button></div>';
@@ -1511,7 +1548,7 @@
         '<label class="edit-field"><span>Section type</span><select data-block-choice="mode">' + modeOptions + '</select></label>' + modeFields +
         '<label class="edit-field wide"><span>Section notes — one per line</span><textarea maxlength="10000" data-block-field="notes">' + esc(notesText(block.notes)) + '</textarea></label></div>' +
         '<div class="edit-items">' + items + '</div><div class="edit-toolbar"><button class="ghost" type="button" data-act="item-add-exercise">＋ Exercise</button>' +
-        '<button class="ghost" type="button" data-act="item-add-rest">＋ Rest</button></div>';
+        (block.mode === 'emom' ? '' : '<button class="ghost" type="button" data-act="item-add-rest">＋ Rest</button>') + '</div>';
       host.appendChild(card);
     });
     const addBlock = document.createElement('button');
@@ -1550,8 +1587,20 @@
         block.mode = e.target.value;
         if (block.mode === 'for-time') { block.rounds = Math.max(1, block.rounds || 3); block.durationSeconds = 0; }
         else if (block.mode === 'amrap') { block.durationSeconds = Math.max(5, block.durationSeconds || 600); block.rounds = 1; block.restBetweenRoundsSeconds = 0; }
+        else if (block.mode === 'emom') {
+          block.durationSeconds = Math.max(60, Math.round((block.durationSeconds || 600) / 60) * 60); block.rounds = 1; block.restBetweenRoundsSeconds = 0; block.score = '';
+          block.items = block.items.filter(item => item.type === 'exercise');
+          block.items.forEach(item => {
+            item.completion = 'timed'; item.tracking = 'reps';
+            item.setPlan = (item.setPlan && item.setPlan.length ? item.setPlan : [{}]).map(() => ({ seconds: 60, restSeconds: 0 }));
+          });
+        }
         else { block.rounds = 1; block.durationSeconds = 0; block.restBetweenRoundsSeconds = 0; }
         return rerender('Section type updated.');
+      }
+      if (e.target.dataset.blockMinutes) {
+        block[e.target.dataset.blockMinutes] = clamp(Math.round(Number(e.target.value) || 1), 1, 120) * 60;
+        return rerender();
       }
       if (e.target.dataset.blockNumber) {
         const field = e.target.dataset.blockNumber;
@@ -1623,8 +1672,11 @@
         if (block.items.length >= 100) return setPlanMsg('workout', 'A section can hold at most 100 items.', true);
         block.items.push(act === 'item-add-rest'
           ? { type: 'rest', label: 'Rest', seconds: 30, notes: [] }
-          : { type: 'exercise', id: 'exercise-' + Date.now().toString(36), label: 'Exercise', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 30,
-              setPlan: [{ target: '10 reps', restSeconds: 30 }], notes: [], tracking: 'reps' });
+          : block.mode === 'emom'
+            ? { type: 'exercise', id: 'exercise-' + Date.now().toString(36), label: 'Exercise', completion: 'timed', seconds: 60, sets: 1, restSeconds: 0,
+                setPlan: [{ seconds: 60, restSeconds: 0 }], notes: [], tracking: 'reps' }
+            : { type: 'exercise', id: 'exercise-' + Date.now().toString(36), label: 'Exercise', completion: 'manual', target: '10 reps', sets: 1, restSeconds: 30,
+                setPlan: [{ target: '10 reps', restSeconds: 30 }], notes: [], tracking: 'reps' });
         return rerender(act === 'item-add-rest' ? 'Rest added.' : 'Exercise added.');
       }
       const itemEl = button.closest('[data-ii]');
@@ -1966,10 +2018,19 @@
   /* ---------- queue building ---------- */
   const isManualItem = (it) => it && it.phase === 'work' && it.completion === 'manual';
   const isBlockTransition = (it) => it && it.phase === 'transition';
-  const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isManualItem(it) ? setTargetDetail(it) : shortSec(it.seconds);
+  const isAmrapResult = (it) => it && it.phase === 'amrap-result';
+  /* ---------- grouped density rounds ---------- */
+  const isGroupedForTimeBlock = (block) => block && block.mode === 'for-time' &&
+    /\bdensity\b/i.test(String(block.id || '') + ' ' + String(block.title || '')) &&
+    Array.isArray(block.items) && block.items.length > 1 && block.items.every(item => item.type === 'exercise' && item.completion === 'manual');
+  const isGroupedManualAmrapBlock = (block) => block && block.mode === 'amrap' &&
+    Array.isArray(block.items) && block.items.length > 1 && block.items.every(item => item.type === 'exercise' && item.completion === 'manual');
+  const isEmomBlock = (block) => block && (block.mode === 'emom' || (block.mode === 'amrap' && block.score === 'emom'));
+  /* ---------- end grouped density rounds ---------- */
+  const itemDetail = (it) => isBlockTransition(it) ? 'Get ready' : isAmrapResult(it) ? 'Record result' : it && it.roundGroup ? 'Round ' + it.round : isManualItem(it) ? setTargetDetail(it) : shortSec(it.seconds);
 
   /* ---------- timed setup transition ---------- */
-  const TIMED_SETUP_SECONDS = 3;
+  const TIMED_SETUP_SECONDS = 5;
   function needsTimedSetup(previous, block, exercise) {
     return !!previous && previous.phase === 'work' && previous.completion === 'manual' &&
       previous.blockId === block.id && block.mode === 'sequence' && exercise.completion === 'timed';
@@ -1990,7 +2051,8 @@
     items.forEach((it, i) => {
       const next = items[i + 1];
       it.name = name;
-      it.next = next ? next.label + ' · ' + itemDetail(next) : 'Finish';
+      it.next = next ? (it.roundGroup && next.roundGroup ? 'Round ' + next.round : next.label + ' · ' + itemDetail(next)) : 'Finish';
+      it.inlineLog = !!(isManualItem(it) && it.liveLog);
     });
     return items;
   }
@@ -2000,11 +2062,12 @@
     if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING',
       blockIndex: workoutPlan.layout === 'blocks' ? 1 : 0, blockCount: workoutPlan.layout === 'blocks' ? workoutPlan.blocks.length : 0 });
     if (workoutPlan.layout === 'blocks') {
-      const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds, addedWeight, weightUnit) => {
+      const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds, addedWeight, weightUnit, minute, minutes) => {
         const base = { label: exercise.label, phase: 'work', completion: exercise.completion, set, sets, notes: exercise.notes,
           exerciseId: exercise.id || exerciseId(block.id, exercise.label), tracking: exercise.tracking || 'reps',
           liveLog: block.mode === 'sequence' && exercise.completion === 'manual' && !isWarmupBlock(block),
           round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: block.unitLabel || 'round',
+          minute: Number(minute) || 0, minutes: Number(minutes) || 0,
           blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
           blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
           meta: block.title.toUpperCase() };
@@ -2035,7 +2098,45 @@
             gateSummary: details.summary, gateExercises: details.exercises, blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
             meta: 'BLOCK ' + (blockIndex + 1) + ' OF ' + workoutPlan.blocks.length + ' · UP NEXT' });
         }
+        if (block.mode === 'emom') {
+          const minuteCount = block.durationSeconds / 60;
+          const minuteSteps = block.items.flatMap(exercise => {
+            const setPlan = exercise.setPlan || Array.from({ length: exercise.sets }, () => ({ seconds: 60, restSeconds: 0 }));
+            return setPlan.map((set, setIndex) => ({ exercise, set, setIndex, setCount: setPlan.length }));
+          });
+          for (let minute = 1; minute <= minuteCount; minute++) {
+            const step = minuteSteps[(minute - 1) % minuteSteps.length];
+            addExerciseSet(block, blockIndex, step.exercise, step.setIndex + 1, step.setCount, minute, minuteCount,
+              60, 0, null, null, minute, minuteCount);
+          }
+          return;
+        }
         const rounds = block.mode === 'for-time' ? block.rounds : block.mode === 'amrap' ? AMRAP_QUEUE_ROUNDS : 1;
+        if (isGroupedForTimeBlock(block) || isGroupedManualAmrapBlock(block)) {
+          const roundExercises = block.items.map(item => ({
+            label: item.label,
+            detail: item.setPlan ? item.setPlan.map(set => setTargetDetail(set)).join(' / ') : item.target
+          }));
+          for (let round = 1; round <= rounds; round++) {
+            items.push({ label: block.title, phase: 'work', completion: 'manual', target: '', roundGroup: true,
+              roundExercises, liveLog: false,
+              round, rounds: block.mode === 'amrap' ? 0 : rounds, progressLabel: 'round', blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
+              blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: block.durationSeconds || 0,
+              meta: block.title.toUpperCase() });
+            if (block.restBetweenRoundsSeconds > 0 && round < rounds) {
+              items.push({ label: 'Rest', phase: 'rest', seconds: block.restBetweenRoundsSeconds, round, rounds,
+                progressLabel: 'round', notes: ['The density stopwatch continues during this rest.'],
+                blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
+                blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: 0, meta: block.title.toUpperCase() });
+            }
+          }
+          if (block.mode === 'amrap') {
+            items.push({ label: block.title, phase: 'amrap-result', resultForBlockId: block.id,
+              blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
+              meta: block.title.toUpperCase() + ' · COMPLETE' });
+          }
+          return;
+        }
         for (let round = 1; round <= rounds; round++) {
           block.items.forEach(item => {
             if (item.type === 'rest') {
@@ -2058,6 +2159,11 @@
               blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
               blockId: block.id, blockTitle: block.title, blockMode: block.mode, blockDuration: 0, meta: block.title.toUpperCase() });
           }
+        }
+        if (block.mode === 'amrap') {
+          items.push({ label: block.title, phase: 'amrap-result', resultForBlockId: block.id,
+            blockIndex: blockIndex + 1, blockCount: workoutPlan.blocks.length,
+            meta: block.title.toUpperCase() + ' · COMPLETE' });
         }
       });
       return withMeta(items, workoutPlan.name);
@@ -2194,13 +2300,13 @@
     });
   }
   /* ---------- end workout weight unit conversion ---------- */
-  function recordManualSet(item, nextItem) {
-    if (!item || !item.liveLog || !item.exerciseId) { S.restLogKey = null; return; }
+  function ensureManualSetResult(item) {
+    if (!item || !item.liveLog || !item.exerciseId) return null;
     const key = setResultKey(item.exerciseId, item.set);
+    if (S.sessionSetResults[key]) return S.sessionSetResults[key];
     const previous = previousSetForItem(item);
     const priorToday = Object.values(S.sessionSetResults).filter(result => result.exerciseId === item.exerciseId && result.set < item.set).sort((a, b) => b.set - a.set)[0];
-    const existing = S.sessionSetResults[key];
-    const result = existing || {
+    const result = {
       exerciseId: item.exerciseId, label: item.label, set: Number(item.set) || 1, target: setTargetDetail(item),
       tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps', actualReps: previous && previous.set && previous.set.actualReps != null ? previous.set.actualReps : targetReps(item.target),
       weight: item.tracking === 'weight-reps'
@@ -2211,7 +2317,13 @@
       previousUnit: previous ? previous.unit : S.sessionUnit
     };
     S.sessionSetResults[key] = result;
-    S.restLogKey = nextItem && nextItem.phase === 'rest' ? key : null;
+    return result;
+  }
+  function recordManualSet(item, nextItem) {
+    const result = ensureManualSetResult(item);
+    if (!result) { S.restLogKey = null; return; }
+    const key = setResultKey(item.exerciseId, item.set);
+    S.restLogKey = !item.inlineLog && nextItem && (nextItem.phase === 'rest' || isBlockTransition(nextItem)) ? key : null;
   }
   function renderRunPrevious(item) {
     const host = $('#runPrevious');
@@ -2222,7 +2334,9 @@
   }
   function renderRunSetLogger(item) {
     const host = $('#setLogger');
-    const result = item && item.phase === 'rest' && S.restLogKey ? S.sessionSetResults[S.restLogKey] : null;
+    const result = item && item.inlineLog && isManualItem(item)
+      ? ensureManualSetResult(item)
+      : item && (item.phase === 'rest' || isBlockTransition(item)) && S.restLogKey ? S.sessionSetResults[S.restLogKey] : null;
     if (!result) { host.classList.add('hidden'); host.innerHTML = ''; return; }
     const previous = result.previousReps != null || result.previousWeight != null
       ? 'Previous: ' + setSummary({ actualReps: result.previousReps, weight: result.previousWeight }, result.previousUnit) : 'Target: ' + result.target;
@@ -2231,6 +2345,27 @@
     host.innerHTML = '<div class="setlogger-grid' + (result.tracking === 'weight-reps' ? '' : ' reps-only') + '"><div><div class="setlogger-title">' + esc(result.label) + ' · Set ' + result.set + '</div>' +
       '<div class="setlogger-previous">' + esc(previous) + '</div></div>' + weightField +
       '<label>Actual reps<input type="number" inputmode="numeric" min="0" max="10000" step="1" value="' + (result.actualReps == null ? '' : result.actualReps) + '" data-live-field="actualReps"></label>' +
+      '<div class="setlogger-saved">SAVED FOR FINAL REVIEW</div></div>';
+    host.classList.remove('hidden');
+  }
+  function ensureAmrapResult(item) {
+    if (!item || !item.resultForBlockId) return null;
+    const blockId = item.resultForBlockId;
+    if (!S.sessionAmrapResults[blockId]) {
+      const progress = S.sessionBlockProgress[blockId] || {};
+      S.sessionAmrapResults[blockId] = {
+        rounds: Math.max(0, (Number(progress.round) || 1) - 1)
+      };
+    }
+    return S.sessionAmrapResults[blockId];
+  }
+  function renderAmrapResultLogger(item) {
+    const host = $('#setLogger');
+    const result = ensureAmrapResult(item);
+    if (!result) { host.classList.add('hidden'); host.innerHTML = ''; return; }
+    host.innerHTML = '<div class="setlogger-grid amrap-result-grid"><div class="amrap-result-copy"><div class="setlogger-title">Record your AMRAP result</div>' +
+      '<div class="setlogger-previous">Count only full rounds. Adjust this if you finished one before reaching your device.</div></div>' +
+      '<label>Completed rounds<input type="number" inputmode="numeric" min="0" max="10000" step="1" value="' + result.rounds + '" data-amrap-field="rounds"></label>' +
       '<div class="setlogger-saved">SAVED FOR FINAL REVIEW</div></div>';
     host.classList.remove('hidden');
   }
@@ -2264,11 +2399,12 @@
           items: (plan.items || []).filter(item => item.type !== 'rest').map(item => Object.assign({ completion: 'manual' }, item)) }];
     const blocks = sourceBlocks.filter(block => !S.sessionSkippedBlocks[block.id]).map(block => {
       const progress = S.sessionBlockProgress[block.id] || {};
+      const amrapResult = S.sessionAmrapResults[block.id] || {};
       return {
         id: String(block.id || 'block'), title: String(block.title || 'Workout section'), mode: String(block.mode || 'sequence'),
         elapsedSeconds: Number(S.sessionBlockTimes[block.id]) || 0,
         stoppedEarly: !!S.sessionEarlyEndedBlocks[block.id],
-        rounds: block.mode === 'amrap' ? Math.max(0, (Number(progress.round) || 1) - 1) : null,
+        rounds: block.mode === 'amrap' ? (amrapResult.rounds == null ? Math.max(0, (Number(progress.round) || 1) - 1) : amrapResult.rounds) : null,
         extraReps: null,
         exercises: (block.items || []).filter(item => item.type !== 'rest').map(item => {
           const itemExerciseId = item.id || exerciseId(block.id || 'workout', item.label);
@@ -2301,10 +2437,10 @@
     $('#logMsg').textContent = '';
     $('#logBlocks').innerHTML = session.blocks.map((block, bi) => {
       const warmup = isWarmupBlock(block);
+      const emom = isHistoryEmomBlock(session, block);
       const forTime = block.mode === 'for-time' ? forTimeDetails(session, block) : null;
-      const score = block.mode === 'amrap'
-        ? '<div class="log-score"><label class="edit-field"><span>Completed rounds</span><input type="number" min="0" max="10000" value="' + (block.rounds == null ? '' : block.rounds) + '" data-log-rounds data-bi="' + bi + '"></label>' +
-          '<label class="edit-field"><span>Extra reps</span><input type="number" min="0" max="10000" value="' + (block.extraReps == null ? '' : block.extraReps) + '" data-log-extra data-bi="' + bi + '"></label></div>'
+      const score = block.mode === 'amrap' && !emom
+        ? '<div class="log-score rounds-only"><label class="edit-field"><span>Completed rounds</span><input type="number" min="0" max="10000" value="' + (block.rounds == null ? '' : block.rounds) + '" data-log-rounds data-bi="' + bi + '"></label></div>'
         : block.mode === 'for-time'
           ? '<div class="log-score"><div><span class="mono">Completed</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(forTime.label) + '</div></div>' +
             '<div><span class="mono">Elapsed time</span><div style="font-size:25px;font-weight:800;margin-top:5px">' + esc(fmtElapsed(block.elapsedSeconds)) + '</div></div></div>' : '';
@@ -2320,7 +2456,7 @@
                 '<label class="edit-field"><span>Weight</span><input type="number" min="0" max="10000" step="0.5" value="' + (set.weight == null ? '' : set.weight) + '" data-log-weight data-bi="' + bi + '" data-ei="' + ei + '" data-si="' + si + '"></label></div>').join('');
         return '<div class="log-exercise"><div class="log-exercise-name">' + esc(exercise.label) + '</div>' + sets + '</div>';
       }).join('');
-      return '<section class="log-block"><div class="log-block-head"><div><div class="mono">' + esc(block.mode) + '</div><div class="log-block-title">' + esc(block.title) + '</div></div>' +
+      return '<section class="log-block"><div class="log-block-head"><div><div class="mono">' + esc(emom ? 'EMOM' : block.mode) + '</div><div class="log-block-title">' + esc(block.title) + '</div></div>' +
         (block.elapsedSeconds && block.mode !== 'for-time' ? '<span class="mono">' + (block.stoppedEarly ? 'Stopped early · ' : '') + esc(fmtElapsed(block.elapsedSeconds)) + '</span>' : '') + '</div>' + score + exercises + '</section>';
     }).join('');
   }
@@ -2358,7 +2494,6 @@
       set.weight = input.value === '' ? null : clamp(Number(input.value) || 0, 0, 10000);
     });
     $$('[data-log-rounds]').forEach(input => { session.blocks[Number(input.dataset.bi)].rounds = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000); });
-    $$('[data-log-extra]').forEach(input => { session.blocks[Number(input.dataset.bi)].extraReps = input.value === '' ? null : clamp(Math.round(Number(input.value) || 0), 0, 10000); });
     $('#logSave').disabled = true; $('#logSave').textContent = 'Saving…';
     try {
       const normalizedSession = normalizeHistorySession(session);
@@ -2366,7 +2501,7 @@
       S.pendingSession = normalizedSession;
       $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
       $('#doneLog').classList.add('hidden');
-      $('#doneHome').textContent = 'Done';
+      $('#doneHome').textContent = 'Back to workouts';
       $('#doneCopyOverview').classList.toggle('hidden', !formatWorkoutOverview(normalizedSession));
       $('#doneCopyMsg').textContent = ''; $('#doneCopyMsg').classList.remove('err');
       $('#doneSub').textContent += ' · saved to history';
@@ -2380,10 +2515,12 @@
   }
   function historyBlockLines(session, block, unit) {
     const lines = [];
+    const emom = isHistoryEmomBlock(session, block);
     const forTime = block.mode === 'for-time' ? forTimeDetails(session, block) : null;
     if (forTime) lines.push((forTime.count ? forTime.label + ' completed' : 'Completed') + (block.elapsedSeconds ? ' · ' + fmtElapsed(block.elapsedSeconds) : ''));
-    if (block.mode === 'amrap' && block.elapsedSeconds) lines.push((block.stoppedEarly ? 'Stopped early · ' : 'Time worked · ') + fmtElapsed(block.elapsedSeconds));
-    if (block.mode === 'amrap' && block.rounds != null) lines.push(block.rounds + ' rounds' + (block.extraReps != null ? ' + ' + block.extraReps + ' reps' : ''));
+    if (emom && block.elapsedSeconds) lines.push((block.stoppedEarly ? 'Ended early · ' : 'Completed · ') + fmtElapsed(block.elapsedSeconds));
+    if (!emom && block.mode === 'amrap' && block.elapsedSeconds) lines.push((block.stoppedEarly ? 'Stopped early · ' : 'Time worked · ') + fmtElapsed(block.elapsedSeconds));
+    if (!emom && block.mode === 'amrap' && block.rounds != null) lines.push(block.rounds + ' rounds' + (block.extraReps != null ? ' + ' + block.extraReps + ' reps' : ''));
     (block.exercises || []).forEach(exercise => {
       if (forTime) {
         lines.push(exercise.label + ' · ' + forTimeExerciseResult(exercise, forTime.count));
@@ -2493,6 +2630,10 @@
     if (!plan || plan.layout !== 'blocks' || !Array.isArray(plan.blocks)) return null;
     return plan.blocks.find(candidate => candidate.id === block.id) || plan.blocks.find(candidate => candidate.title === block.title) || null;
   }
+  function isHistoryEmomBlock(session, block) {
+    const planBlock = overviewPlanBlock(session, block);
+    return !!(block && (block.mode === 'emom' || (planBlock && (planBlock.mode === 'emom' || (planBlock.mode === 'amrap' && planBlock.score === 'emom')))));
+  }
   function overviewBlockHeading(title, workoutName) {
     const heading = String(title || 'Workout section').trim();
     const name = String(workoutName || '').trim();
@@ -2522,10 +2663,14 @@
     }
     return blocks.map(block => {
       const planBlock = overviewPlanBlock(session, block);
+      const emom = isHistoryEmomBlock(session, block);
       const repeatUnit = String(planBlock && planBlock.unitLabel || 'round');
       const lines = [overviewBlockHeading(block.title, session.workoutName)];
       let repeatCount = 1;
-      if (block.mode === 'for-time') {
+      if (emom) {
+        const minutes = Math.max(1, Math.round(Number(planBlock && planBlock.durationSeconds || block.elapsedSeconds || 60) / 60));
+        lines.push('• ' + minutes + '-minute EMOM' + (block.stoppedEarly && block.elapsedSeconds ? ' ended early after ' + overviewClock(block.elapsedSeconds) : ' completed'));
+      } else if (block.mode === 'for-time') {
         const completed = planBlock && Number.isInteger(planBlock.rounds) ? planBlock.rounds : 0;
         if (completed) {
           lines.push('• ' + completed + ' ' + overviewPlural(completed, repeatUnit) + (block.elapsedSeconds ? ' in ' + overviewClock(block.elapsedSeconds) : ''));
@@ -2535,7 +2680,7 @@
         lines.push('• ' + overviewAmrapScore(block));
         repeatCount = Math.max(0, Number(block.rounds) || 0);
       }
-      if (block.mode !== 'amrap' || repeatCount > 0) {
+      if (emom || block.mode !== 'amrap' || repeatCount > 0) {
         (block.exercises || []).forEach(exercise => lines.push(block.mode === 'for-time'
           ? '• ' + exercise.label + ' — ' + forTimeExerciseResult(exercise, repeatCount || 1)
           : overviewExerciseLine(exercise, unit, repeatCount || 1, repeatUnit)));
@@ -2598,7 +2743,7 @@
     const host = $('#historyList'); host.innerHTML = '<div class="card note">Loading history…</div>';
     const sessions = await historyAll();
     renderedHistorySessions = new Map(sessions.map(session => [session.id, session]));
-    if (!sessions.length) { host.innerHTML = '<div class="card"><div class="title" style="font-size:24px">No workouts logged yet</div><div class="note" style="margin-top:8px">Complete a workout and choose Log workout to create your first entry.</div></div>'; return; }
+    if (!sessions.length) { host.innerHTML = '<div class="card"><div class="title" style="font-size:24px">No workouts logged yet</div><div class="note" style="margin-top:8px">Complete a workout and choose Log result to create your first entry.</div></div>'; return; }
     host.innerHTML = sessions.map(session => {
       const blocks = (session.blocks || []).map(block => {
         const lines = historyBlockLines(session, block, session.unit || 'lb');
@@ -2675,7 +2820,7 @@
       const title = historyText(block.title, 'History section ' + (bi + 1) + ' title', 80);
       const blockId = cleanExerciseId(historyText(block.id, title + ' ID', 60), 'history-block-' + (bi + 1));
       const mode = String(block.mode || '').toLowerCase();
-      if (!['sequence', 'for-time', 'amrap'].includes(mode)) throw new Error(title + ' has an invalid history mode.');
+      if (!['sequence', 'for-time', 'amrap', 'emom'].includes(mode)) throw new Error(title + ' has an invalid history mode.');
       if (block.stoppedEarly != null && typeof block.stoppedEarly !== 'boolean') throw new Error(title + ' has an invalid early-stop value.');
       if (!Array.isArray(block.exercises) || !block.exercises.length || block.exercises.length > 100) throw new Error(title + ' must contain 1 to 100 logged exercises.');
       const exercises = block.exercises.map((exercise, ei) => {
@@ -2772,7 +2917,7 @@
   }
 
   function phaseColor(phase) {
-    if (phase === 'prep' || phase === 'transition') return PREP_BG;
+    if (phase === 'prep' || phase === 'transition' || phase === 'amrap-result') return PREP_BG;
     if (S.mode === 'workout') return phase === 'rest' ? workoutTheme.rest : workoutTheme.work;
     if (S.mode === 'circuit') return phase === 'rest' ? circuitTheme.rest : circuitTheme.work;
     if (S.mode === 'rest') return MODE_REST;
@@ -2785,9 +2930,15 @@
     const parts = ['Block ' + it.blockIndex + ' of ' + it.blockCount];
     if (it.phase === 'prep') return parts.concat(it.setupFor ? 'Get ready' : 'Starting').join(' · ');
     if (isBlockTransition(it)) return parts.concat('Up next').join(' · ');
+    if (isAmrapResult(it)) return parts.concat('AMRAP complete').join(' · ');
     const contextLabel = it.contextLabel || (it.label !== 'Rest' ? it.label : '');
+    if (it.blockMode === 'emom') {
+      parts.push('Minute ' + it.minute + ' of ' + it.minutes);
+      if (contextLabel) parts.push(contextLabel);
+      return parts.join(' · ');
+    }
     if (contextLabel) parts.push(contextLabel);
-    if ((it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0) {
+    if ((it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0 && !(it.roundGroup && it.blockMode === 'amrap')) {
       const unit = String(it.progressLabel || 'round');
       parts.push(unit.charAt(0).toUpperCase() + unit.slice(1) + ' ' + it.round + (Number(it.rounds) > 0 ? ' of ' + it.rounds : ''));
     } else if (Number(it.sets) > 1) parts.push('Set ' + it.set + ' of ' + it.sets);
@@ -2798,21 +2949,31 @@
     const it = S.queue[S.qi];
     const manual = isManualItem(it);
     const blockTransition = isBlockTransition(it);
-    const showRound = (it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0;
+    const amrapResult = isAmrapResult(it);
+    const roundGroup = !!it.roundGroup;
+    const groupedAmrap = roundGroup && it.blockMode === 'amrap';
+    const showBlockClock = it.blockMode === 'amrap' && !blockTransition && !amrapResult;
+    const showRound = (it.blockMode === 'for-time' || it.blockMode === 'amrap') && Number(it.round) > 0 && !groupedAmrap;
     const showSet = !showRound && Number(it.sets) > 1;
     const showProgress = showRound || showSet;
     const bg = phaseColor(it.phase);
-    const fg = it.phase === 'prep' || blockTransition ? '#ffffff' : textOn(bg);
+    const fg = it.phase === 'prep' || blockTransition || amrapResult ? '#ffffff' : textOn(bg);
     const run = $('#run');
+    run.classList.toggle('round-group', roundGroup);
+    run.classList.toggle('amrap-round-group', groupedAmrap);
+    run.classList.toggle('emom', it.blockMode === 'emom' && !blockTransition);
     run.style.setProperty('--phase', bg);
     run.style.setProperty('--phase-text', fg);
     $('#wipe').style.background = fg === '#ffffff' ? 'rgba(0,0,0,.24)' : 'rgba(0,0,0,.14)';
     $('#runName').textContent = (it.name || '').toUpperCase();
     $('#runName').classList.remove('hidden');
     $('#runPos').textContent = structuredRunPosition(it);
+    $('#runBlockClock').classList.toggle('hidden', !showBlockClock);
     $('#runLabel').textContent = it.label;
-    $('#runGateMeta').textContent = blockTransition ? it.gateSummary || '' : '';
-    $('#runGateMeta').classList.toggle('hidden', !blockTransition || !it.gateSummary);
+    $('#runLabel').classList.toggle('hidden', roundGroup);
+    const gateSummary = amrapResult ? 'Record what you completed' : blockTransition ? it.gateSummary || '' : '';
+    $('#runGateMeta').textContent = gateSummary;
+    $('#runGateMeta').classList.toggle('hidden', !gateSummary);
     const gateExercises = blockTransition && Array.isArray(it.gateExercises) ? it.gateExercises : [];
     $('#runGateExercises').innerHTML = gateExercises.map(label => '<li>' + esc(label) + '</li>').join('');
     $('#runGateExercises').classList.toggle('hidden', !gateExercises.length);
@@ -2829,17 +2990,29 @@
     $('#runNote').textContent = note;
     $('#runNote').classList.toggle('hidden', !note);
     renderRunPrevious(it);
-    renderRunSetLogger(it);
+    if (amrapResult) renderAmrapResultLogger(it); else renderRunSetLogger(it);
+    $('#runAmrapCompleted').classList.toggle('hidden', !groupedAmrap);
+    if (groupedAmrap) $('#runAmrapCompletedValue').textContent = Math.max(0, (Number(it.round) || 1) - 1);
     $('#runNext').textContent = it.next;
-    $('#runNextWrap').classList.toggle('hidden', !it.next || it.next === 'Finish');
+    $('#runNextWrap').classList.toggle('hidden', !it.next || it.next === 'Finish' || it.inlineLog || (roundGroup && it.blockMode === 'amrap'));
     const t = $('#runTime');
-    const timerTappable = !manual && !blockTransition;
-    t.classList.toggle('manual', manual || blockTransition);
-    t.classList.toggle('block-ready', blockTransition);
+    const timerTappable = !manual && !blockTransition && !amrapResult;
+    t.classList.toggle('manual', manual || blockTransition || amrapResult);
+    t.classList.toggle('block-ready', blockTransition || roundGroup || amrapResult);
+    t.classList.toggle('round-exercises', roundGroup);
     t.classList.toggle('pause-target', timerTappable);
     t.title = timerTappable ? 'Tap timer to pause or resume' : '';
     if (timerTappable) showRunTapHint(); else hideRunTapHint();
-    if (blockTransition) {
+    if (roundGroup) {
+      t.innerHTML = it.roundExercises.map(exercise => '<div class="round-exercise"><span class="round-exercise-name">' + esc(exercise.label) + '</span>' +
+        '<span class="round-exercise-detail">' + esc(exercise.detail) + '</span></div>').join('');
+      paintBlockClock(it);
+      $('#wipe').style.width = '0%';
+    } else if (amrapResult) {
+      t.textContent = 'AMRAP complete';
+      $('#runLeft').textContent = '';
+      $('#wipe').style.width = '0%';
+    } else if (blockTransition) {
       t.textContent = it.target;
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
@@ -2848,8 +3021,9 @@
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
     }
-    $('#btnPause').textContent = blockTransition ? 'Start block' : manual ? 'Set done' : 'Pause';
-    $('#btnSkip').classList.toggle('hidden', blockTransition || manual || S.mode === 'rest');
+    $('#btnPause').textContent = amrapResult ? (it.next === 'Finish' ? 'Finish workout' : 'Continue') : blockTransition ? 'Start block' : groupedAmrap ? 'Complete round' : roundGroup ? 'Round done' : manual ? 'Set done' : 'Pause';
+    $('#btnSkip').classList.toggle('hidden', amrapResult || blockTransition || manual || it.blockMode === 'emom' || S.mode === 'rest');
+    $('#btnEnd').classList.toggle('hidden', amrapResult);
     resetBlockAction();
     t.style.transform = 'scale(1.05)';
     setTimeout(() => { t.style.transform = 'scale(1)'; }, 40);
@@ -2865,7 +3039,11 @@
 
   function paintBlockClock(it) {
     const ms = blockElapsed();
-    if (it.blockMode === 'amrap') $('#runLeft').textContent = fmtPad(Math.max(0, it.blockDuration - ms / 1000)) + ' LEFT';
+    if (it.blockMode === 'amrap' || it.blockMode === 'emom') {
+      const left = Math.max(0, it.blockDuration - ms / 1000);
+      $('#runLeft').textContent = fmtPad(left) + ' LEFT';
+      $('#runBlockClockValue').textContent = fmtPad(left);
+    }
     else if (it.blockMode === 'for-time') $('#runLeft').textContent = fmtElapsed(ms / 1000) + ' ELAPSED';
     else $('#runLeft').textContent = '';
   }
@@ -2873,7 +3051,7 @@
   function remainingAfter(index) {
     let sum = 0;
     for (let i = index; i < S.queue.length; i++) {
-      if (S.queue[i].phase !== 'up' && !isManualItem(S.queue[i]) && !isBlockTransition(S.queue[i])) sum += S.queue[i].seconds;
+      if (S.queue[i].phase !== 'up' && !isManualItem(S.queue[i]) && !isBlockTransition(S.queue[i]) && !isAmrapResult(S.queue[i])) sum += S.queue[i].seconds;
     }
     return sum;
   }
@@ -2885,13 +3063,13 @@
     const ms = elapsed();
     const blockMs = blockElapsed();
 
-    if (isBlockTransition(it)) {
+    if (isBlockTransition(it) || isAmrapResult(it)) {
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
       return;
     }
 
-    if (it.blockMode === 'amrap') {
+    if (it.blockMode === 'amrap' || it.blockMode === 'emom') {
       const blockLeft = Math.max(0, it.blockDuration * 1000 - blockMs);
       const whole = Math.ceil(blockLeft / 1000);
       if (whole !== S.lastBlockBeep) { S.lastBlockBeep = whole; if (whole > 0 && whole <= 3) beep(940, 0.1, 0.07); }
@@ -2899,7 +3077,7 @@
     }
 
     if (isManualItem(it)) {
-      $('#runTime').textContent = setTargetDetail(it);
+      if (!it.roundGroup) $('#runTime').textContent = setTargetDetail(it);
       paintBlockClock(it);
       $('#wipe').style.width = '0%';
       if (it.blockMode !== 'for-time' && it.blockMode !== 'amrap') return;
@@ -2914,7 +3092,7 @@
       const left = Math.max(0, dur - ms);
       paintTime($('#runTime'), fmt(left / 1000));
       $('#wipe').style.width = clamp((ms / dur) * 100, 0, 100) + '%';
-      if (it.blockMode === 'for-time' || it.blockMode === 'amrap' || (S.mode === 'workout' && S.sessionPlan && S.sessionPlan.layout === 'blocks')) paintBlockClock(it);
+      if (it.blockMode === 'for-time' || it.blockMode === 'amrap' || it.blockMode === 'emom' || (S.mode === 'workout' && S.sessionPlan && S.sessionPlan.layout === 'blocks')) paintBlockClock(it);
       else $('#runLeft').textContent = S.variableDuration ? '' : fmtPad(left / 1000 + remainingAfter(S.qi + 1)) + ' LEFT';
       const whole = Math.ceil(left / 1000);
       if (whole !== S.lastBeep) { S.lastBeep = whole; if (whole > 0 && whole <= 3) beep(720, 0.09, 0.06); }
@@ -2935,7 +3113,7 @@
     if (nextBlock !== previousBlock) {
       S.blockId = nextBlock; S.blockAccum = 0; S.blockFrom = performance.now(); S.lastBlockBeep = null;
     }
-    beep(it.phase === 'rest' ? 520 : it.phase === 'prep' || isBlockTransition(it) ? 700 : 1100, 0.16, 0.1);
+    beep(it.phase === 'rest' ? 520 : it.phase === 'prep' || isBlockTransition(it) || isAmrapResult(it) ? 700 : 1100, 0.16, 0.1);
     paintPhase(); tick();
   }
 
@@ -2972,6 +3150,7 @@
   function blockActionMode() {
     if (!S.running) return '';
     const current = S.queue[S.qi];
+    if (current && current.blockId && current.blockMode === 'emom' && !isBlockTransition(current)) return 'end-emom';
     if (current && current.blockId && current.blockMode === 'amrap' && !isBlockTransition(current)) return 'end-amrap';
     return nextBlockTransitionIndex() >= 0 ? 'skip' : '';
   }
@@ -2982,7 +3161,7 @@
     blockActionArmed = 0;
     const button = $('#btnSkipBlock');
     const mode = blockActionMode();
-    button.textContent = mode === 'end-amrap' ? 'End AMRAP' : 'Skip block';
+    button.textContent = mode === 'end-emom' ? 'End EMOM' : mode === 'end-amrap' ? 'End AMRAP' : 'Skip block';
     button.classList.toggle('hidden', !mode);
     button.classList.remove('confirm');
   }
@@ -2994,13 +3173,13 @@
     if (!mode || !blockId) return;
     if (!blockActionArmed) {
       const button = $('#btnSkipBlock');
-      button.textContent = mode === 'end-amrap' ? 'End AMRAP?' : 'Skip block?';
+      button.textContent = mode === 'end-emom' ? 'End EMOM?' : mode === 'end-amrap' ? 'End AMRAP?' : 'Skip block?';
       button.classList.add('confirm');
       blockActionArmed = setTimeout(resetBlockAction, 2600);
       return;
     }
     resetBlockAction();
-    if (mode === 'end-amrap') {
+    if (mode === 'end-amrap' || mode === 'end-emom') {
       S.sessionEarlyEndedBlocks[blockId] = true;
       S.restLogKey = null;
       return completeActiveBlock();
@@ -3015,9 +3194,9 @@
     const current = S.queue[S.qi];
     const upcoming = S.queue[S.qi + 1] || null;
     if (isManualItem(current)) recordManualSet(current, upcoming);
-    else if (current && current.phase === 'rest') S.restLogKey = null;
+    else if (current && (current.phase === 'rest' || isBlockTransition(current))) S.restLogKey = null;
     if (S.qi >= S.queue.length - 1) {
-      S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) || isBlockTransition(q) ? 0 : q.seconds), 0);
+      S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) || isBlockTransition(q) || isAmrapResult(q) ? 0 : q.seconds), 0);
       return finish();
     }
     moveToQueueIndex(S.qi + 1);
@@ -3050,10 +3229,10 @@
       primeAudio();
       S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
       S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
-      S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.sessionSkippedBlocks = {}; S.sessionEarlyEndedBlocks = {}; S.pendingSession = null; S.sessionSetResults = {}; S.restLogKey = null;
+      S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.sessionSkippedBlocks = {}; S.sessionEarlyEndedBlocks = {}; S.pendingSession = null; S.sessionSetResults = {}; S.sessionAmrapResults = {}; S.restLogKey = null;
       S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
       S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
-      $('#doneLog').textContent = 'Log workout'; $('#doneLog').disabled = false;
+      $('#doneLog').textContent = 'Log result'; $('#doneLog').disabled = false;
       launch(buildWorkout());
     } catch (err) {
       setPlanMsg('workout', err.message || 'Could not start this workout.', true);
@@ -3074,7 +3253,7 @@
 
   function togglePause() {
     if (!S.running) return;
-    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) return;
+    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi]) || isAmrapResult(S.queue[S.qi])) return;
     hideRunTapHint();
     if (S.paused) {
       S.paused = false; S.from = performance.now(); S.blockFrom = performance.now(); lockScreen();
@@ -3099,10 +3278,12 @@
     paintTime($('#doneTime'), S.variableDuration ? 'Done' : fmtPad(S.doneTotal));
     const name = S.mode === 'workout' ? workoutPlan.name : S.mode === 'circuit' ? circuitPlan.name : S.mode === 'intervals' ? 'Intervals' : S.mode === 'rest' ? 'Rest' : 'Stopwatch';
     const rounds = S.mode === 'circuit' ? cfg.circuit.rounds : S.mode === 'intervals' ? cfg.intervals.rounds : 0;
-    $('#doneSub').textContent = (rounds ? rounds + (rounds === 1 ? ' round · ' : ' rounds · ') : '') + name + (S.variableDuration ? ' · variable duration' : '');
     const canLogWorkout = S.mode === 'workout' && !!S.sessionPlan;
+    $('#doneSub').textContent = canLogWorkout ? name : (rounds ? rounds + (rounds === 1 ? ' round · ' : ' rounds · ') : '') + name + (S.variableDuration ? ' · variable duration' : '');
     $('#doneLog').classList.toggle('hidden', !canLogWorkout);
-    $('#doneHome').textContent = canLogWorkout ? 'Skip logging' : 'Done';
+    $('#doneAgain').classList.toggle('hidden', canLogWorkout);
+    $('#doneHome').textContent = canLogWorkout ? 'Back to workouts' : 'Done';
+    $('#doneMotto').classList.toggle('hidden', !canLogWorkout);
   }
 
   function goHome() {
@@ -3441,15 +3622,24 @@
 
   $('#runTime').addEventListener('click', () => { if ($('#runTime').classList.contains('pause-target')) togglePause(); });
   $('#setLogger').addEventListener('input', e => {
+    const amrapField = e.target.dataset.amrapField;
+    if (amrapField) {
+      const result = ensureAmrapResult(S.queue[S.qi]);
+      if (!result) return;
+      result[amrapField] = e.target.value === '' ? null : clamp(Math.round(Number(e.target.value) || 0), 0, 10000);
+      return;
+    }
     const field = e.target.dataset.liveField;
-    const result = S.restLogKey && S.sessionSetResults[S.restLogKey];
+    const current = S.queue[S.qi];
+    const resultKey = current && current.inlineLog && isManualItem(current) ? setResultKey(current.exerciseId, current.set) : S.restLogKey;
+    const result = resultKey && S.sessionSetResults[resultKey];
     if (!result || !field) return;
     if (field === 'weight') result.weight = e.target.value === '' ? null : clamp(Number(e.target.value) || 0, 0, 10000);
     if (field === 'actualReps') result.actualReps = e.target.value === '' ? null : clamp(Math.round(Number(e.target.value) || 0), 0, 10000);
   });
   $('#btnPause').addEventListener('click', (e) => {
     e.stopPropagation();
-    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) advance(); else togglePause();
+    if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi]) || isAmrapResult(S.queue[S.qi])) advance(); else togglePause();
   });
   $('#btnSkip').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) advance(); });
   $('#btnSkipBlock').addEventListener('click', (e) => { e.stopPropagation(); if (S.running) runBlockAction(); });
@@ -3542,7 +3732,7 @@
     if (e.code === 'Space') {
       e.preventDefault();
       if (S.running) {
-        if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi])) advance(); else togglePause();
+        if (isManualItem(S.queue[S.qi]) || isBlockTransition(S.queue[S.qi]) || isAmrapResult(S.queue[S.qi])) advance(); else togglePause();
       }
       else if (S.mode === 'rest') {
         cfg.rest.minutes = Math.floor(restPresets[0] / 60); cfg.rest.seconds = restPresets[0] % 60;

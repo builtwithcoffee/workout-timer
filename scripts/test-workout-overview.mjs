@@ -59,7 +59,7 @@ const structured = {
     blocks: [
       { id: 'warm-up', title: 'Lower Body Focus Day · Warm-Up', mode: 'sequence', rounds: 1, unitLabel: 'round' },
       { id: 'main-lift', title: 'Main Lift / Squats', mode: 'sequence', rounds: 1, unitLabel: 'round' },
-      { id: 'density', title: 'Density / Quality Work', mode: 'for-time', rounds: 5, unitLabel: 'cycle' },
+      { id: 'density', title: 'Density / Quality Work', mode: 'for-time', rounds: 5, unitLabel: 'round' },
       { id: 'finisher', title: 'Core / Finisher', mode: 'amrap', rounds: 1, unitLabel: 'round' },
       { id: 'skipped', title: 'Skipped Block', mode: 'sequence', rounds: 1, unitLabel: 'round' }
     ]
@@ -76,7 +76,7 @@ MAIN LIFT / SQUATS
 • Squats — 8, 7, 6 reps @ 95 lb
 
 DENSITY / QUALITY WORK
-• 5 cycles in 12:34
+• 5 rounds in 12:34
 • Neutral-Grip Rows — 5 × 10 reps
 • Reverse Lunges — 5 × 20 overall reps
 
@@ -92,10 +92,10 @@ const prDensity = {
   workoutName: 'Dip Focus Day', workoutKind: 'structured', unit: 'lb',
   blocks: [{ id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', elapsedSeconds: 600,
     exercises: [manual('Push-Ups', [null], ['PR-based reps']), manual('Inverted Rows', [9], ['9 reps'])] }],
-  planSnapshot: { layout: 'blocks', blocks: [{ id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 8, unitLabel: 'cycle' }] }
+  planSnapshot: { layout: 'blocks', blocks: [{ id: 'dip-density', title: 'Density · Quality Work', mode: 'for-time', rounds: 8, unitLabel: 'round' }] }
 };
 assert.equal(formatWorkoutOverview(prDensity), `DENSITY · QUALITY WORK
-• 8 cycles in 10:00
+• 8 rounds in 10:00
 • Push-Ups — 8 × PR-based reps
 • Inverted Rows — 8 × 9 reps`);
 

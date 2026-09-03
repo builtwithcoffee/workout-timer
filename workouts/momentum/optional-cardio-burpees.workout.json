@@ -98,7 +98,7 @@
           "sets": 1,
           "restSeconds": 180,
           "notes": [
-            "Tap Set done, then enter your total reps during the recovery timer."
+            "Enter your total reps, then tap Set done."
           ]
         }
       ]
@@ -106,10 +106,10 @@
     {
       "id": "main-session-emom",
       "title": "Phase 3 · 21-Minute EMOM",
-      "mode": "amrap",
+      "mode": "emom",
       "durationSeconds": 1260,
-      "unitLabel": "cycle",
-      "score": "emom",
+      "unitLabel": "minute",
+      "score": "",
       "notes": [
         "Every minute on the minute for 21 minutes. Complete the prescribed reps, then rest for the remainder of that minute.",
         "Odd minutes: PR-based reps of Two-Pump Burpees.",

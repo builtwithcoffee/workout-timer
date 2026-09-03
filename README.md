@@ -24,7 +24,7 @@ You can then use it at the gym without a network connection. When a new version 
 - **Stopwatch** — Count up freely or toward an optional limit.
 - **Intervals** — Alternate work and rest using editable presets.
 
-The running screen uses large type, strong phase colours, progress animation, countdown sounds, and screen wake lock where the browser supports it. Workouts can also record reps, weight, notes, elapsed blocks, and AMRAP results.
+The running screen uses large type, strong phase colours, progress animation, countdown sounds, and screen wake lock where the browser supports it. Workouts can also record reps, weight, notes, elapsed blocks, and AMRAP results, and can run fixed-minute EMOM blocks.
 
 ## Workouts and your data
 
@@ -52,7 +52,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.36**.
+- Current application release: **1.0.54**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.

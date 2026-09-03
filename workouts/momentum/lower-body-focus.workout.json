@@ -122,12 +122,12 @@
       "title": "Density / Quality Work",
       "mode": "for-time",
       "rounds": 5,
-      "unitLabel": "cycle",
+      "unitLabel": "round",
       "restBetweenRoundsSeconds": 30,
       "score": "elapsed-time",
       "notes": [
-        "Complete five cycles, alternating A then B in each cycle.",
-        "Rest 30 seconds after each completed A-B cycle except the final cycle. The density stopwatch continues during rest.",
+        "Complete five rounds, performing A then B in each round.",
+        "Rest 30 seconds after each completed round except the final round. The density stopwatch continues during rest.",
         "The exercises are rep-based. The block stopwatch starts with the first rep and the elapsed time is the score.",
         "Prioritize quality reps. Sets do not all need to be unbroken; aim to keep the early sets unbroken.",
         "Use extra weight for the lunges if available and appropriate to your level."
@@ -161,7 +161,7 @@
       "score": "rounds-and-reps",
       "notes": [
         "Perform A-B-C repeatedly for 12 minutes, aiming for quality work.",
-        "Record total rounds plus any extra reps when the clock expires."
+        "Count completed full rounds only."
       ],
       "items": [
         {
