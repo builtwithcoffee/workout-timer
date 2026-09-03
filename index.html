@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-r9X/mkznVc+MGijv3w+NFSFzqHCnuat3FM5b3Zjz3I4='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-S25P9LZCAF8Cak0RCc5wCz1E3E4MIfmO0jz2/8ejSXw='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -271,6 +271,8 @@
   .day-optional .day-row{border:1px solid var(--line);border-radius:14px;min-height:66px;background:none}
   .day-optional .day-row:hover{background:var(--card2)}
   .track-card:focus-visible,.track-chip:focus-visible,.day-row:focus-visible,.track-custom-toggle:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+  .pack-import{width:100%;margin-top:16px}
+  .pack-remove{align-self:flex-end;min-height:44px;padding:0 8px;background:transparent;color:var(--muted);font-size:12px}
   .track-custom-toggle{display:none;width:100%;margin-top:20px}
   .workout-selecting .panelhead,.workout-selecting .workout-primary{display:none}
   .workout-selecting .layout{display:block}
@@ -564,6 +566,7 @@
           <div class="plan-library-body">
             <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
             <div class="msg plan-library-message" id="wCatalogMsg" aria-live="polite"></div>
+            <button class="ghost pack-import" id="wImportPack" type="button">Import workout pack</button>
             <button class="ghost track-custom-toggle" id="wCustomToolsToggle" type="button" aria-expanded="false">Create or load my own workout</button>
           </div>
         </details>
@@ -894,10 +897,14 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.57';
+  const APP_VERSION = '1.0.58';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
+  const PACK_FORMAT = 'workout-timer-pack';
+  const PACKS_KEY = 'workoutTimerPacksV1';
+  const PACK_EDITIONS_KEY = 'workoutTimerPackEditionsV1';
+  const MAX_PACK_BYTES = 512 * 1024;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
   const AMRAP_QUEUE_ROUNDS = 200;
   const HEX = /^#[0-9a-f]{6}$/i;
@@ -1306,10 +1313,12 @@
 
   function workoutFile() {
     if (workoutPlan.layout === 'blocks') {
-      return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks', name: workoutPlan.name, workoutType: workoutPlan.workoutType,
+      return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'blocks', name: workoutPlan.name,
+        ...(activePackWorkout ? { packSource: { ...activePackWorkout } } : {}), workoutType: workoutPlan.workoutType,
         prepSeconds: cfg.workout.prep, blocks: JSON.parse(JSON.stringify(workoutPlan.blocks)), theme: { ...workoutTheme } };
     }
-    return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'simple', name: workoutPlan.name, prepSeconds: cfg.workout.prep,
+    return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', layout: 'simple', name: workoutPlan.name,
+      ...(activePackWorkout ? { packSource: { ...activePackWorkout } } : {}), prepSeconds: cfg.workout.prep,
       items: workoutPlan.items.map(x => x.type === 'rest'
         ? { type: 'rest', label: x.label, seconds: x.seconds }
         : { type: 'exercise', id: x.id, label: x.label, target: x.target, sets: x.sets, restSeconds: x.restSeconds, tracking: x.tracking }), theme: { ...workoutTheme } };
@@ -1330,6 +1339,10 @@
     if (p.theme) workoutTheme = p.theme;
   }
 
+  let importedPacks = readImportedPacks();
+  let activePackWorkout = null;
+  let selectedPackEditions = store.get(PACK_EDITIONS_KEY, {});
+  if (!selectedPackEditions || typeof selectedPackEditions !== 'object' || Array.isArray(selectedPackEditions)) selectedPackEditions = {};
   let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
   let workoutTheme = defaultTheme(), circuitTheme = defaultTheme();
   let editingStructuredWorkout = false;
@@ -1340,7 +1353,9 @@
     const savedCircuit = store.get('workoutTimerCircuitPlanV7', null) || store.get('workoutTimerCircuitPlanV6', null) || store.get('workoutTimerCircuitPlanV5', null);
     if (savedWorkout) try {
       const normalized = normalizeWorkout(savedWorkout);
-      setWorkoutPlan(normalized); restoredWorkout = true; workoutSelectionPending = false;
+      setWorkoutPlan(normalized);
+      if (importedWorkoutSource(savedWorkout.packSource)) activePackWorkout = { packId: savedWorkout.packSource.packId, workoutId: savedWorkout.packSource.workoutId };
+      restoredWorkout = true; workoutSelectionPending = false;
     } catch (_) {}
     if (savedCircuit) try { const p = normalizeCircuit(savedCircuit); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; restoredCircuit = true; } catch (_) {}
     if (!restoredWorkout || !restoredCircuit) {
@@ -1354,6 +1369,7 @@
   })();
 
   function persistPlans() {
+    try { saveImportedWorkoutEdit(); } catch (err) { setPlanMsg('workout', err.message, true); }
     if (!workoutSelectionPending) store.set('workoutTimerWorkoutPlanV7', workoutFile());
     store.set('workoutTimerCircuitPlanV7', circuitFile());
   }
@@ -3378,19 +3394,23 @@
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     try {
-      if (file.size > 102400) throw new Error('Workout and circuit files must be smaller than 100 KB.');
+      if (file.size > MAX_PACK_BYTES) throw new Error('Workout packs must be smaller than 512 KB.');
       const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      if (raw && raw.format === PACK_FORMAT) { importWorkoutPack(raw); return; }
+      if (file.size > 102400) throw new Error('Workout and circuit files must be smaller than 100 KB.');
       const v = raw.version == null ? 1 : Number(raw.version);
       let loaded = [];
       if ([5, 6, PLAN_VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
         if (raw.kind === 'workout') {
-          setWorkoutPlan(normalizeWorkout(raw)); workoutSelectionPending = false; loaded.push('workout');
+          const plan = normalizeWorkout(raw);
+          saveImportedWorkoutEdit(); activePackWorkout = null;
+          setWorkoutPlan(plan); workoutSelectionPending = false; loaded.push('workout');
         } else if (raw.kind === 'circuit') {
           const p = normalizeCircuit(raw); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; loaded.push('circuit');
         }
       } else {
         const split = splitLegacy(raw);
-        if (split.workout) { setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
+        if (split.workout) { saveImportedWorkoutEdit(); activePackWorkout = null; setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
         if (split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; loaded.push('circuit'); }
       }
       if (!loaded.length) throw new Error('No usable exercises or timed circuit stations were found.');
@@ -3401,7 +3421,12 @@
       selectMode(destination);
       const message = v < 5 && loaded.length === 2 ? 'Loaded and split the older file into Workout and Circuit.' : 'Loaded ' + file.name + '.';
       loaded.forEach(kind => setPlanMsg(kind, message));
-    } catch (err) { setPlanMsg(pendingLoadKind, err.message || 'Could not load that file.', true); }
+    } catch (err) {
+      const message = err.message || 'Could not load that file.';
+      setPlanMsg(pendingLoadKind, message, true);
+      setCatalogMsg(message, true);
+      $('#wPlanLibraryCard').open = true;
+    }
   }
 
   let newWorkoutArmed = '', newWorkoutTimer = 0;
@@ -3425,7 +3450,9 @@
       newWorkoutTimer = setTimeout(disarmNewWorkout, 3000);
       return;
     }
+    try { saveImportedWorkoutEdit(); } catch (err) { setPlanMsg('workout', err.message, true); return; }
     disarmNewWorkout();
+    activePackWorkout = null;
     if (structured) setWorkoutPlan(defaultStructuredWorkout());
     else workoutPlan = defaultWorkout();
     workoutSelectionPending = false;
@@ -3437,7 +3464,9 @@
     setPlanMsg('workout', structured ? 'New structured workout ready to edit.' : 'New basic workout ready to edit.');
   }
 
-  function applyBuiltInWorkout(plan) {
+  function applyBuiltInWorkout(plan, source = null) {
+    saveImportedWorkoutEdit();
+    activePackWorkout = source;
     setWorkoutPlan(plan);
     workoutSelectionPending = false;
     editingStructuredWorkout = false;
@@ -3450,6 +3479,151 @@
   let workoutCatalog = null;
   let selectedTrackId = store.get(TRACK_KEY, '');
   if (typeof selectedTrackId !== 'string') selectedTrackId = '';
+
+  /* ---------- imported workout packs ---------- */
+  function packWorkoutFile(raw) {
+    if (!raw || raw.version !== PLAN_VERSION || raw.kind !== 'workout' || raw.format !== FORMAT) {
+      throw new Error('Every pack workout must be a version 7 Workout Timer plan.');
+    }
+    if (JSON.stringify(raw).length > 102400) throw new Error('A workout in this pack is larger than 100 KB.');
+    const plan = normalizeWorkout(raw);
+    return { format: FORMAT, version: PLAN_VERSION, kind: 'workout', name: plan.name,
+      layout: plan.layout, prepSeconds: plan.prep, theme: plan.theme || defaultTheme(),
+      ...(plan.layout === 'blocks' ? { workoutType: plan.workoutType, blocks: plan.blocks } : { items: plan.items }) };
+  }
+
+  function normalizeWorkoutPack(raw) {
+    if (!raw || raw.format !== PACK_FORMAT || raw.version !== 1) throw new Error('This is not a supported workout pack.');
+    const text = (value, max, label) => {
+      if (typeof value !== 'string' || !value.trim() || value.trim().length > max) throw new Error(label + ' is missing or too long.');
+      return value.trim();
+    };
+    const id = (value, label) => {
+      if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(value)) throw new Error(label + ' must use lowercase letters, numbers and hyphens.');
+      return value;
+    };
+    const packId = id(raw.id, 'Pack ID');
+    const trackId = id(raw.track && raw.track.id, 'Track ID');
+    if (trackId.length > 40) throw new Error('Track ID is too long.');
+    const trackName = text(raw.track && raw.track.name, 60, 'Track name');
+    const edition = text(raw.edition, 60, 'Pack edition');
+    if (!Array.isArray(raw.workouts) || !raw.workouts.length || raw.workouts.length > 20) throw new Error('A pack needs 1 to 20 workouts.');
+    const ids = new Set();
+    const workouts = raw.workouts.map(entry => {
+      const workoutId = id(entry && entry.id, 'Workout ID');
+      if (ids.has(workoutId)) throw new Error('Workout IDs must be unique within a pack.');
+      ids.add(workoutId);
+      return { id: workoutId, workout: packWorkoutFile(entry.workout) };
+    });
+    const pack = { format: PACK_FORMAT, version: 1, id: packId, track: { id: trackId, name: trackName }, edition, workouts };
+    if (JSON.stringify(pack).length > MAX_PACK_BYTES) throw new Error('This workout pack is too large.');
+    return pack;
+  }
+
+  function readImportedPacks() {
+    const saved = store.get(PACKS_KEY, []);
+    if (!Array.isArray(saved) || saved.length > 52) return [];
+    const ids = new Set();
+    return saved.flatMap(entry => {
+      try {
+        const pack = normalizeWorkoutPack(entry.pack);
+        if (ids.has(pack.id)) return [];
+        ids.add(pack.id);
+        const edits = {};
+        for (const workout of pack.workouts) {
+          if (entry.edits && Object.hasOwn(entry.edits, workout.id)) {
+            try { edits[workout.id] = packWorkoutFile(entry.edits[workout.id]); } catch (_) {}
+          }
+        }
+        return [{ pack, edits }];
+      } catch (_) { return []; }
+    });
+  }
+
+  function writeImportedPacks(next) {
+    const serialized = JSON.stringify(next);
+    if (next.length > 52 || serialized.length > 2 * 1024 * 1024) {
+      throw new Error('Your pack library is full. Save any edits you need, then remove an older pack.');
+    }
+    try { localStorage.setItem(PACKS_KEY, serialized); }
+    catch (_) { throw new Error('Could not save the pack library on this device. Free some browser storage and try again.'); }
+    importedPacks = next;
+  }
+
+  function importedWorkoutSource(source) {
+    if (!source || typeof source.packId !== 'string' || typeof source.workoutId !== 'string') return null;
+    const entry = importedPacks.find(entry => entry.pack.id === source.packId);
+    const item = entry && entry.pack.workouts.find(item => item.id === source.workoutId);
+    return item ? { entry, item } : null;
+  }
+
+  function saveImportedWorkoutEdit() {
+    const source = importedWorkoutSource(activePackWorkout);
+    if (!source || workoutSelectionPending) return;
+    const workout = packWorkoutFile(workoutFile());
+    const previous = Object.hasOwn(source.entry.edits, source.item.id) ? source.entry.edits[source.item.id] : source.item.workout;
+    if (JSON.stringify(previous) === JSON.stringify(workout)) return;
+    writeImportedPacks(importedPacks.map(entry => entry === source.entry
+      ? { pack: entry.pack, edits: { ...entry.edits, [source.item.id]: workout } } : entry));
+  }
+
+  function importWorkoutPack(raw) {
+    const pack = normalizeWorkoutPack(raw);
+    const existing = importedPacks.find(entry => entry.pack.id === pack.id);
+    if (existing && JSON.stringify(existing.pack) !== JSON.stringify(pack)) {
+      throw new Error('A different edition already uses this pack ID. Give the updated pack a new ID so existing workouts and edits stay intact.');
+    }
+    if (!existing) writeImportedPacks([...importedPacks, { pack, edits: {} }]);
+    selectedTrackId = pack.track.id;
+    selectedPackEditions[pack.track.id] = pack.id;
+    store.set(TRACK_KEY, selectedTrackId);
+    store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+    renderWorkoutCatalogView(true);
+    $('#wPlanLibraryCard').open = true;
+    setCatalogMsg(existing ? 'This pack is already imported. Your edits are unchanged.' : pack.track.name + ' · ' + pack.edition + ' imported. Choose a workout day.');
+  }
+
+  function availableWorkoutCatalog() {
+    const catalog = workoutCatalog || { tracks: [], optional: [] };
+    const tracks = catalog.tracks.map(track => ({ ...track, packs: [] }));
+    for (const entry of importedPacks) {
+      let track = tracks.find(track => track.id === entry.pack.track.id);
+      if (!track) {
+        track = { ...entry.pack.track, blurb: '', plans: [], packs: [] };
+        tracks.push(track);
+      }
+      track.packs.push(entry);
+    }
+    return { tracks, optional: catalog.optional };
+  }
+
+  function selectedTrackPack(track) {
+    return track.packs.find(entry => entry.pack.id === selectedPackEditions[track.id]) ||
+      (track.plans.length ? null : track.packs[track.packs.length - 1]);
+  }
+
+  function trackWorkoutPlans(track) {
+    const entry = selectedTrackPack(track);
+    return entry ? entry.pack.workouts.map(item => {
+      const workout = Object.hasOwn(entry.edits, item.id) ? entry.edits[item.id] : item.workout;
+      return { id: item.id, name: workout.name, summary: '', workout, source: { packId: entry.pack.id, workoutId: item.id } };
+    }) : track.plans;
+  }
+
+  function removeImportedPack(packId) {
+    const entry = importedPacks.find(entry => entry.pack.id === packId);
+    if (!entry || !window.confirm('Remove ' + entry.pack.track.name + ' · ' + entry.pack.edition + ' and its saved edits from this device? Save any personal copies first. Your current workout and History will remain.')) return;
+    try {
+      writeImportedPacks(importedPacks.filter(entry => entry.pack.id !== packId));
+      if (activePackWorkout && activePackWorkout.packId === packId) activePackWorkout = null;
+      delete selectedPackEditions[entry.pack.track.id];
+      store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+      persistPlans();
+      renderWorkoutCatalogView(true);
+      setCatalogMsg('Pack removed. Your current workout and History are unchanged.');
+    } catch (err) { setCatalogMsg(err.message, true); }
+  }
+  /* ---------- end imported workout packs ---------- */
 
   function normalizeWorkoutCatalog(raw) {
     if (!raw || raw.format !== 'workout-timer-catalog' || Number(raw.version) !== 1 || !Array.isArray(raw.tracks) || !raw.tracks.length || raw.tracks.length > 20) {
@@ -3504,8 +3678,8 @@
     button.setAttribute('aria-busy', 'true');
     button.textContent = 'Loading…';
     try {
-      const raw = await fetchSmallJson(plan.file, plan.name);
-      applyBuiltInWorkout(normalizeWorkout(raw));
+      const raw = plan.workout || await fetchSmallJson(plan.file, plan.name);
+      applyBuiltInWorkout(normalizeWorkout(raw), plan.source || null);
     } catch (err) {
       setCatalogMsg(err.message || 'Could not load ' + plan.name + '.', true);
     } finally {
@@ -3564,7 +3738,8 @@
       const cardCopy = document.createElement('span');
       addCatalogText(cardCopy, 'span', 'track-card-name', track.name);
       const optionalCount = catalog.optional.length;
-      const meta = track.plans.length + ' training day' + (track.plans.length === 1 ? '' : 's') +
+      const dayCount = trackWorkoutPlans(track).length;
+      const meta = dayCount + ' training day' + (dayCount === 1 ? '' : 's') +
         (optionalCount ? ' · ' + optionalCount + ' optional cardio' : '');
       addCatalogText(cardCopy, 'span', 'track-card-meta', meta);
       if (track.blurb) addCatalogText(cardCopy, 'span', 'track-card-blurb', track.blurb);
@@ -3599,7 +3774,26 @@
     view.appendChild(chip);
     const list = document.createElement('div');
     list.className = 'day-list';
-    track.plans.forEach(plan => list.appendChild(makeDayRow(plan)));
+    if (track.packs.length) {
+      const field = document.createElement('label');
+      field.className = 'edit-field';
+      addCatalogText(field, 'span', '', 'Workout pack');
+      const select = document.createElement('select');
+      select.id = 'wPackEdition';
+      const selected = selectedTrackPack(track);
+      if (track.plans.length) select.add(new Option('Included workouts', ''));
+      track.packs.slice().reverse().forEach(entry => select.add(new Option(entry.pack.edition, entry.pack.id)));
+      select.value = selected ? selected.pack.id : '';
+      select.addEventListener('change', () => {
+        selectedPackEditions[track.id] = select.value;
+        store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+        renderWorkoutCatalogView();
+        focusCatalogTarget('#wPackEdition');
+      });
+      field.appendChild(select);
+      view.appendChild(field);
+    }
+    trackWorkoutPlans(track).forEach(plan => list.appendChild(makeDayRow(plan)));
     view.appendChild(list);
     if (catalog.optional.length) {
       const optional = document.createElement('section');
@@ -3611,24 +3805,35 @@
       optional.appendChild(optionalList);
       view.appendChild(optional);
     }
+    const selected = selectedTrackPack(track);
+    if (selected) {
+      const remove = document.createElement('button');
+      remove.type = 'button'; remove.className = 'ghost pack-remove'; remove.textContent = 'Remove pack';
+      remove.addEventListener('click', () => removeImportedPack(selected.pack.id));
+      view.appendChild(remove);
+    }
     host.appendChild(view);
     if (focusHeading) focusCatalogTarget('.day-row');
   }
   function renderWorkoutCatalogView(focusHeading = false) {
     const host = $('#wPlanLibrary');
     setCatalogMsg('');
-    if (!workoutCatalog) return;
+    const catalog = availableWorkoutCatalog();
     host.innerHTML = '';
-    const selectedTrack = workoutCatalog.tracks.find(track => track.id === selectedTrackId);
+    if (!catalog.tracks.length) {
+      addCatalogText(host, 'p', 'note plan-library-status', 'Import a workout pack, or connect to load the included workouts.');
+      return;
+    }
+    const selectedTrack = catalog.tracks.find(track => track.id === selectedTrackId);
     if (!selectedTrack) {
       if (selectedTrackId) {
         selectedTrackId = '';
         store.remove(TRACK_KEY);
       }
-      renderTrackChooser(workoutCatalog, host, focusHeading);
+      renderTrackChooser(catalog, host, focusHeading);
       return;
     }
-    renderTrackDays(workoutCatalog, selectedTrack, host, focusHeading);
+    renderTrackDays(catalog, selectedTrack, host, focusHeading);
   }
   async function renderWorkoutCatalog() {
     const host = $('#wPlanLibrary');
@@ -3637,11 +3842,12 @@
       renderWorkoutCatalogView();
     } catch (_) {
       workoutCatalog = null;
-      host.innerHTML = '<p class="note plan-library-status">Workout plans are available from the hosted app or when this folder is served by a local web server.</p>';
+      renderWorkoutCatalogView();
     }
   }
 
   /* ---------- wiring ---------- */
+  $('#wImportPack').addEventListener('click', () => chooseFile('workout'));
   $('#wStart').addEventListener('click', startWorkout);
   $('#wEdit').addEventListener('click', () => {
     if (workoutPlan.layout !== 'blocks') return;

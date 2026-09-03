@@ -1,0 +1,351 @@
+{
+  "format": "workout-timer-plan",
+  "version": 7,
+  "kind": "workout",
+  "layout": "blocks",
+  "name": "Pull Focus Day",
+  "workoutType": "strength",
+  "prepSeconds": 5,
+  "blocks": [
+    {
+      "id": "pull-warm-up",
+      "title": "Pull Focus Day · Warm-Up",
+      "mode": "sequence",
+      "score": "",
+      "notes": [
+        "Move with control and do not rush. This prepares scapular stability, grip strength and core tension without fatigue.",
+        "The explosive pull-up primer is optional; skip its four sets if it is not appropriate today."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "warm-up-burpees-round-1",
+          "label": "Original Burpees · Round 1",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Controlled, not rushed."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-forward-circles-round-1",
+          "label": "Forward Arm Circles · Round 1",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-backward-circles-round-1",
+          "label": "Backward Arm Circles · Round 1",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-burpees-round-2",
+          "label": "Original Burpees · Round 2",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Controlled, not rushed."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-forward-circles-round-2",
+          "label": "Forward Arm Circles · Round 2",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-backward-circles-round-2",
+          "label": "Backward Arm Circles · Round 2",
+          "completion": "manual",
+          "target": "10 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-scapula-pull-ups",
+          "label": "Scapula Pull-Ups",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "6 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "6 reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Move only the shoulder blades. Do not bend the elbows."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-passive-hang-1",
+          "label": "Passive Dead Hang · Round 1",
+          "completion": "timed",
+          "seconds": 20,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Relax the shoulders."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-active-hang-1",
+          "label": "Active Dead Hang · Round 1",
+          "completion": "timed",
+          "seconds": 10,
+          "sets": 1,
+          "restSeconds": 30,
+          "notes": [
+            "Engage the shoulders without bending the elbows."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-passive-hang-2",
+          "label": "Passive Dead Hang · Round 2",
+          "completion": "timed",
+          "seconds": 20,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Relax the shoulders."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-active-hang-2",
+          "label": "Active Dead Hang · Round 2",
+          "completion": "timed",
+          "seconds": 10,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Engage the shoulders without bending the elbows."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-ring-rows",
+          "label": "Overhand Ring Rows",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "5–8 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "5–8 reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use an easy high angle and controlled tempo. Do not approach failure."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-hollow-body-hold",
+          "label": "Hollow Body Hold",
+          "completion": "timed",
+          "setPlan": [
+            {
+              "seconds": 20,
+              "restSeconds": 0
+            },
+            {
+              "seconds": 20,
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Focus on full-body tension."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "warm-up-explosive-pull-up",
+          "label": "Optional Explosive Pull-Up",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "1 rep",
+              "restSeconds": 30
+            },
+            {
+              "target": "1 rep",
+              "restSeconds": 30
+            },
+            {
+              "target": "1 rep",
+              "restSeconds": 30
+            },
+            {
+              "target": "1 rep",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "One powerful pull-up per set to activate fast-twitch muscle fibres. Skip if not appropriate today."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "main-lift-pull-ups",
+      "title": "Main Lift · Pull-Ups",
+      "mode": "sequence",
+      "score": "max-reps",
+      "notes": [
+        "Use pull-ups or banded pull-ups. Focus on full range of motion and clean reps.",
+        "You may move slightly faster on the biggest set, but keep every rep intentional.",
+        "Record your maximum unbroken set as the benchmark if you have not already done so.",
+        "If your prescribed target is 0 or 1 and you train without a band, perform four sets of 1–2 reps and aim to collect 6–8 total reps. Otherwise, keep the banded variation you currently use."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "main-lift-pull-ups",
+          "label": "Pull-Ups / Banded Pull-Ups",
+          "completion": "manual",
+          "tracking": "weight-reps",
+          "setPlan": [
+            {
+              "target": "PR-based reps",
+              "restSeconds": 180
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 150
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 150
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use your current program’s PR-based target for each set."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pull-density",
+      "title": "Density · Quality Work",
+      "mode": "for-time",
+      "rounds": 10,
+      "unitLabel": "round",
+      "restBetweenRoundsSeconds": 0,
+      "score": "elapsed-time",
+      "notes": [
+        "Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.",
+        "Complete A then B in each round until you finish 10 rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+        "If your squat entry test used additional weight, use that weight for the squats when appropriate."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "density-dips",
+          "label": "Dips / Banded Dips",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "PR-based reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Quality reps; use assistance if needed.",
+            "Use your current program’s PR-based rep target."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "density-squats",
+          "label": "Squats",
+          "completion": "manual",
+          "tracking": "weight-reps",
+          "target": "PR-based reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Use your entry-test weight only if appropriate.",
+            "Use your current program’s PR-based rep target."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pull-core-finisher",
+      "title": "Core · Finisher",
+      "mode": "amrap",
+      "durationSeconds": 420,
+      "unitLabel": "round",
+      "score": "rounds-and-reps",
+      "notes": [
+        "Perform a 7-minute AMRAP for quality, alternating A-B until time expires.",
+        "Count completed full rounds. Record any extra reps from the final partial round in your session notes.",
+        "Aim for full burpees. If your push muscles are exhausted, use original burpees."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "finisher-toes-to-bar",
+          "label": "Toes to Bar / Hanging Knee Raises",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "8 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "finisher-burpees",
+          "label": "Burpees",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "8 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Use full burpees when possible; switch to original burpees if needed."
+          ]
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "work": "#f04e23",
+    "rest": "#1668c4"
+  }
+}

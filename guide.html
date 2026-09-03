@@ -85,10 +85,18 @@
     <section aria-labelledby="tracks">
       <h2 id="tracks">Included workouts</h2>
       <div class="callout">
-        <p>This is an early community test of Workout Timer as a BuiltSimple companion. The current library includes the Cycle 4, Week 3 workouts from <strong>Momentum</strong> and <strong>Rise</strong>. Foundation, Forge, and Built workouts are not yet included.</p>
+        <p>This is an early community test of Workout Timer as a BuiltSimple companion. The current library includes the Cycle 4, Week 3 workouts from <strong>Momentum</strong> and <strong>Rise</strong>. Forge is available as an importable workout pack. Foundation and Built workouts are not yet included.</p>
       </div>
       <p style="margin-top:12px">The supplied workouts were added manually for this test. Workout Timer does not connect to BuiltSimple or update its programming automatically, so always treat your current BuiltSimple assignment as authoritative.</p>
       <div class="tip"><strong>Changing track is safe:</strong> It changes the workout library you are browsing. The workout already open, its edits, and your History remain untouched until you select a different workout day.</div>
+    </section>
+
+    <section aria-labelledby="workout-packs">
+      <h2 id="workout-packs">Import a weekly workout pack</h2>
+      <p>A workout pack contains several workout days in one file. Save the supplied <code>.workout-pack.json</code> file to your device, open the workout chooser, and tap <strong>Import workout pack</strong>. Select the downloaded file; its track and workout days become part of your library.</p>
+      <p>Use <strong>Workout pack</strong> within the track to choose an edition. Importing next week's pack keeps earlier editions available, and importing the same file again keeps your edits. Importing a pack or changing its edition does not replace the workout already open; selecting a workout day does.</p>
+      <p>Use <strong>Edit workout</strong> to enter the rep targets from your assignment wherever the template says PR-based reps. These are instructions, not automatically calculated targets. Edits to imported days are saved separately for each pack and stay available when you switch days or reopen offline.</p>
+      <div class="tip"><strong>Keep personal copies:</strong> Use <strong>More workout tools → Workout files → Save</strong> to export an edited day. <strong>Remove pack</strong> removes that edition and its saved edits from this device after confirmation. Your current workout and History remain.</div>
     </section>
 
     <section aria-labelledby="weekly-workflow">
@@ -100,7 +108,7 @@
         <li><span class="step-number" aria-hidden="true">4</span><div><h3>Edit only when needed</h3><p>Choose <strong>Edit workout</strong> to adjust blocks, exercises, sets, targets, rests, timers, or added weight when your assigned version differs. Leave added weight blank for bodyweight sets.</p></div></li>
         <li><span class="step-number" aria-hidden="true">5</span><div><h3>Save changes you want to keep</h3><p>Open <strong>More workout tools</strong> and choose <strong>Save</strong> to keep a portable <code>.workout.json</code> copy. Use <strong>Load</strong> there to restore it later.</p></div></li>
       </ol>
-      <div class="tip"><strong>Save before selecting another workout:</strong> Workout Timer keeps one editable current workout. Choosing another supplied workout replaces it, and choosing the same supplied workout again reloads the original workout.</div>
+      <div class="tip"><strong>Included workouts and individual files:</strong> Save an edited copy before choosing another day. Reselecting an included workout reloads its supplied version. Workouts imported as a pack keep their edits in the pack library automatically.</div>
     </section>
 
     <section aria-labelledby="during-workout">
@@ -116,7 +124,7 @@
     <section aria-labelledby="your-data">
       <h2 id="your-data">Your plans and data</h2>
       <p>Workout Timer is local-first. It has no account, server, subscription, or analytics. Your selected track, plans, settings, and workout history stay in the browser on this device and are not uploaded by the app.</p>
-      <p>After the first online launch, the installed app works without gym Wi-Fi or cellular service. A connection is only needed to load the site initially and check for app updates.</p>
+      <p>After the first online launch, the installed app works without gym Wi-Fi or cellular service. A connection is needed to load the site initially, check for app updates, and download new packs. Once a pack is imported, its workouts are available offline.</p>
       <div class="grid" style="margin-top:14px">
         <article class="mini-card"><h3>Workout file</h3><p><strong>Save</strong> and <strong>Load</strong> handle a reusable plan. The file does not include completed-session history.</p></article>
         <article class="mini-card"><h3>History backup</h3><p><strong>Export history</strong> and <strong>Import history</strong> handle completed sessions. They do not replace the current workout plan.</p></article>

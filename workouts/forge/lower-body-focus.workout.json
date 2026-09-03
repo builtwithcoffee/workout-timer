@@ -1,0 +1,241 @@
+{
+  "format": "workout-timer-plan",
+  "version": 7,
+  "kind": "workout",
+  "layout": "blocks",
+  "name": "Lower Body Focus Day",
+  "workoutType": "strength",
+  "prepSeconds": 5,
+  "blocks": [
+    {
+      "id": "lower-body-warm-up",
+      "title": "Lower Body Focus Day · Warm-Up",
+      "mode": "sequence",
+      "score": "",
+      "notes": [
+        "Activate the hips, glutes and knees to prepare for lower-body loading.",
+        "Allow about seven to nine minutes for this warm-up."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "lower-body-warm-up-wall-sit",
+          "label": "Wall Sit",
+          "completion": "timed",
+          "setPlan": [
+            {
+              "seconds": 30,
+              "restSeconds": 30
+            },
+            {
+              "seconds": 30,
+              "restSeconds": 30
+            }
+          ],
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-warm-up-squats",
+          "label": "Bodyweight Squats",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "5 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "5 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "5 reps",
+              "restSeconds": 30
+            }
+          ],
+          "notes": [
+            "Use a slow descent and reach full depth if possible."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-warm-up-hip-thrust",
+          "label": "Hip Thrust",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "10 reps",
+              "restSeconds": 30
+            },
+            {
+              "target": "10 reps",
+              "restSeconds": 30
+            }
+          ],
+          "notes": [
+            "Pause briefly at the top."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-warm-up-reverse-lunges",
+          "label": "Reverse Lunges",
+          "completion": "manual",
+          "tracking": "reps",
+          "setPlan": [
+            {
+              "target": "10 per side",
+              "restSeconds": 30
+            },
+            {
+              "target": "10 per side",
+              "restSeconds": 30
+            }
+          ],
+          "notes": [
+            "Move with control and balance."
+          ]
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-warm-up-deep-squat-hold",
+          "label": "Deep Squat Position Hold",
+          "completion": "timed",
+          "seconds": 20,
+          "sets": 1,
+          "restSeconds": 20,
+          "notes": [
+            "Sit into the squat and stay relaxed but stable."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lower-body-main-lift",
+      "title": "Main Lift · Squats",
+      "mode": "sequence",
+      "score": "max-reps",
+      "notes": [
+        "Use air squats or weighted squats. If your entry test used a particular weight, keep that weight; otherwise use bodyweight.",
+        "Record your maximum set as the benchmark if you have not already done so."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "lower-body-main-lift-squats",
+          "label": "Squats",
+          "completion": "manual",
+          "tracking": "weight-reps",
+          "setPlan": [
+            {
+              "target": "PR-based reps",
+              "restSeconds": 180
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 180
+            },
+            {
+              "target": "PR-based reps",
+              "restSeconds": 0
+            }
+          ],
+          "notes": [
+            "Use your current program’s PR-based target for each set."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lower-body-density",
+      "title": "Density · Quality Work",
+      "mode": "for-time",
+      "rounds": 6,
+      "unitLabel": "round",
+      "restBetweenRoundsSeconds": 0,
+      "score": "elapsed-time",
+      "notes": [
+        "Build quality volume without rushing. Perform every rep with intent.",
+        "Complete A then B in each round until you finish six rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+        "Use 10–20 kg of additional weight for the lunges when available and appropriate to your level."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "lower-body-density-neutral-grip-rows",
+          "label": "Neutral-Grip Rows",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "11 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-density-reverse-lunges",
+          "label": "Reverse Lunges",
+          "completion": "manual",
+          "tracking": "weight-reps",
+          "target": "24 overall reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": [
+            "Add 10–20 kg when available and appropriate."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lower-body-core-finisher",
+      "title": "Core · Finisher",
+      "mode": "amrap",
+      "durationSeconds": 720,
+      "unitLabel": "round",
+      "score": "rounds-and-reps",
+      "notes": [
+        "Perform a 12-minute AMRAP for quality, cycling A-B-C until time expires.",
+        "Count completed full rounds. Record any extra reps from the final partial round in your session notes."
+      ],
+      "items": [
+        {
+          "type": "exercise",
+          "id": "lower-body-finisher-side-plank-left",
+          "label": "Side Plank · Left",
+          "completion": "timed",
+          "seconds": 35,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-finisher-side-plank-right",
+          "label": "Side Plank · Right",
+          "completion": "timed",
+          "seconds": 35,
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        },
+        {
+          "type": "exercise",
+          "id": "lower-body-finisher-hamstring-curls",
+          "label": "TRX / Ring Hamstring Curls",
+          "completion": "manual",
+          "tracking": "reps",
+          "target": "15 reps",
+          "sets": 1,
+          "restSeconds": 0,
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "work": "#f04e23",
+    "rest": "#1668c4"
+  }
+}

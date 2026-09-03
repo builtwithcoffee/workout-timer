@@ -41,6 +41,16 @@ On first use, the workout picker asks you to select Momentum or Rise and then sh
 - [Momentum workout files](workouts/momentum/)
 - [Rise workout files](workouts/rise/)
 
+## Import a workout pack
+
+A `.workout-pack.json` file contains a complete set of workout days. Download it to your device, open the workout chooser, and tap **Import workout pack**. The imported track appears alongside Momentum and Rise. Choose its **Workout pack** edition, then select a day.
+
+Imported workouts and their edits stay on your device, including when switching days or reopening offline. Importing the same pack again keeps your edits. Each new weekly edition has its own entry, so earlier weeks remain available. Importing or browsing a pack leaves the current workout and History unchanged.
+
+The first [Forge pack](workouts/packs/forge-2026-09-03.workout-pack.json) contains Lower Body, Dip, Pull, and Push. PR-based targets are instructions to enter the reps from your current assignment; the app does not calculate them. Use **Workout files → Save** to back up a personalized workout before removing a pack or clearing browser data.
+
+For preparing weekly distributions, see [Workout pack publishing](docs/workout-packs.md).
+
 ## About the project
 
 Workout Timer is intentionally small and local-first. It is meant to be useful on a phone or tablet without turning into a fitness platform, requiring an account, or depending on an ongoing hosted service.
@@ -52,7 +62,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.57**.
+- Current application release: **1.0.58**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.
