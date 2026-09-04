@@ -32,7 +32,7 @@ The running screen uses large type, strong phase colours, progress animation, co
 
 The primary flow is **import a weekly pack → choose a day → train**. BuiltSimple workouts always start with a five-second countdown; Workout options retains colour controls. Custom workouts keep their adjustable start delay and colour controls. Edits to BuiltSimple workouts save automatically to that day and pack on this device. Choose **Edit workout → Restore original** to discard only that day's edits.
 
-The separate **More → Custom workouts** screen supports creating basic or structured workouts, loading individual workout files, resuming your last personal draft, and saving it as a file. Personal creation and file controls are absent from BuiltSimple track/day selection. Personal editing also hides the track chooser. Use the **Workout** tab to return to BuiltSimple. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
+The separate **More → Custom workouts** screen offers New basic workout, New structured workout, and Load workout file. Returning to this screen starts at those three choices. Use **Save workout file** in the editor before leaving to keep a reusable copy; the editor is not automatically resumed. Personal creation and file controls are absent from BuiltSimple track/day selection. Personal editing also hides the track chooser. Use the **Workout** tab to return to BuiltSimple. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
 
 Workout history is stored locally in the browser on that device. It is never uploaded. Plan files and workout-history backups are deliberately separate: loading a plan does not bring its previous sessions with it.
 
@@ -66,7 +66,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.77**.
+- Current application release: **1.0.78**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.

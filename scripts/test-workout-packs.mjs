@@ -55,7 +55,7 @@ function fixture(saved = new Map()) {
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
-    return {workoutStartDelay,setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+    return {workoutStartDelay,setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
       get inlinePicker(){return workoutSelectionInline;},get editing(){return editingStructuredWorkout;},get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
@@ -277,7 +277,8 @@ assert.equal(flow.plan.blocks[1].items[0].setPlan[0].target,raw.workouts[3].work
 assert.equal(flow.packs.find(e=>e.pack.id===raw.id).edits['dip-focus'].name,'Edited dip','Restore affects only one day');
 assert.equal(flow.packs.find(e=>e.pack.id===next.id).pack.edition,next.edition,'Restore does not affect another week');
 assert.equal(flow.saved.get('workoutTimerHistoryFallbackV1'),history);
-flow.resumeMyWorkout();
+flow.openMyWorkouts();assert.equal(flow.personalScreen,true);
+await upload(flow,JSON.parse(flow.saved.get('workoutTimerMyWorkoutV1')));
 assert.equal(flow.plan.name,'My own push workout');assert.equal(flow.active,null);
 flow.renderWorkoutOwnership();assert.equal(flow.elements.get('#wSave').disabled,false);
 assert.equal(flow.elements.get('#wWorkoutContext').textContent,'Custom workouts');
@@ -353,7 +354,10 @@ assert.equal(screens.elements.get('#wPersonalActions').classList.contains('hidde
 screens.openBuiltSimpleWorkouts();
 assert.equal(screens.pending,true,'Returning from a personal workout asks for a BuiltSimple day');
 assert.equal(screens.elements.get('#wPersonalActions').classList.contains('hidden'),true);
-screens.openMyWorkouts();screens.resumeMyWorkout();assert.equal(screens.plan.name,'Structured Workout');
+screens.openMyWorkouts();assert.equal(screens.personalScreen,true);assert.equal(screens.pending,true);
+screens.createWorkout('structured');screens.createWorkout('structured');
+screens.setTimerMode('rest');assert.equal(screens.pending,true,'Leaving a custom editor clears its displayed selection');
+screens.openMyWorkouts();assert.equal(screens.personalScreen,true);assert.equal(screens.pending,true);
 screens.openMyWorkouts();screens.setTimerMode('circuit');
 assert.equal(screens.elements.get('#panel-my-workouts').classList.contains('hidden'),true);
 assert.equal(screens.elements.get('#panel-workout').classList.contains('hidden'),true);
@@ -375,11 +379,12 @@ const download=racing.loadCatalogWorkout(catalog.tracks[0].plans[3],button());
 racing.selectWorkoutPack('rise','');finishDownload(initial);await download;
 assert.equal(racing.pending,true);assert.equal(racing.track,'rise');assert.equal(racing.active,null);
 
-// Legacy standalone/current workouts are retained as the personal draft on first switch.
+// Old local data is preserved, but startup opens the custom landing page rather than resuming it.
 const legacy=fixture(new Map([['workoutTimerWorkoutPlanV7',JSON.stringify(initial)]]));
 legacy.restoreCurrent();legacy.setCatalog(catalog);
-legacy.selectWorkoutPack('rise','');legacy.resumeMyWorkout();
-assert.equal(legacy.plan.name,initial.name);assert.equal(legacy.pending,false);
+assert.equal(legacy.personalScreen,true);assert.equal(legacy.pending,true);
+assert.equal(JSON.parse(legacy.saved.get('workoutTimerWorkoutPlanV7')).name,initial.name);
+legacy.selectWorkoutPack('rise','');assert.equal(legacy.pending,true);
 assert.equal(legacy.active,null);
 
 for(const file of await readdir(new URL('workouts/packs/',root))) if(file.endsWith('.workout-pack.json')) f.normalizeWorkoutPack(JSON.parse(await readFile(new URL('workouts/packs/'+file,root),'utf8')));
@@ -424,6 +429,7 @@ assert.equal(editionFlow.inlinePicker,true,'Dropdown stays in place beside the e
 assert.equal(JSON.parse(editionFlow.saved.get('workoutTimerPickerInlineV1')),true);
 const editionReload=fixture(new Map(editionFlow.saved));editionReload.restoreCurrent();
 assert.equal(editionReload.inlinePicker,true);assert.equal(editionReload.pending,true);
+assert.equal(editionReload.personalScreen,false,'Reloading BuiltSimple selection stays in BuiltSimple');
 assert.equal(editionFlow.elements.get('#workoutManager')?.open,undefined,'Switching editions never opens management');
 assert.equal(editionFlow.walk(editionFlow.elements.get('#wPlanLibrary')).filter(el=>el.className==='day-row').length,5,'Starter days and optional cardio replace the imported list');
 editionFlow.selectWorkoutPack('momentum',momentum.id,false,true);assert.equal(editionFlow.inlinePicker,true);
@@ -451,5 +457,9 @@ const customDelay=structuredClone(initial);customDelay.prepSeconds=15;
 await upload(delays,customDelay);delays.renderWorkoutOwnership();
 assert.equal(delays.workoutStartDelay(),15,'Custom workouts retain their chosen delay');
 assert.equal(delays.elements.get('#wStartDelay').classList.contains('hidden'),false);
+
+const customLanding=html.split('id="panel-my-workouts"')[1].split('<!-- HISTORY -->')[0];
+assert.equal((customLanding.match(/<button /g)||[]).length,3,'Custom landing offers only create basic, create structured, and load');
+assert.doesNotMatch(html,/id="(?:wResumeMyWorkout|myWorkoutsBack)"/);
 
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');
