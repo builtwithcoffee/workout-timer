@@ -1,74 +1,85 @@
 # Workout Timer
 
-A focused, local-first workout timer designed for an iPhone or iPad at the gym.
+A local-first workout timer for an iPhone or iPad at the gym. No account, subscription, or analytics is required. Workouts and History stay on your device.
 
-**[Open Workout Timer](https://builtwithcoffee.github.io/workout-timer/)**
+**[Open Workout Timer](https://builtwithcoffee.github.io/workout-timer/)** · **[Read the guide](https://builtwithcoffee.github.io/workout-timer/guide.html)**
 
-Workout Timer runs as an installable web app. After the first online launch, it works offline with no account, subscription, analytics, or server. Your workouts and history remain on your device.
+This repository describes app release **1.0.79**. A local commit does not update the shared site; check the version in the app footer against the release announced to the community.
 
-## Install on iPhone or iPad
+## Start with a workout pack
 
-1. Open [Workout Timer](https://builtwithcoffee.github.io/workout-timer/) in Chrome, Safari, or your preferred browser.
-2. Tap the browser’s **Share** button.
-3. Scroll down and tap **Add to Home Screen**.
-4. Leave **Open as Web App** turned on, then tap **Add**.
-5. Launch Workout Timer from the new Home Screen icon once while online. Its files will be cached for offline use.
+Momentum and Rise each include a **Starter Pack** with four training days and shared optional Cardio · Burpees. You can try a starter immediately or import a weekly pack supplied to the community. Forge appears after importing its pack.
 
-You can then use it at the gym without a network connection. When a new version is available, fully close and reopen the app to allow the update to finish.
+1. Save the supplied `.workout-pack.json` attachment to Files or Downloads.
+2. In **Workout**, open **Manage packs → Import workout pack** and select the file.
+3. The imported track and edition open to their workout days. Choose a day.
+4. Check the track and edition above the workout title, review its targets, and choose **Start workout**. BuiltSimple workouts use a five-second countdown.
+5. Follow the on-screen completion controls. After training, choose **Log result** and save the session to History.
 
-## What it does
+Workout Timer does not connect to BuiltSimple or fetch new programming automatically. Your current assignment is authoritative. Where a template says **PR-based reps**, enter the assigned target using **Edit workout**; the app does not calculate it from a benchmark.
 
-Workout, Circuit, and Intervals are the main navigation choices. **More** contains Rest, Stopwatch, and Custom workouts on phones, tablets, and desktop.
+Current prepared editions:
 
-- **Workout** — Run rep- and set-based workouts, including mixed bodyweight and weighted movements.
-- **Circuit** — Repeat timed stations and rests for a chosen number of rounds.
-- **Rest** — Start a countdown from editable one-tap presets.
-- **Stopwatch** — Count up freely or toward an optional limit.
-- **Intervals** — Alternate work and rest using editable presets.
+- [Momentum · Cycle 4 · Week 3](workouts/packs/momentum-cycle-4-week-3.workout-pack.json)
+- [Forge · Cycle 4 · Week 3](workouts/packs/forge-cycle-4-week-3.workout-pack.json)
+- [Rise · Cycle 4 · Week 3](workouts/packs/rise-cycle-4-week-3.workout-pack.json)
 
-The running screen uses large type, strong phase colours, progress animation, countdown sounds, and screen wake lock where the browser supports it. Workouts can also record reps, weight, notes, elapsed blocks, and AMRAP results, and can run fixed-minute EMOM blocks.
+Cycle/week labels identify the programming, not a scheduled date range. These files are separate imports; they do not automatically replace the Starter Packs.
 
-## Workouts and your data
+## Choose, edit, and manage packs
 
-The primary flow is **import a weekly pack → choose a day → train**. BuiltSimple workouts always start with a five-second countdown; Workout options retains colour controls. Custom workouts keep their adjustable start delay and colour controls. Edits to BuiltSimple workouts save automatically to that day and pack on this device. Choose **Edit workout → Restore original** to discard only that day's edits.
+- **Change** saves edits and opens the centered track picker immediately. Choose a track, edition, and day.
+- The **Workout pack** dropdown switches editions within the current track and refreshes the days beneath it. It keeps the current chooser layout. The previous workout clears until you choose a day from the new pack.
+- **Manage packs** lists compact rows by track. Import adds a pack; **Remove** confirms the deletion of an imported pack and its edits. Starter Packs cannot be removed. **Done** returns to the chooser without changing the current selection.
+- **Edit workout** saves changes automatically to that day and edition on this device. **Done editing** and **Restore original** are grouped in the editing panel. Restore requires confirmation and affects only that day's edits, not other days or History.
+- **Workout options → Workout colours** remains available. The BuiltSimple start delay is fixed at five seconds.
 
-The separate **More → Custom workouts** screen offers New basic workout, New structured workout, and Load workout file. Returning to this screen starts at those three choices. Use **Save workout file** in the editor before leaving to keep a reusable copy; the editor is not automatically resumed. Personal creation and file controls are absent from BuiltSimple track/day selection. Personal editing also hides the track chooser. Use the **Workout** tab to return to BuiltSimple. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
+Importing a new week keeps earlier weeks available. Re-importing the identical file keeps existing edits; different content under the same pack ID is rejected. New editions start with their own targets and do not inherit edits from earlier weeks. Optional Cardio stays shared across editions within a track.
 
-Workout history is stored locally in the browser on that device. It is never uploaded. Plan files and workout-history backups are deliberately separate: loading a plan does not bring its previous sessions with it.
+Pack workouts cannot be saved as new custom workouts, and edited-pack export is not available. Keep original pack files for re-import, and record any changes you need before removing a pack. History remains available when a workout is loaded and is hidden during track/day selection.
 
-Use **Export history** to make a backup or move history to another device. On the second device, use **Import history** to merge the backup without duplicating existing sessions. Export periodically if the history matters to you, especially before clearing browser website data or changing devices.
+## Custom workouts and timer tools
 
-## Included workout plans
+**Workout**, **Circuit**, and **Intervals** are the main navigation choices. **More** contains **Rest**, **Stopwatch**, and **Custom workouts**.
 
-On first use, the workout picker asks you to select Momentum or Rise and then shows the workout days for that track. It remembers your track on the device, while shared optional workouts are listed once. Starter workout edits persist by track and day, with an untouched original available to restore offline after that day has been loaded.
+**More → Custom workouts** offers exactly three choices: **New basic workout**, **New structured workout**, and **Load workout file**. Custom workouts support adjustable start delay and colours. Use **Save workout file** in the editor before leaving to keep a reusable JSON copy. Returning to Custom workouts shows the three choices; it does not resume the old editor. Use **Load workout file** to reopen a saved file, or the **Workout** tab to return to BuiltSimple.
 
-- [Momentum workout files](workouts/momentum/)
-- [Rise workout files](workouts/rise/)
+Circuit has its own file controls. Rest is a quick countdown, Stopwatch counts up, and Intervals alternates work and recovery periods.
 
-## Import a workout pack
+## Install and use offline
 
-A `.workout-pack.json` file contains a complete set of workout days. Download it to your device, open the workout chooser, and choose **Manage packs → Import workout pack**. The imported track appears alongside Momentum and Rise. Choose its **Workout pack** edition, then select a day.
+1. Open the app in your iPhone or iPad browser.
+2. Open the browser's **Share** menu and choose **Add to Home Screen**.
+3. If shown, leave **Open as Web App** enabled, then tap **Add**.
+4. Launch it from the Home Screen while online so the app and starter files can finish caching. Test reopening offline before relying on it at the gym.
 
-Imported workouts and their edits stay on your device, including when switching days or reopening offline. Importing the same pack again keeps your edits. Each new weekly edition has its own entry, so earlier weeks remain available. Switching to a different track or pack clears the displayed workout until a day is selected, including after a reload. Opening and closing Manage packs, choosing the same pack, or re-importing it does not clear the day. History is unchanged.
+Imported packs are copied into the app's browser storage on that device. They are not linked to the downloaded file, and edits do not modify that file. After import and app caching, you can load and train with them offline. Internet access is needed for the initial app load, app updates, and downloading new packs.
 
-The first [Forge pack](workouts/packs/forge-2026-09-03.workout-pack.json) contains Lower Body, Dip, Pull, and Push. PR-based targets are instructions to enter the reps from your current assignment; the app does not calculate them. Removing a pack removes its edits after confirmation. Keep the original pack file for re-import; edited pack export is outside this release.
+Normal updates preserve packs, edits, and History. Clearing website data or removing the installed app can remove local data. There is no automatic synchronization between browsers or devices.
 
-For preparing weekly distributions, see [Workout pack publishing](docs/workout-packs.md).
+## Update the app
 
-## About the project
+Open the app online and wait for **Update ready**. Finish and log any active workout first.
 
-Workout Timer is intentionally small and local-first. It is meant to be useful on a phone or tablet without turning into a fitness platform, requiring an account, or depending on an ongoing hosted service.
+- **Installed iPhone/iPad app:** swipe Workout Timer away in the app switcher, then reopen it from its Home Screen icon. Returning to the Home Screen alone may leave it running.
+- **Browser:** close every Workout Timer tab/window, including Guide pages, then open the site again. Refresh alone may leave the new version waiting.
 
-The project was primarily vibe-coded with OpenAI Codex. Its initial interface and design direction were developed with Anthropic Claude, with product decisions and real-device testing guided by the maintainer.
+Check the version in the footer. If it is still older, close other app pages and repeat once the update is ready. Closing before the download finishes is not a reliable update method. Reinstalling is not the normal update procedure. See the [update guide](guide.html#update-app).
 
-## Technical notes
+## History and backups
 
-- Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
-- Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
-- Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.78**.
-- Current workout-plan format: **version 7**, with compatibility for older supported plan files.
-- App updates replace cached code and assets without clearing saved plans or workout history.
-- `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.
+After logging a workout, you can copy a concise overview for sharing. **History → Export history** creates a fuller backup of completed sessions. **Import history** merges a backup without duplicating existing session IDs.
 
-For full local testing, including the supplied workout library, serve the repository over HTTP. Installation and service-worker testing require HTTP or HTTPS as well.
+History backups do not contain the installed pack library or its current edits. Custom workout files contain plans, not completed sessions. Keep original pack files, save custom workout files, and export History before changing devices or clearing storage. There is currently no complete backup/export of edited packs.
+
+## Development and distribution
+
+The app is dependency-free HTML, CSS, and JavaScript, primarily in `index.html`. `sw.js`, `manifest.webmanifest`, and local icons provide the PWA shell. There is no application server or package-install/build step. Use a localhost HTTP server for development; opening `index.html` as a file does not reliably load the JSON catalog.
+
+Application release **1.0.79**, workout-plan format **7**, and pack format **1** are separate version numbers. Plans/settings use local storage; History uses IndexedDB with a local-storage fallback. Keep `APP_VERSION` synchronized in `index.html` and `sw.js`, and keep the CSP script hash current.
+
+- [Weekly pack publishing and format](docs/workout-packs.md)
+- [Pack management behavior](docs/manage-workouts-spec.md)
+- [Release and device checks](docs/release-checklist.md)
+
+Workout Timer was primarily vibe-coded with OpenAI Codex, with the initial interface and design direction developed with Anthropic Claude and product decisions and real-device testing guided by the maintainer.

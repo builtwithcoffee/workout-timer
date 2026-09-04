@@ -1,4 +1,4 @@
 .DS_Store
 /AGENTS.md
-/docs/context/*.md
+/docs/context/
 /.security-audit-*

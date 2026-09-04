@@ -74,10 +74,10 @@
     <section aria-labelledby="quick-start">
       <h2 id="quick-start">Quick start</h2>
       <ol class="steps">
-        <li><span class="step-number" aria-hidden="true">1</span><div><h3>Select your track</h3><p>On first use, choose the BuiltSimple track you are following. Workout Timer remembers it on this device until you choose <strong>Change</strong>.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">2</span><div><h3>Choose today’s workout</h3><p>Select Lower Body, Dip, Pull, or Push Focus Day. The shared Cardio · Burpees workout appears once under <strong>Optional</strong>.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Review your workout</h3><p>Check that the exercises, sets, targets, rests, and block order match your current assignment, then choose <strong>Start workout</strong>.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">4</span><div><h3>Follow the timer and log the result</h3><p>Enter the actual reps and weight for manual work, then tap <strong>Set done</strong>. After finishing, review the results and save the session to History.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">1</span><div><h3>Select your track</h3><p>Start with Momentum or Rise, or use <strong>Manage packs → Import workout pack</strong> to add the weekly file supplied to you. A successful import opens its track and edition.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">2</span><div><h3>Choose today’s workout</h3><p>Choose an edition in <strong>Workout pack</strong>, then select a workout day. Check the track and week above the workout title. Cardio · Burpees appears under <strong>Optional</strong>.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Review your workout</h3><p>Check that the exercises, sets, targets, rests, and block order match your current assignment, then choose <strong>Start workout</strong>. BuiltSimple workouts begin with a five-second countdown.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">4</span><div><h3>Follow the timer and log the result</h3><p>Follow the completion button for the current activity. Tracked manual sets offer reps and weight entry before <strong>Set done</strong>; grouped work uses round completion. After finishing, choose <strong>Log result</strong> and save the session to History.</p></div></li>
         <li><span class="step-number" aria-hidden="true">5</span><div><h3>Use or back up the result</h3><p>Copy the concise workout overview for an activity description. Export History separately when you want a complete backup.</p></div></li>
       </ol>
     </section>
@@ -85,18 +85,18 @@
     <section aria-labelledby="tracks">
       <h2 id="tracks">Starter packs</h2>
       <div class="callout">
-        <p>This is an early community test of Workout Timer as a BuiltSimple companion. The app includes Cycle 4, Week 3 starter packs for <strong>Momentum</strong> and <strong>Rise</strong>. Forge is available as an importable workout pack. Foundation and Built workouts are not yet included.</p>
+        <p>This is an early community test of Workout Timer as a BuiltSimple companion. The app includes a <strong>Starter Pack</strong> for each of <strong>Momentum</strong> and <strong>Rise</strong>, with four training days and shared optional cardio. Separately imported editions use labels such as <strong>Cycle 4 · Week 3</strong>. Forge is available as an importable workout pack. Foundation and Built workouts are not yet included.</p>
       </div>
       <p style="margin-top:12px">The supplied workouts were added manually for this test. Workout Timer does not connect to BuiltSimple or update its programming automatically, so always treat your current BuiltSimple assignment as authoritative.</p>
-      <div class="tip"><strong>Changing track is safe:</strong> Your edits save before switching. Changing to a different track or week clears the displayed workout so you can choose a day from the new selection. Your History stays unchanged.</div>
+      <div class="tip"><strong>Change track or change week:</strong> <strong>Change</strong> saves edits and opens the centered track picker immediately. The <strong>Workout pack</strong> dropdown keeps the chooser in place and updates the days below it. Either change clears the old workout until you choose a day; your saved edits and History stay intact.</div>
     </section>
 
     <section aria-labelledby="workout-packs">
       <h2 id="workout-packs">Import a weekly workout pack</h2>
       <p>A workout pack contains several workout days in one file. Save the supplied <code>.workout-pack.json</code> file to your device, open the workout chooser, and tap <strong>Manage packs → Import workout pack</strong>. Select the downloaded file; its track and workout days become part of your library.</p>
-      <p>Use the <strong>Workout pack</strong> dropdown above the workout days to choose an edition. Momentum and Rise initially offer <strong>Starter Pack</strong>; imported weekly editions appear alongside it. Importing next week's pack keeps earlier editions available, and importing the same file again keeps your edits. Switching to a different pack asks you to choose a day. Opening and closing Manage packs or choosing the same pack keeps your current day.</p>
-      <p>Use <strong>Edit workout</strong> to enter the rep targets from your assignment wherever the template says PR-based reps. These are instructions, not automatically calculated targets. Edits save automatically to that day and pack, including Starter Packs, and stay available when you switch days or reopen offline. They do not create another workout.</p>
-      <div class="tip"><strong>Manage your packs:</strong> Use <strong>Manage packs</strong> to import packs or choose <strong>Remove</strong> to delete an imported edition and its edits after confirmation. Starter packs stay available. Your History remains. Tap <strong>Done</strong>, then select a pack in the workout chooser.</div>
+      <p>Use the <strong>Workout pack</strong> dropdown above the workout days to choose an edition. Momentum and Rise initially offer <strong>Starter Pack</strong>; imported weekly editions appear alongside it. Importing next week's pack keeps earlier editions available, and importing the same file again keeps your edits. Switching to a different pack asks you to choose a day without opening Manage packs. New editions use their own targets; your edits are not copied into the next week. Opening and closing Manage packs or choosing the same pack keeps your current day.</p>
+      <p>Use <strong>Edit workout</strong> to enter the rep targets from your assignment wherever the template says PR-based reps. These are instructions, not automatically calculated targets. Edits save automatically to that day and pack, including Starter Packs, and stay available when you switch days or reopen offline. They do not create another workout. You cannot save a pack day as a new custom workout or export an edited pack.</p>
+      <div class="tip"><strong>Manage your packs:</strong> Use <strong>Manage packs</strong> to import packs or choose <strong>Remove</strong> to delete an imported edition and its edits after confirmation. Starter packs stay available. Removal also deletes that edition’s saved edits, so record changes you need before removing it. Your History remains. Tap <strong>Done</strong>, then select a pack in the workout chooser.</div>
     </section>
 
     <section aria-labelledby="weekly-workflow">
@@ -104,17 +104,25 @@
       <ol class="steps">
         <li><span class="step-number" aria-hidden="true">1</span><div><h3>Confirm the assignment</h3><p>Check your current track, week, and workout day in BuiltSimple.</p></div></li>
         <li><span class="step-number" aria-hidden="true">2</span><div><h3>Open the matching track</h3><p>If Workout Timer is showing another track, choose <strong>Change</strong> and select the one you are currently following.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Load the workout day</h3><p>Select the matching Focus Day and compare its exercises, targets, and rests with the current assignment before training.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Load the workout day</h3><p>Choose the matching edition in <strong>Workout pack</strong>, then select the Focus Day and compare its exercises, targets, and rests with the current assignment before training.</p></div></li>
         <li><span class="step-number" aria-hidden="true">4</span><div><h3>Edit only when needed</h3><p>Choose <strong>Edit workout</strong> to adjust blocks, exercises, sets, targets, rests, timers, or added weight when your assigned version differs. Leave added weight blank for bodyweight sets.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">5</span><div><h3>Finish editing</h3><p>Choose <strong>Done editing</strong>. Changes save automatically on this device to this workout and week. To undo them later, choose <strong>Edit workout → Restore original</strong> and confirm. Other days and History stay unchanged.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">5</span><div><h3>Finish editing</h3><p>Choose <strong>Done editing</strong> beside <strong>Restore original</strong> in the editing panel. Changes save automatically to this workout and week on this device; Done editing saves once more before closing the editor. To undo them later, choose <strong>Edit workout → Restore original</strong> and confirm. Other days and History stay unchanged.</p></div></li>
       </ol>
-      <div class="tip"><strong>Custom workouts:</strong> Rest, Stopwatch, and Custom workouts are grouped under <strong>More</strong> on every screen size. Open <strong>More → Custom workouts</strong> for your own basic or structured workouts and individual files. These controls have their own screen, separate from the BuiltSimple day chooser. Use the <strong>Workout</strong> tab to return to BuiltSimple. The screen always offers <strong>New basic workout</strong>, <strong>New structured workout</strong>, and <strong>Load workout file</strong>. Use <strong>Save workout file</strong> before leaving the editor to keep a copy you can load later; returning does not resume the editor.</div>
+      <p style="margin-top:12px"><strong>Workout options → Workout colours</strong> lets you adjust the colours. BuiltSimple workouts use a fixed five-second start delay.</p>
+    </section>
+
+    <section aria-labelledby="custom-workouts">
+      <h2 id="custom-workouts">Custom workouts and other timers</h2>
+      <p><strong>Workout</strong>, <strong>Circuit</strong>, and <strong>Intervals</strong> are the main navigation choices. <strong>More</strong> contains <strong>Rest</strong>, <strong>Stopwatch</strong>, and <strong>Custom workouts</strong>.</p>
+      <p><strong>More → Custom workouts</strong> has three choices: <strong>New basic workout</strong>, <strong>New structured workout</strong>, and <strong>Load workout file</strong>. Basic workouts use exercises and rests; structured workouts organize them into blocks. Custom workouts keep adjustable start delay and colours.</p>
+      <p>Use <strong>Save workout file</strong> before leaving a custom editor to keep a copy you can load later. Returning to Custom workouts opens the three choices, and reopening the app does not automatically resume a custom editor. Use <strong>Load workout file</strong> to open your saved copy. The <strong>Workout</strong> tab returns to BuiltSimple.</p>
+      <p>Use <strong>Manage packs</strong> in Workout for weekly pack files. Circuit has separate file controls; Rest, Stopwatch, and Intervals provide standalone timer tools.</p>
     </section>
 
     <section aria-labelledby="during-workout">
       <h2 id="during-workout">While you train</h2>
       <div class="grid">
-        <article class="mini-card"><h3>Manual sets</h3><p>Enter the completed reps and weight, then tap <strong>Set done</strong>. Rest screens are for recovery.</p></article>
+        <article class="mini-card"><h3>Manual sets</h3><p>Tracked manual sets let you enter completed reps and weight before <strong>Set done</strong>. Warm-ups and grouped rounds use simpler completion controls. Rest screens are for recovery.</p></article>
         <article class="mini-card"><h3>Structured blocks</h3><p>Review the next block, then tap <strong>Start block</strong>. A skipped block is left out of the saved session.</p></article>
         <article class="mini-card"><h3>AMRAPs</h3><p>Let the timer finish or end it early. Record completed full rounds before finishing the workout.</p></article>
         <article class="mini-card"><h3>EMOMs</h3><p>Each minute starts the next activity. Complete its target, then recover until the following minute begins.</p></article>
@@ -124,14 +132,14 @@
     <section aria-labelledby="your-data">
       <h2 id="your-data">Your plans and data</h2>
       <p>Workout Timer is local-first. It has no account, server, subscription, or analytics. Your selected track, plans, settings, and workout history stay in the browser on this device and are not uploaded by the app.</p>
-      <p>After the first online launch, the installed app works without gym Wi-Fi or cellular service. A connection is needed to load the site initially, check for app updates, and download new packs. Once a pack is imported, its workouts are available offline.</p>
+      <p>Once the app and starter files have finished caching, the installed app works without gym Wi-Fi or cellular service. Test an offline launch before relying on it at the gym. A connection is needed to load the site initially, check for app updates, and download new packs. Once a pack is imported, its workouts are available offline.</p>
       <p>Importing copies the workouts into this app’s storage on your device. They are not linked to the downloaded JSON file, and you do not need to select that file again to train. Keep the original pack as a backup. Pack edits remain in app storage; exporting edited packs is not available yet. App updates preserve this storage, but deleting the app or clearing website data can remove it.</p>
       <div class="grid" style="margin-top:14px">
         <article class="mini-card"><h3>Workout file</h3><p>The file controls in <strong>Custom workouts</strong> handle your own reusable plan. The file does not include completed-session history.</p></article>
-        <article class="mini-card"><h3>History backup</h3><p><strong>Export history</strong> and <strong>Import history</strong> handle completed sessions. They do not replace the current workout plan.</p></article>
+        <article class="mini-card"><h3>History backup</h3><p><strong>Export history</strong> and <strong>Import history</strong> handle completed sessions. They do not back up the installed packs, current pack edits, or custom workout files.</p></article>
         <article class="mini-card"><h3>Copied overview</h3><p>A concise plain-text summary for sharing elsewhere. It is convenient, but it is not a complete history backup.</p></article>
       </div>
-      <div class="tip"><strong>Keep a backup:</strong> Export History before clearing browser data, replacing a device, or moving your records to another iPhone or iPad.</div>
+      <div class="tip"><strong>Keep a backup:</strong> Export History, save custom workout files, and retain original pack files before clearing data or changing devices. Edited packs cannot currently be exported. There is no automatic sync between devices or browsers.</div>
     </section>
 
     <section aria-labelledby="update-app">
@@ -141,7 +149,7 @@
         <article class="mini-card"><h3>Installed on iPhone or iPad</h3><p>Open the app switcher: swipe up from the bottom and pause, or double-click the Home button on devices with one. Find Workout Timer and swipe its preview up to close it. Reopen it from its Home Screen icon. Simply returning to the Home Screen may leave the old version running.</p></article>
         <article class="mini-card"><h3>Using a browser</h3><p>Close every Workout Timer tab or window, including any open Guide pages, then open the site again. A refresh alone may leave the new version waiting for the old pages to close.</p></article>
       </div>
-      <p>Check the version at the bottom against the release announced to the community. If it is still older, close any other open Workout Timer pages, reopen while online, and repeat the close-and-reopen step once the update is ready.</p>
+      <p>Check the version at the bottom against the release announced to the community. If it is still older, close any other open Workout Timer pages, reopen while online, and repeat the close-and-reopen step once the update is ready. Closing before the download finishes may simply reopen the older version.</p>
       <div class="tip"><strong>Keep your data:</strong> Reinstalling is not the normal update procedure. Normal updates preserve packs, edits, and History. Before any removal or website-data clearing, export History, save any personal workout files, and keep the original pack files; those actions can erase the app’s local data.</div>
     </section>
 
@@ -151,7 +159,7 @@
       <ol class="steps" style="margin-top:14px">
         <li><span class="step-number" aria-hidden="true">1</span><div><h3>Return to Workout Timer</h3><p>Use the button below to open the timer in your browser.</p></div></li>
         <li><span class="step-number" aria-hidden="true">2</span><div><h3>Open your browser’s Share menu</h3><p>Tap the square with an upward arrow in the browser toolbar or menu.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Add it to your Home Screen</h3><p>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>. The timer will open in its own window.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Add it to your Home Screen</h3><p>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>. If <strong>Open as Web App</strong> is shown, leave it enabled. Launch the new Home Screen icon while online to let the app finish caching, then test opening it offline.</p></div></li>
       </ol>
       <div class="section-action">
         <p>The installation help in Workout Timer also includes these steps and a reminder about local data and backups.</p>
@@ -161,7 +169,7 @@
   </main>
 
   <footer>
-    <span>Workout Timer guide</span>
+    <span>Guide · App 1.0.79</span>
     <a href="./">Back to timer</a>
   </footer>
 </div>
