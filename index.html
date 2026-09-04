@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7hutjvcSMFSDWeMgqYVG0wbVS0aKkDWzTDXUVY7yh7I='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7sl0FGQqR3YhNDg8l4MX7ONJXeZ20kfblpSERi82FtE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -975,7 +975,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.75';
+  const APP_VERSION = '1.0.76';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3822,7 +3822,7 @@
     const source = workoutSource(activePackWorkout);
     const owned = !!source && !workoutSelectionPending;
     renderWorkoutSection();
-    $('#wWorkoutTools').classList.toggle('hidden', owned || workoutSelectionPending);
+    $('#wStartDelay').classList.toggle('hidden', owned);
     $('#wSave').disabled = workoutSelectionPending || owned;
     $('#wSave').classList.toggle('hidden', workoutSelectionPending || owned);
     $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));
