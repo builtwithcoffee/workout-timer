@@ -17,7 +17,7 @@ Cycle/week labels describe the supplied programming, not a calendar schedule. Do
    ```
 
 4. Run `node scripts/test-workout-packs.mjs` and `node scripts/verify-release.mjs`. Review all prescription changes against the source.
-5. Share the resulting JSON as a file attachment with the community. Users download it into Files/Downloads, then choose **Manage workouts → Import workout pack** in the workout chooser. No account or upload to a server is involved.
+5. Share the resulting JSON as a file attachment with the community. Users download it into Files/Downloads, then choose **Manage packs → Import workout pack** in the workout chooser. No account or upload to a server is involved.
 
 The builder refuses to overwrite a distribution. Use a new ID for a correction, such as `forge-cycle-5-week-1-r2`, and an edition label such as `Cycle 5 · Week 1 (corrected)`. Keep original distributed files so re-importing an older edition remains reproducible.
 
@@ -69,7 +69,7 @@ Starter originals and full edited copies live under `workoutTimerStarterWorkouts
 
 `workoutTimerMyWorkoutV1` retains one personal draft across BuiltSimple use. Existing unassociated current plans migrate to this draft when leaving them; no attempt is made to identify old starter copies by name. `workoutTimerSelectionPendingV1` records that a day must be selected. The legacy current-plan key remains compatible. The separate More → Custom workouts screen exposes existing basic/structured creation and individual-file loading. Its personal editor hides the track chooser and contains Save workout file and Back to Custom workouts. Workout returns to BuiltSimple; a larger personal library is deferred.
 
-Use **Manage workouts** in the chooser to import, see, use, or remove packs. Starter packs are listed alongside imported editions and cannot be removed. Import and Use pack return to the selected edition’s workout days. Removing a pack requires confirmation and deletes its stored edits. Removing the selected pack clears the displayed day; History remains. Removing an unselected edition preserves the selected one; removing the selected edition falls back to Starter Pack or the latest remaining import in that track. Pack workouts cannot be saved as new personal workouts. Export of edited packs and automatic PR calculations are outside this release.
+Use **Manage packs** in the chooser to import, see, use, or remove packs. Starter packs are listed alongside imported editions and cannot be removed. Import and Use pack return to the selected edition’s workout days. Removing a pack requires confirmation and deletes its stored edits. Removing the selected pack clears the displayed day; History remains. Removing an unselected edition preserves the selected one; removing the selected edition falls back to Starter Pack or the latest remaining import in that track. Pack workouts cannot be saved as new personal workouts. Export of edited packs and automatic PR calculations are outside this release.
 
 ## Verification before sharing
 

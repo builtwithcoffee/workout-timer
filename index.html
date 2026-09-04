@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3yB3gYA+6d1/xiwdFoOxwplPlNJpZI7VAjABp9caKlo='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CXzjRdjocZ/p+sZDS+O0CKzc07o7i7UNDAPAU/T1Rro='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -618,7 +618,7 @@
           <div class="plan-library-body">
             <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
             <div class="msg plan-library-message" id="wCatalogMsg" aria-live="polite"></div>
-            <button class="ghost pack-import" id="wManageWorkouts" type="button" aria-haspopup="dialog">Manage workouts</button>
+            <button class="ghost pack-import" id="wManageWorkouts" type="button" aria-haspopup="dialog">Manage packs</button>
           </div>
         </details>
         <details class="card workout-tools-card" id="wWorkoutTools">
@@ -668,7 +668,7 @@
       <h2 class="title" id="myWorkoutsTitle" tabindex="-1">Custom workouts</h2>
       <button class="ghost" id="myWorkoutsBack" type="button">Back to BuiltSimple workouts</button>
     </div>
-    <p class="note">Create and load your own workouts here. For a BuiltSimple weekly pack, use Manage workouts in the Workout section.</p>
+    <p class="note">Create and load your own workouts here. For a BuiltSimple weekly pack, use Manage packs in the Workout section.</p>
     <div class="card">
       <div class="plan-actions">
         <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume custom workout</button>
@@ -839,7 +839,7 @@
 </div>
 
 <dialog class="install-dialog workout-manager" id="workoutManager" aria-labelledby="workoutManagerTitle" closedby="closerequest">
-  <header class="manager-header"><h2 id="workoutManagerTitle">Manage workouts</h2><button id="workoutManagerDone" type="button" autofocus>Done</button></header>
+  <header class="manager-header"><h2 id="workoutManagerTitle">Manage packs</h2><button id="workoutManagerDone" type="button" autofocus>Done</button></header>
   <div class="manager-body">
     <button class="manager-import" id="wImportPack" type="button">Import workout pack</button>
     <p class="manager-intro">Import the workout pack shared with the community. Imported workouts stay on this device and work offline.</p>
@@ -964,7 +964,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.67';
+  const APP_VERSION = '1.0.68';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';

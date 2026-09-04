@@ -1,6 +1,6 @@
-# Manage workouts
+# Manage packs
 
-Status: implemented in local app release 1.0.67; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.68; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -8,11 +8,11 @@ Give members one place to import, see, and remove workout packs, while keeping e
 
 ## Entry and presentation
 
-- Replace the chooser's **Import workout pack** button with **Manage workouts**. Show it on both the track picker and the selected track's day list, including first use.
+- Replace the chooser's **Import workout pack** button with **Manage packs**. Show it on both the track picker and the selected track's day list, including first use.
 - Remove **Remove pack** from the everyday day list.
 - Keep the track chip and Workout pack dropdown above the days. Training still starts with track → pack → day.
 - Open one labelled management dialog, using the app's existing dialog pattern. Make it a full-height sheet on phones and a bounded, scrollable panel on larger screens.
-- Header: **Manage workouts**, with a visible **Done** button. Keep the header available while scrolling. Escape/platform Back should dismiss where supported, without exiting the app or discarding a workout; restore focus to the entry button.
+- Header: **Manage packs**, with a visible **Done** button. Keep the header available while scrolling. Escape/platform Back should dismiss where supported, without exiting the app or discarding a workout; restore focus to the entry button.
 - Opening or closing the manager does not load, reset, or start a workout. It is available from setup, not during an active timer or unfinished result entry.
 
 ## Screen contents
@@ -72,7 +72,7 @@ This is a small-to-moderate feature, not a new workout subsystem. It needs one d
 
 Small logic work is required around removal of an unselected edition, selection fallbacks, save-before-navigation, and keeping error messages visible. These are the important parts to verify, beyond moving buttons.
 
-Exclude search, filters, folders, drag ordering, bulk deletion, automatic downloads, a hosted pack marketplace, pack editing/export, and management of unrelated standalone workout files. The title is **Manage workouts**, but this first version manages the packs that supply the library.
+Exclude search, filters, folders, drag ordering, bulk deletion, automatic downloads, a hosted pack marketplace, pack editing/export, and management of unrelated standalone workout files. This screen manages the packs that supply the track library.
 
 ## Acceptance checks
 
@@ -93,4 +93,4 @@ Recommended next step: try importing and removing a second test week on the inst
 
 BuiltSimple remains the primary workflow. Day edits save automatically to their original track/week. Edit workout exposes a confirmed Restore original action that replaces only that day’s edited copy. Starter days use the same behavior with a retained local original after first load. Opening and dismissing management alone does not clear the day. The workout preview identifies its track and pack.
 
-Custom workouts is a separate screen reached through More → Custom workouts, containing the existing basic/structured creation and individual-file loading, plus Resume custom workout for the last personal draft. Personal editing hides the BuiltSimple track/day chooser and exposes Save workout file and Back to Custom workouts. The Workout tab and Back to BuiltSimple workouts return to the primary flow. No personal creation/loading controls appear beside Manage workouts. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
+Custom workouts is a separate screen reached through More → Custom workouts, containing the existing basic/structured creation and individual-file loading, plus Resume custom workout for the last personal draft. Personal editing hides the BuiltSimple track/day chooser and exposes Save workout file and Back to Custom workouts. The Workout tab and Back to BuiltSimple workouts return to the primary flow. No personal creation/loading controls appear beside Manage packs. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
