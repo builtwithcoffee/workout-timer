@@ -29,7 +29,7 @@ Pack tests simulate DOM/storage and fetch boundaries. They do not establish that
 
 ## App update checks
 
-The service worker caches `guide.html` with the app. A guide change needs a new app/cache version to reach existing installations. The worker does not use skipWaiting or force-reload active workouts. The app registers the worker on page load and displays Update ready when a replacement is waiting/installed; there is no app-level hourly polling loop.
+The service worker caches `guide.html` and its member-facing images with the app. A guide change needs a new app/cache version to reach existing installations. The worker does not use skipWaiting or force-reload active workouts. The app registers the worker on page load and displays Update ready when a replacement is waiting/installed; there is no app-level hourly polling loop.
 
 1. Open the old build online and let the new worker finish downloading.
 2. Confirm Update ready appears without interrupting a workout.

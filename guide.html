@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#131414" />
@@ -47,6 +47,15 @@
   .tip{margin-top:12px;padding:13px 14px;border-left:3px solid var(--accent);background:var(--card2);font-size:14px;line-height:1.5;color:var(--text)}
   .section-action{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
   .section-action p{flex:1;min-width:min(280px,100%)}
+  .guide-subhead{margin:20px 0 10px;font-size:20px;letter-spacing:-.015em}
+  .shot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+  .shot-card{margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  .shot-link{display:grid;place-items:center;min-height:220px;padding:10px;background:#090a09}
+  .shot-link:focus-visible{outline:3px solid #fff;outline-offset:-4px}
+  .shot-card img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;border-radius:8px}
+  .shot-card figcaption{display:grid;grid-template-columns:34px minmax(0,1fr);gap:11px;padding:14px}
+  .shot-card figcaption p{font-size:14px;line-height:1.5}
+  .shot-note{margin-top:10px;font-size:13px}
   footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
   @media(max-width:620px){
     .top{flex-direction:column-reverse;margin-bottom:28px}
@@ -56,6 +65,9 @@
     .track-path small{display:inline;margin:0 8px 0 0}
     .track-status{display:inline;margin:0 0 0 8px}
     .grid{grid-template-columns:1fr}
+    .shot-grid{grid-template-columns:1fr}
+    .shot-link{min-height:0}
+    .shot-card img{max-height:none}
   }
 </style>
 </head>
@@ -91,9 +103,33 @@
       <div class="tip"><strong>Change track or change week:</strong> <strong>Change</strong> saves edits and opens the centered track picker immediately. The <strong>Workout pack</strong> dropdown keeps the chooser in place and updates the days below it. Either change clears the old workout until you choose a day; your saved edits and History stay intact.</div>
     </section>
 
-    <section aria-labelledby="workout-packs">
+    <section aria-labelledby="workout-packs" id="import-from-fitr">
       <h2 id="workout-packs">Import a weekly workout pack</h2>
-      <p>A workout pack contains several workout days in one file. Save the supplied <code>.workout-pack.json</code> file to your device, open the workout chooser, and tap <strong>Manage packs → Import workout pack</strong>. Select the downloaded file; its track and workout days become part of your library.</p>
+      <p>A workout pack contains several workout days in one file. When FITR opens the supplied <code>.workout-pack.json</code> file as text, save it to Files before opening Workout Timer.</p>
+
+      <h3 class="guide-subhead">Save the pack from FITR</h3>
+      <div class="shot-grid">
+        <figure class="shot-card">
+          <a class="shot-link" href="./assets/guide/fitr-pack-preview.png" aria-label="Open the full-size FITR workout-pack preview screenshot">
+            <img src="./assets/guide/fitr-pack-preview.png" alt="A Forge workout-pack JSON file open as text in the FITR file preview." width="738" height="1046" loading="lazy" decoding="async" />
+          </a>
+          <figcaption><span class="step-number" aria-hidden="true">1</span><div><h3>Open the attachment</h3><p>Tap the workout-pack attachment in FITR. Seeing JSON text is expected. Tap the arrow beside the filename at the top.</p></div></figcaption>
+        </figure>
+        <figure class="shot-card">
+          <a class="shot-link" href="./assets/guide/fitr-save-to-files.png" aria-label="Open the full-size FITR Save to Files screenshot">
+            <img src="./assets/guide/fitr-save-to-files.png" alt="The iPhone file menu showing the Save to Files action for the Forge JSON workout pack opened from FITR." width="714" height="1000" loading="lazy" decoding="async" />
+          </a>
+          <figcaption><span class="step-number" aria-hidden="true">2</span><div><h3>Save it to Files</h3><p>Choose <strong>Save to Files</strong>, select a location you can find again, and tap <strong>Save</strong>.</p></div></figcaption>
+        </figure>
+      </div>
+
+      <h3 class="guide-subhead">Import it into Workout Timer</h3>
+      <ol class="steps">
+        <li><span class="step-number" aria-hidden="true">3</span><div><h3>Open Manage packs</h3><p>Return to the <strong>Workout</strong> tab in Workout Timer and tap <strong>Manage packs</strong>.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">4</span><div><h3>Start the import</h3><p>Tap <strong>Import workout pack</strong>. The iPhone Files picker opens.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">5</span><div><h3>Select the saved file</h3><p>Choose the workout-pack JSON file from <strong>Recents</strong>, or use <strong>Browse</strong> to find the folder where you saved it.</p></div></li>
+      </ol>
+      <p class="shot-note">Tap either FITR screenshot to view it at full size. After a successful import, Workout Timer opens the pack’s track and lists its workout days.</p>
       <p>Use the <strong>Workout pack</strong> dropdown above the workout days to choose an edition. Momentum and Rise initially offer <strong>Starter Pack</strong>; imported weekly editions appear alongside it. Importing next week's pack keeps earlier editions available, and importing the same file again keeps your edits. Switching to a different pack asks you to choose a day without opening Manage packs. New editions use their own targets; your edits are not copied into the next week. Opening and closing Manage packs or choosing the same pack keeps your current day.</p>
       <p>Use <strong>Edit workout</strong> to enter the rep targets from your assignment wherever the template says PR-based reps. These are instructions, not automatically calculated targets. Edits save automatically to that day and pack, including Starter Packs, and stay available when you switch days or reopen offline. They do not create another workout. You cannot save a pack day as a new custom workout or export an edited pack.</p>
       <div class="tip"><strong>Manage your packs:</strong> Use <strong>Manage packs</strong> to import packs or choose <strong>Remove</strong> to delete an imported edition and its edits after confirmation. Starter packs stay available. Removal also deletes that edition’s saved edits, so record changes you need before removing it. Your History remains. Tap <strong>Done</strong>, then select a pack in the workout chooser.</div>
@@ -169,7 +205,7 @@
   </main>
 
   <footer>
-    <span>Guide · App 1.0.79</span>
+    <span>Guide · App 1.0.80</span>
     <a href="./">Back to timer</a>
   </footer>
 </div>

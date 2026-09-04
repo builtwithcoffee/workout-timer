@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cCydpM3Z1XcE2rDunKQvTKJ666+2911MW6aZaLFMB1A='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TbzS7Y1fJi3mK5GZ+sNEZH9UwN6qwRtoyb2scLWknHo='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -855,7 +855,7 @@
   <header class="manager-header"><h2 id="workoutManagerTitle">Manage packs</h2><button id="workoutManagerDone" type="button" autofocus>Done</button></header>
   <div class="manager-body">
     <button class="manager-import" id="wImportPack" type="button">Import workout pack</button>
-    <p class="manager-intro">Imported packs stay on this device and work offline.</p>
+    <p class="manager-intro">On iPhone, save the shared JSON file to Files first, then import it here. <a href="./guide.html#import-from-fitr">See iPhone steps</a>. Imported packs stay on this device and work offline.</p>
     <div class="msg manager-message" id="workoutManagerMsg" role="status" aria-live="polite"></div>
     <div class="manager-groups" id="workoutManagerPacks"></div>
   </div>
@@ -977,7 +977,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.79';
+  const APP_VERSION = '1.0.80';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';

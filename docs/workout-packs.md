@@ -1,6 +1,6 @@
 # Workout pack publishing
 
-Current workflow: app **1.0.79**, pack format **1**, workout-plan format **7**. Pack import was introduced in 1.0.58; members need the current community build to get the management and navigation described here. A local commit does not publish that build. Once members have a compatible app, distributing new weekly packs does not require another app release. See the [release checklist](release-checklist.md).
+Current workflow: app **1.0.80**, pack format **1**, workout-plan format **7**. Pack import was introduced in 1.0.58; members need the current community build to get the management and navigation described here. A local commit does not publish that build. Once members have a compatible app, distributing new weekly packs does not require another app release. See the [release checklist](release-checklist.md).
 
 ## Weekly distribution
 

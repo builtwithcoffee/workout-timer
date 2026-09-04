@@ -1,10 +1,12 @@
-const APP_VERSION = '1.0.79';
+const APP_VERSION = '1.0.80';
 const CACHE_PREFIX = 'workout-timer-v';
 const CACHE = `${CACHE_PREFIX}${APP_VERSION}`;
 const ASSETS = [
   './',
   './index.html',
   './guide.html',
+  './assets/guide/fitr-pack-preview.png',
+  './assets/guide/fitr-save-to-files.png',
   './manifest.webmanifest',
   './workouts/catalog.json',
   './workouts/momentum/lower-body-focus.workout.json',

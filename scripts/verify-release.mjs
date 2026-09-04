@@ -33,6 +33,12 @@ if (!indexVersion || indexVersion !== workerVersion) {
 if (!html.includes('href="./guide.html"')) throw new Error('The app footer does not link to guide.html.');
 if (!worker.includes("'./guide.html'")) throw new Error('guide.html is missing from the service-worker asset list.');
 if (!guide.includes('href="./"')) throw new Error('guide.html does not link back to Workout Timer.');
+const guideImages = [...guide.matchAll(/<img[^>]+src="\.\/([^"]+)"/g)].map(match => match[1]);
+for (const image of guideImages) {
+  if (!/^assets\/guide\/[a-z0-9-]+\.png$/.test(image)) throw new Error(`Unsafe guide image path: ${image}`);
+  await readFile(new URL(image, root));
+  if (!worker.includes(`'./${image}'`)) throw new Error(`./${image} is missing from the service-worker asset list.`);
+}
 if (/function (?:lowerBodyFocusWorkout|optionalCardioBurpeeWorkout|pullFocusWorkout|dipFocusWorkout)\(/.test(html)) {
   throw new Error('Workout templates must live in JSON files, not in index.html.');
 }
