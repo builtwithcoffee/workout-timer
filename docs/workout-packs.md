@@ -4,6 +4,10 @@ Workout Timer 1.0.58 adds local workout-pack import. Publish that app update onc
 
 ## Weekly distribution
 
+Use **Cycle N · Week M** as the displayed edition and **`<track>-cycle-N-week-M.workout-pack.json`** as the filename. The pack ID matches the filename without `.workout-pack.json`; the track ID stays `momentum`, `forge`, or `rise`. For example, `forge-cycle-4-week-3` displays as **Cycle 4 · Week 3** under Forge.
+
+Cycle/week labels describe the supplied programming, not a calendar schedule. Do not assign a start date, end date, or Sunday boundary without confirmation. Corrections use a new ID/file with an `-r2` suffix and the display label **Cycle 4 · Week 3 (corrected)**.
+
 1. Update the individual `.workout.json` templates under `workouts/<track>/` from the supplied programming. Preserve exercise IDs for history continuity. Keep personalized benchmark targets as PR-based instructions until the actual formulas are known.
 2. Give the distribution a unique pack ID and a clear edition label. For example, use `forge-cycle-5-week-1` and `Cycle 5 · Week 1` when those values are confirmed. Do not infer a training week from screenshot dates.
 3. Build one self-contained pack, in the same Lower Body, Dip, Pull, Push order as the built-in tracks:
@@ -17,7 +21,17 @@ Workout Timer 1.0.58 adds local workout-pack import. Publish that app update onc
 
 The builder refuses to overwrite a distribution. Use a new ID for a correction, such as `forge-cycle-5-week-1-r2`, and an edition label such as `Cycle 5 · Week 1 (corrected)`. Keep original distributed files so re-importing an older edition remains reproducible.
 
-The first Forge pack is `workouts/packs/forge-2026-09-03.workout-pack.json`, labelled `Distributed 3 Sep 2026`. Its cycle/week is unconfirmed. The four source workout files remain individually importable.
+The current distribution uses the user's provisional **Cycle 4 · Week 3** designation for all three available sets:
+
+| Track | Pack file in `workouts/packs/` |
+| --- | --- |
+| Momentum | `momentum-cycle-4-week-3.workout-pack.json` |
+| Forge | `forge-cycle-4-week-3.workout-pack.json` |
+| Rise | `rise-cycle-4-week-3.workout-pack.json` |
+
+Each contains its four existing strength workouts in Lower Body, Dip, Pull, Push order, with prescriptions unchanged. Optional Cardio remains shared by the app. Individual source workout files remain importable.
+
+The earlier `forge-2026-09-03.workout-pack.json` is retained unchanged so existing imports remain reproducible. Importing the newly named Forge pack adds a separate edition; it does not rename the older import or copy its personal edits. After saving any edits they want to keep, testers may remove the earlier **Distributed 3 Sep 2026** edition. Momentum and Rise packs similarly coexist with their built-in **Included workouts**; creating these files does not automatically import them or replace the built-in library.
 
 ## File format
 

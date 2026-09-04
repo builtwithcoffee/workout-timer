@@ -1,0 +1,1090 @@
+{
+  "format": "workout-timer-pack",
+  "version": 1,
+  "id": "rise-cycle-4-week-3",
+  "track": {
+    "id": "rise",
+    "name": "Rise"
+  },
+  "edition": "Cycle 4 · Week 3",
+  "workouts": [
+    {
+      "id": "lower-body-focus",
+      "workout": {
+        "format": "workout-timer-plan",
+        "version": 7,
+        "kind": "workout",
+        "layout": "blocks",
+        "name": "Lower Body Focus Day",
+        "workoutType": "strength",
+        "prepSeconds": 5,
+        "blocks": [
+          {
+            "id": "lower-body-warm-up",
+            "title": "Lower Body Focus Day · Warm-Up",
+            "mode": "sequence",
+            "score": "",
+            "notes": [
+              "Activate the hips, glutes and knees to prepare for lower-body loading.",
+              "Allow about seven to nine minutes for this warm-up."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "lower-body-warm-up-wall-sit",
+                "label": "Wall Sit",
+                "completion": "timed",
+                "setPlan": [
+                  {
+                    "seconds": 30,
+                    "restSeconds": 30
+                  },
+                  {
+                    "seconds": 30,
+                    "restSeconds": 30
+                  }
+                ],
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-warm-up-squats",
+                "label": "Bodyweight Squats",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "5 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "5 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "5 reps",
+                    "restSeconds": 30
+                  }
+                ],
+                "notes": [
+                  "Use a slow descent and reach full depth if possible."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-warm-up-hip-thrust",
+                "label": "Hip Thrust",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 30
+                  }
+                ],
+                "notes": [
+                  "Pause briefly at the top."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-warm-up-reverse-lunges",
+                "label": "Reverse Lunges",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "10 per side",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "10 per side",
+                    "restSeconds": 30
+                  }
+                ],
+                "notes": [
+                  "Move with control and balance."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-warm-up-deep-squat-hold",
+                "label": "Deep Squat Position Hold",
+                "completion": "timed",
+                "seconds": 20,
+                "sets": 1,
+                "restSeconds": 20,
+                "notes": [
+                  "Sit into the squat and stay relaxed but stable."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "lower-body-main-lift",
+            "title": "Main Lift · Squats",
+            "mode": "sequence",
+            "score": "max-reps",
+            "notes": [
+              "Use air squats or weighted squats. If your entry test used a particular weight, keep that weight; otherwise use bodyweight.",
+              "Record your maximum set as the benchmark if you have not already done so."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "lower-body-main-lift-squats",
+                "label": "Squats",
+                "completion": "manual",
+                "tracking": "weight-reps",
+                "setPlan": [
+                  {
+                    "target": "90% of PR",
+                    "restSeconds": 180
+                  },
+                  {
+                    "target": "75% of PR",
+                    "restSeconds": 150
+                  },
+                  {
+                    "target": "65% of PR",
+                    "restSeconds": 150
+                  }
+                ],
+                "notes": [
+                  "Use the prescribed PR-based target for each set."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "lower-body-density",
+            "title": "Density · Quality Work",
+            "mode": "for-time",
+            "rounds": 7,
+            "unitLabel": "round",
+            "restBetweenRoundsSeconds": 0,
+            "score": "elapsed-time",
+            "notes": [
+              "Build quality volume without rushing. Perform every rep with intent.",
+              "Complete A then B in each round until you finish seven rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+              "Use 10–20 kg of additional weight for the lunges when available and appropriate to your level."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "lower-body-density-neutral-grip-rows",
+                "label": "Neutral-Grip Rows",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-density-reverse-lunges",
+                "label": "Reverse Lunges",
+                "completion": "manual",
+                "tracking": "weight-reps",
+                "target": "20 overall reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Add 10–20 kg when available and appropriate."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "lower-body-core-finisher",
+            "title": "Core · Finisher",
+            "mode": "amrap",
+            "durationSeconds": 720,
+            "unitLabel": "round",
+            "score": "rounds-and-reps",
+            "notes": [
+              "Perform a 12-minute AMRAP for quality, cycling A-B-C until time expires.",
+              "Count completed full rounds only."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "lower-body-finisher-side-plank-left",
+                "label": "Side Plank · Left",
+                "completion": "timed",
+                "seconds": 35,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-finisher-side-plank-right",
+                "label": "Side Plank · Right",
+                "completion": "timed",
+                "seconds": 35,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "lower-body-finisher-hamstring-curls",
+                "label": "TRX / Ring Hamstring Curls",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "15 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              }
+            ]
+          }
+        ],
+        "theme": {
+          "work": "#f04e23",
+          "rest": "#1668c4"
+        }
+      }
+    },
+    {
+      "id": "dip-focus",
+      "workout": {
+        "format": "workout-timer-plan",
+        "version": 7,
+        "kind": "workout",
+        "layout": "blocks",
+        "name": "Dip Focus Day",
+        "workoutType": "strength",
+        "prepSeconds": 5,
+        "blocks": [
+          {
+            "id": "dip-warm-up",
+            "title": "Dip Focus Day · Warm-Up",
+            "mode": "sequence",
+            "score": "",
+            "notes": [
+              "Prepare the shoulders, elbows and anterior chain for pressing. Move smoothly and keep the warm-up easy.",
+              "Allow about six to eight minutes for this warm-up."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "dip-warm-up-shoulder-circles",
+                "label": "Shoulder Circles",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "30 each direction",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Smooth and controlled."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "dip-warm-up-scapula-dips",
+                "label": "Scapula Dips",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Move only the shoulder blades and keep the arms straight."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "dip-warm-up-banded-rotations",
+                "label": "Banded Shoulder Rotations",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "6 per arm",
+                    "restSeconds": 0
+                  },
+                  {
+                    "target": "6 per arm",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Alternate arms without rest. Focus on shoulder engagement and a strong shoulder stretch."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "dip-warm-up-position-hold",
+                "label": "90° Dip Position Hold",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "15s + 1–3 dips",
+                    "restSeconds": 60
+                  },
+                  {
+                    "target": "15s + 1–3 dips",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Keep the effort easy. This is activation, not a hard working set."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "dip-warm-up-plank",
+                "label": "Straight-Arm Plank Hold",
+                "completion": "timed",
+                "setPlan": [
+                  {
+                    "seconds": 30,
+                    "restSeconds": 30
+                  },
+                  {
+                    "seconds": 30,
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Brace lightly and avoid shaking."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "main-lift-dips",
+            "title": "Main Lift · Dips",
+            "mode": "sequence",
+            "score": "max-reps",
+            "notes": [
+              "Use chest-focused dips or band-supported dips. Focus on full range of motion and clean reps.",
+              "You may move slightly faster on the biggest set, but keep every rep intentional.",
+              "Record your maximum set as the benchmark if you have not already done so."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "main-lift-dips",
+                "label": "Dips / Band-Supported Dips",
+                "completion": "manual",
+                "tracking": "weight-reps",
+                "setPlan": [
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 180
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 180
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 180
+                  },
+                  {
+                    "target": "Max reps",
+                    "restSeconds": 0,
+                    "addedWeight": 10,
+                    "weightUnit": "kg"
+                  }
+                ],
+                "notes": [
+                  "Use the current dip benchmark for the bodyweight sets. Add 10 kg for the final max-rep set."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "dip-density",
+            "title": "Density · Quality Work",
+            "mode": "for-time",
+            "rounds": 8,
+            "unitLabel": "round",
+            "restBetweenRoundsSeconds": 0,
+            "score": "elapsed-time",
+            "notes": [
+              "Build quality volume without rushing. Perform every rep with intent.",
+              "Complete A then B in each round until you finish eight rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+              "Use the prescribed PR-based target for push-ups."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "dip-density-push-ups",
+                "label": "Push-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "PR-based reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Prioritize controlled, high-quality reps."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "dip-density-inverted-rows",
+                "label": "Inverted Rows",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              }
+            ]
+          },
+          {
+            "id": "dip-core-finisher",
+            "title": "Core · Finisher",
+            "mode": "amrap",
+            "durationSeconds": 480,
+            "unitLabel": "round",
+            "score": "rounds-and-reps",
+            "notes": [
+              "Perform an 8-minute AMRAP for quality, alternating A-B until time expires.",
+              "Count completed full rounds only."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "dip-finisher-l-sit-raises",
+                "label": "L-Sit Leg Raises",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "22 overall reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "dip-finisher-split-squats",
+                "label": "Bulgarian Split Squats",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "12 per leg",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              }
+            ]
+          }
+        ],
+        "theme": {
+          "work": "#f04e23",
+          "rest": "#1668c4"
+        }
+      }
+    },
+    {
+      "id": "pull-focus",
+      "workout": {
+        "format": "workout-timer-plan",
+        "version": 7,
+        "kind": "workout",
+        "layout": "blocks",
+        "name": "Pull Focus Day",
+        "workoutType": "strength",
+        "prepSeconds": 5,
+        "blocks": [
+          {
+            "id": "pull-warm-up",
+            "title": "Pull Focus Day · Warm-Up",
+            "mode": "sequence",
+            "score": "",
+            "notes": [
+              "Move with control and do not rush. This prepares scapular stability, grip strength and core tension without fatigue.",
+              "The explosive pull-up primer is optional; skip its four sets if it is not appropriate today."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "warm-up-burpees-round-1",
+                "label": "Original Burpees · Round 1",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Controlled, not rushed."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-forward-circles-round-1",
+                "label": "Forward Arm Circles · Round 1",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-backward-circles-round-1",
+                "label": "Backward Arm Circles · Round 1",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-burpees-round-2",
+                "label": "Original Burpees · Round 2",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Controlled, not rushed."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-forward-circles-round-2",
+                "label": "Forward Arm Circles · Round 2",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-backward-circles-round-2",
+                "label": "Backward Arm Circles · Round 2",
+                "completion": "manual",
+                "target": "10 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-scapula-pull-ups",
+                "label": "Scapula Pull-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "6 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "6 reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Move only the shoulder blades. Do not bend the elbows."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-passive-hang-1",
+                "label": "Passive Dead Hang · Round 1",
+                "completion": "timed",
+                "seconds": 20,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Relax the shoulders."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-active-hang-1",
+                "label": "Active Dead Hang · Round 1",
+                "completion": "timed",
+                "seconds": 10,
+                "sets": 1,
+                "restSeconds": 30,
+                "notes": [
+                  "Engage the shoulders without bending the elbows."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-passive-hang-2",
+                "label": "Passive Dead Hang · Round 2",
+                "completion": "timed",
+                "seconds": 20,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Relax the shoulders."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-active-hang-2",
+                "label": "Active Dead Hang · Round 2",
+                "completion": "timed",
+                "seconds": 10,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Engage the shoulders without bending the elbows."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-ring-rows",
+                "label": "Overhand Ring Rows",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "5–8 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "5–8 reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Use an easy high angle and controlled tempo. Do not approach failure."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-hollow-body-hold",
+                "label": "Hollow Body Hold",
+                "completion": "timed",
+                "setPlan": [
+                  {
+                    "seconds": 20,
+                    "restSeconds": 0
+                  },
+                  {
+                    "seconds": 20,
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Focus on full-body tension."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "warm-up-explosive-pull-up",
+                "label": "Optional Explosive Pull-Up",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "1 rep",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "1 rep",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "1 rep",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "1 rep",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "One powerful pull-up per set to activate fast-twitch muscle fibres. Skip if not appropriate today."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "main-lift-pull-ups",
+            "title": "Main Lift · Pull-Ups",
+            "mode": "sequence",
+            "score": "max-reps",
+            "notes": [
+              "Use pull-ups or banded pull-ups. Focus on full range of motion and clean reps.",
+              "You may move slightly faster on the biggest set, but keep every rep intentional.",
+              "Record your maximum unbroken set as the benchmark if you have not already done so.",
+              "If the benchmark is 0 or 1 without a band, perform four sets of 1–2 reps.",
+              "Aim to collect 6–8 total reps each time, or remain with the banded variation you currently use."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "main-lift-pull-ups",
+                "label": "Pull-Ups / Banded Pull-Ups",
+                "completion": "manual",
+                "tracking": "weight-reps",
+                "setPlan": [
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 180
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 150
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 150
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 120
+                  },
+                  {
+                    "target": "Max reps",
+                    "restSeconds": 0,
+                    "addedWeight": 10,
+                    "weightUnit": "kg"
+                  }
+                ],
+                "notes": [
+                  "Use the current pull-up benchmark for the first four sets.",
+                  "Add 10 kg for the final max-rep set."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pull-density",
+            "title": "Density · Quality Work",
+            "mode": "for-time",
+            "rounds": 10,
+            "unitLabel": "round",
+            "restBetweenRoundsSeconds": 0,
+            "score": "elapsed-time",
+            "notes": [
+              "Build quality volume without rushing. Perform every rep with intent and use banded dips if needed.",
+              "Complete A then B in each round until you finish 10 rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+              "Use the prescribed PR-based target for dips.",
+              "If your squat entry test used additional weight, use that weight for the squats when appropriate."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "density-dips",
+                "label": "Dips / Banded Dips",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "PR-based reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Quality reps; use assistance if needed."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "density-squats",
+                "label": "Squats",
+                "completion": "manual",
+                "tracking": "weight-reps",
+                "target": "6 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Use your entry-test weight only if appropriate."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pull-core-finisher",
+            "title": "Core · Finisher",
+            "mode": "amrap",
+            "durationSeconds": 540,
+            "unitLabel": "round",
+            "score": "rounds-and-reps",
+            "notes": [
+              "Perform a 9-minute AMRAP for quality, alternating A-B until time expires.",
+              "Count completed full rounds only.",
+              "Aim for full burpees. If your push muscles are exhausted, use original burpees."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "finisher-toes-to-bar",
+                "label": "Toes to Bar / Hanging Knee Raises",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "9 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "finisher-burpees",
+                "label": "Burpees",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "9 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Use full burpees when possible; switch to original burpees if needed."
+                ]
+              }
+            ]
+          }
+        ],
+        "theme": {
+          "work": "#f04e23",
+          "rest": "#1668c4"
+        }
+      }
+    },
+    {
+      "id": "push-focus",
+      "workout": {
+        "format": "workout-timer-plan",
+        "version": 7,
+        "kind": "workout",
+        "layout": "blocks",
+        "name": "Push Focus Day",
+        "workoutType": "strength",
+        "prepSeconds": 5,
+        "blocks": [
+          {
+            "id": "push-warm-up",
+            "title": "Push Focus Day · Warm-Up",
+            "mode": "sequence",
+            "score": "",
+            "notes": [
+              "Prepare the shoulders, elbows and anterior chain for pressing. Move smoothly and keep the warm-up easy.",
+              "Allow about six to eight minutes for this warm-up."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "push-warm-up-shoulder-circles",
+                "label": "Shoulder Circles",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "30 each direction",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Smooth and controlled."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "push-warm-up-scapula-push-ups",
+                "label": "Scapula Push-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "10 reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Move only the shoulder blades and keep the arms straight."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "push-warm-up-plank",
+                "label": "Straight-Arm Plank Hold",
+                "completion": "timed",
+                "setPlan": [
+                  {
+                    "seconds": 30,
+                    "restSeconds": 30
+                  },
+                  {
+                    "seconds": 30,
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Focus on shoulder engagement."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "push-warm-up-elevated-push-ups",
+                "label": "Elevated Push-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "6 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "6 reps",
+                    "restSeconds": 30
+                  },
+                  {
+                    "target": "6 reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Use an easy variation. This is activation, not a hard working set."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "main-lift-push-ups",
+            "title": "Main Lift · Push-Ups",
+            "mode": "sequence",
+            "score": "max-reps",
+            "notes": [
+              "Focus on full range of motion and clean reps.",
+              "You may move slightly faster on the biggest set, but keep every rep intentional.",
+              "Record your maximum set as the benchmark if you have not already done so."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "main-lift-push-ups",
+                "label": "Push-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "setPlan": [
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 150
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 150
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 120
+                  },
+                  {
+                    "target": "PR-based reps",
+                    "restSeconds": 0
+                  }
+                ],
+                "notes": [
+                  "Use the current push-up benchmark for all four sets."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "push-density",
+            "title": "Density · Quality Work",
+            "mode": "for-time",
+            "rounds": 8,
+            "unitLabel": "round",
+            "restBetweenRoundsSeconds": 0,
+            "score": "elapsed-time",
+            "notes": [
+              "Build quality volume without rushing. Perform every rep with intent and use banded pull-ups if needed.",
+              "Complete A then B in each round until you finish eight rounds. Aim for unbroken sets early, but not every set must be unbroken.",
+              "Use the prescribed PR-based target for chin-ups."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "push-density-chin-ups",
+                "label": "Chin-Ups / Banded Chin-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "PR-based reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": [
+                  "Prioritize controlled, high-quality reps; use assistance if needed."
+                ]
+              },
+              {
+                "type": "exercise",
+                "id": "push-density-pike-push-ups",
+                "label": "Pike Push-Ups",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "7 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              }
+            ]
+          },
+          {
+            "id": "push-core-finisher",
+            "title": "Core · Finisher",
+            "mode": "amrap",
+            "durationSeconds": 600,
+            "unitLabel": "round",
+            "score": "rounds-and-reps",
+            "notes": [
+              "Perform a 10-minute AMRAP for quality, cycling A-B-C until time expires.",
+              "Count completed full rounds only."
+            ],
+            "items": [
+              {
+                "type": "exercise",
+                "id": "push-finisher-ring-y-raises",
+                "label": "Ring Y-Raises",
+                "completion": "manual",
+                "tracking": "reps",
+                "target": "8 reps",
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "push-finisher-plank-hold",
+                "label": "Plank Hold",
+                "completion": "timed",
+                "seconds": 40,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              },
+              {
+                "type": "exercise",
+                "id": "push-finisher-dip-hold",
+                "label": "90° Dip Hold",
+                "completion": "timed",
+                "seconds": 25,
+                "sets": 1,
+                "restSeconds": 0,
+                "notes": []
+              }
+            ]
+          }
+        ],
+        "theme": {
+          "work": "#f04e23",
+          "rest": "#1668c4"
+        }
+      }
+    }
+  ]
+}

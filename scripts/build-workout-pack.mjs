@@ -2,7 +2,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 
 const [track, id, edition] = process.argv.slice(2);
 if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(track || '') || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(id || '') || !edition || edition.length > 60) {
-  throw new Error('Usage: node scripts/build-workout-pack.mjs forge forge-2026-09-03 "Distributed 3 Sep 2026"');
+  throw new Error('Usage: node scripts/build-workout-pack.mjs forge forge-cycle-4-week-3 "Cycle 4 · Week 3"');
 }
 const root = new URL('../', import.meta.url);
 const workouts = [];
