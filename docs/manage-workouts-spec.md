@@ -1,6 +1,6 @@
 # Manage workouts — proposed first version
 
-Status: specification for review; not implemented.
+Status: implemented in local app release 1.0.64; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -87,4 +87,4 @@ Exclude search, filters, folders, drag ordering, bulk deletion, automatic downlo
 - Check a narrow iPhone viewport, long edition names, scrolling, keyboard/screen-reader labels, focus restoration, and actual installed-iPhone file-picker return behavior.
 - Run the pack regression suite and release/CSP verification. Test the existing workout and History preservation paths where affected.
 
-Recommended next step: implement this single-screen scope, then try importing and removing a second test week on the installed iPhone app before community distribution.
+Recommended next step: try importing and removing a second test week on the installed iPhone app before community distribution.

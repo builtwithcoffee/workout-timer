@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LLmL3W4Rs0EBiT8bwd4MF24LyrGIP3iJa61b4rwhZW8='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0PyG5hfqCd/hjfmcKkR5yDbfKvP3YkTBXHiCC8JfmFs='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -276,7 +276,37 @@
   .day-optional .day-row:hover{background:var(--card2)}
   .track-card:focus-visible,.track-chip:focus-visible,.day-row:focus-visible,.track-custom-toggle:focus-visible{outline:3px solid var(--text);outline-offset:3px}
   .pack-import{width:100%;margin-top:16px}
-  .pack-remove{align-self:flex-end;min-height:44px;padding:0 8px;background:transparent;color:var(--muted);font-size:12px}
+  body.managing-workouts{overflow:hidden}
+  .workout-manager{width:min(620px,calc(100vw - 28px));max-height:calc(100dvh - 28px);padding:0}
+  .manager-header{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:var(--card);border-bottom:1px solid var(--line)}
+  .manager-header h2{margin:0;font-size:25px;letter-spacing:-.02em}
+  .manager-header button,.manager-actions button{min-height:44px;padding:0 14px;border-radius:10px;background:var(--card2);font-size:14px;font-weight:700}
+  .manager-body{padding:24px}
+  .manager-import{width:100%;min-height:48px;border-radius:12px;background:var(--accent);color:var(--accent-text);font-weight:750}
+  .manager-intro{margin:12px 0 0;font-size:14px;line-height:1.5;color:var(--muted)}
+  .manager-message:not(:empty){margin-top:14px}
+  .manager-groups{display:flex;flex-direction:column;gap:24px;margin-top:24px}
+  .manager-group h3{margin:0 0 10px;font-size:19px;letter-spacing:-.01em}
+  .manager-pack{padding:16px;border:1px solid var(--line);border-radius:14px}
+  .manager-pack+.manager-pack{margin-top:10px}
+  .manager-pack-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 12px}
+  .manager-pack-name{font-size:17px;font-weight:750;overflow-wrap:anywhere;min-width:0}
+  .manager-selected{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .manager-pack-meta{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
+  .manager-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .manager-actions .manager-remove{margin-left:auto;background:transparent;color:var(--muted);font-weight:500}
+  .manager-confirm{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .manager-confirm p{margin:0;font-size:14px;line-height:1.5}
+  .manager-confirm .manager-save-hint{margin-top:8px;color:var(--muted);font-size:13px}
+  .manager-actions .manager-confirm-remove{background:var(--accent);color:var(--accent-text)}
+  .workout-manager button:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+  .workout-manager button:disabled{opacity:.5;cursor:wait}
+  @media(max-width:600px){
+    .workout-manager{width:100%;max-width:none;height:100dvh;max-height:100dvh;margin:0;border:0;border-radius:0}
+    .manager-header{padding:calc(16px + env(safe-area-inset-top)) 20px 16px}
+    .manager-body{padding:20px 20px calc(24px + env(safe-area-inset-bottom))}
+    .manager-header h2{font-size:23px}
+  }
   .track-custom-toggle{display:none;width:100%;margin-top:20px}
   .workout-selecting .panelhead,.workout-selecting .workout-primary{display:none}
   .workout-selecting .layout{display:block}
@@ -577,7 +607,7 @@
           <div class="plan-library-body">
             <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
             <div class="msg plan-library-message" id="wCatalogMsg" aria-live="polite"></div>
-            <button class="ghost pack-import" id="wImportPack" type="button">Import workout pack</button>
+            <button class="ghost pack-import" id="wManageWorkouts" type="button" aria-haspopup="dialog">Manage workouts</button>
             <button class="ghost track-custom-toggle" id="wCustomToolsToggle" type="button" aria-expanded="false">Create or load my own workout</button>
           </div>
         </details>
@@ -793,6 +823,17 @@
   </div>
 </div>
 
+<dialog class="install-dialog workout-manager" id="workoutManager" aria-labelledby="workoutManagerTitle" closedby="closerequest">
+  <header class="manager-header"><h2 id="workoutManagerTitle">Manage workouts</h2><button id="workoutManagerDone" type="button" autofocus>Done</button></header>
+  <div class="manager-body">
+    <button class="manager-import" id="wImportPack" type="button">Import workout pack</button>
+    <p class="manager-intro">Import the workout pack shared with the community. Imported workouts stay on this device and work offline.</p>
+    <div class="msg manager-message" id="workoutManagerMsg" role="status" aria-live="polite"></div>
+    <div class="manager-groups" id="workoutManagerPacks"></div>
+  </div>
+</dialog>
+<input class="hidden" id="packFileInput" type="file" accept=".json,application/json" />
+
 <dialog class="install-dialog" id="installHelp" aria-labelledby="installHelpTitle" aria-describedby="installHelpIntro">
   <div class="install-shell">
     <div class="install-head">
@@ -908,7 +949,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.63';
+  const APP_VERSION = '1.0.64';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3580,6 +3621,7 @@
 
   function importWorkoutPack(raw) {
     const pack = normalizeWorkoutPack(raw);
+    saveImportedWorkoutEdit();
     const existing = importedPacks.find(entry => entry.pack.id === pack.id);
     if (existing && JSON.stringify(existing.pack) !== JSON.stringify(pack)) {
       throw new Error('A different edition already uses this pack ID. Give the updated pack a new ID so existing workouts and edits stay intact.');
@@ -3635,18 +3677,185 @@
   }
 
   function removeImportedPack(packId) {
+    if (managerImportBusy) return;
     const entry = importedPacks.find(entry => entry.pack.id === packId);
-    if (!entry || !window.confirm('Remove ' + entry.pack.track.name + ' · ' + entry.pack.edition + ' and its saved edits from this device? Save any personal copies first. Your current workout and History will remain.')) return;
+    if (!entry) return;
     try {
+      saveImportedWorkoutEdit();
+      const track = availableWorkoutCatalog().tracks.find(track => track.id === entry.pack.track.id);
+      const selected = track && selectedTrackPack(track);
       writeImportedPacks(importedPacks.filter(entry => entry.pack.id !== packId));
       if (activePackWorkout && activePackWorkout.packId === packId) activePackWorkout = null;
-      delete selectedPackEditions[entry.pack.track.id];
-      store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+      if (selected && selected.pack.id === packId) {
+        const remaining = importedPacks.filter(item => item.pack.track.id === entry.pack.track.id);
+        selectedPackEditions[entry.pack.track.id] = track.plans.length || !remaining.length ? '' : remaining[remaining.length - 1].pack.id;
+        store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+      }
       persistPlans();
-      renderWorkoutCatalogView(true);
-      setCatalogMsg('Pack removed. Your current workout and History are unchanged.');
-    } catch (err) { setCatalogMsg(err.message, true); }
+      managerRemovalId = '';
+      renderWorkoutCatalogView();
+      renderWorkoutManager();
+      setManagerMsg(entry.pack.track.name + ' · ' + entry.pack.edition + ' removed. Your current workout and History are unchanged.');
+      focusCatalogTarget('#wImportPack');
+    } catch (err) { setManagerMsg(err.message, true); }
   }
+  let managerImportBusy = false;
+  let managerRemovalId = '';
+
+  function setManagerMsg(message, isError = false) {
+    const host = $('#workoutManagerMsg');
+    host.textContent = message;
+    host.classList.toggle('err', isError);
+    if (isError && $('#workoutManager').open) host.scrollIntoView({ block: 'nearest' });
+  }
+
+  function setManagerBusy(busy) {
+    managerImportBusy = busy;
+    $('#wImportPack').disabled = busy;
+    $('#workoutManagerDone').disabled = busy;
+    $('#workoutManagerPacks').inert = busy;
+    $('#workoutManager').setAttribute('aria-busy', String(busy));
+  }
+
+  function openWorkoutManager() {
+    if (S.screen !== 'home') return;
+    managerRemovalId = '';
+    setManagerMsg('');
+    renderWorkoutManager();
+    document.body.classList.add('managing-workouts');
+    $('#workoutManager').showModal();
+  }
+
+  function closeWorkoutManager(restoreFocus = true) {
+    if (managerImportBusy) return;
+    managerRemovalId = '';
+    if ($('#workoutManager').open) $('#workoutManager').close();
+    document.body.classList.remove('managing-workouts');
+    if (restoreFocus) focusCatalogTarget('#wManageWorkouts');
+  }
+
+  function selectWorkoutPack(trackId, packId, fromManager = false) {
+    if (managerImportBusy) return false;
+    try {
+      const track = availableWorkoutCatalog().tracks.find(track => track.id === trackId);
+      if (!track || (packId ? !track.packs.some(entry => entry.pack.id === packId) : !track.plans.length)) {
+        throw new Error('That workout pack is no longer available.');
+      }
+      saveImportedWorkoutEdit();
+      selectedTrackId = trackId;
+      selectedPackEditions[trackId] = packId;
+      store.set(TRACK_KEY, selectedTrackId);
+      store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+      if (fromManager) closeWorkoutManager(false);
+      renderWorkoutCatalogView(fromManager);
+      $('#wPlanLibraryCard').open = true;
+      return true;
+    } catch (err) {
+      if (fromManager) setManagerMsg(err.message, true);
+      else setCatalogMsg(err.message, true);
+      return false;
+    }
+  }
+
+  async function loadManagerPack(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file || managerImportBusy) return;
+    setManagerBusy(true);
+    setManagerMsg('Importing workout pack…');
+    try {
+      if (file.size > MAX_PACK_BYTES) throw new Error('Workout packs must be smaller than 512 KB.');
+      const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      if (!raw || raw.format !== PACK_FORMAT) throw new Error('Choose a workout pack. For an individual workout file, use More workout tools → Workout files → Load.');
+      importWorkoutPack(raw);
+      setManagerBusy(false);
+      closeWorkoutManager(false);
+      focusCatalogTarget('.day-row');
+    } catch (err) {
+      setManagerMsg(err.message || 'Could not import that workout pack.', true);
+    } finally {
+      setManagerBusy(false);
+      e.target.value = '';
+    }
+  }
+
+  function requestPackRemoval(packId) {
+    if (managerImportBusy) return;
+    managerRemovalId = packId;
+    setManagerMsg('');
+    renderWorkoutManager();
+    focusCatalogTarget('#packRemoveCancel');
+  }
+
+  function cancelPackRemoval() {
+    managerRemovalId = '';
+    renderWorkoutManager();
+    focusCatalogTarget('#wImportPack');
+  }
+
+  function renderWorkoutManager() {
+    const host = $('#workoutManagerPacks');
+    host.innerHTML = '';
+    const catalog = availableWorkoutCatalog();
+    if (!catalog.tracks.length) {
+      addCatalogText(host, 'p', 'manager-intro', 'No workout packs yet. Import one to get started, or connect to load the starter packs.');
+      return;
+    }
+    for (const track of catalog.tracks) {
+      const section = document.createElement('section');
+      section.className = 'manager-group';
+      const heading = addCatalogText(section, 'h3', '', track.name);
+      heading.id = 'manager-track-' + track.id;
+      section.setAttribute('aria-labelledby', heading.id);
+      const selected = selectedTrackPack(track);
+      const rows = track.packs.slice().reverse().map(entry => ({ id: entry.pack.id, name: entry.pack.edition, count: entry.pack.workouts.length }));
+      if (track.plans.length) rows.unshift({ id: '', name: 'Starter Pack', count: track.plans.length });
+      for (const pack of rows) {
+        const row = document.createElement('div');
+        row.className = 'manager-pack';
+        const title = document.createElement('div');
+        title.className = 'manager-pack-heading';
+        addCatalogText(title, 'span', 'manager-pack-name', pack.name);
+        if (track.id === selectedTrackId && pack.id === (selected ? selected.pack.id : '')) addCatalogText(title, 'span', 'manager-selected', 'Selected');
+        row.appendChild(title);
+        addCatalogText(row, 'p', 'manager-pack-meta', pack.count + ' workout day' + (pack.count === 1 ? '' : 's') + (pack.id ? '' : ' · Included with app'));
+        const actions = document.createElement('div');
+        actions.className = 'manager-actions';
+        const use = addCatalogText(actions, 'button', '', 'Use pack');
+        use.type = 'button';
+        use.setAttribute('aria-label', 'Use ' + track.name + ' · ' + pack.name);
+        use.addEventListener('click', () => selectWorkoutPack(track.id, pack.id, true));
+        if (pack.id) {
+          const remove = addCatalogText(actions, 'button', 'manager-remove', 'Remove');
+          remove.type = 'button';
+          remove.setAttribute('aria-label', 'Remove ' + track.name + ' · ' + pack.name);
+          remove.addEventListener('click', () => requestPackRemoval(pack.id));
+        }
+        row.appendChild(actions);
+        if (pack.id && managerRemovalId === pack.id) {
+          const confirm = document.createElement('div');
+          confirm.className = 'manager-confirm';
+          confirm.setAttribute('role', 'group');
+          confirm.setAttribute('aria-labelledby', 'packRemoveQuestion');
+          const question = addCatalogText(confirm, 'p', '', 'Remove ' + track.name + ' · ' + pack.name + ' and its saved edits from this device? Your current workout and History will remain.');
+          question.id = 'packRemoveQuestion';
+          addCatalogText(confirm, 'p', 'manager-save-hint', 'Need to keep edited days? Cancel and save them using More workout tools → Workout files → Save first.');
+          const buttons = document.createElement('div');
+          buttons.className = 'manager-actions';
+          const cancel = addCatalogText(buttons, 'button', '', 'Cancel');
+          cancel.id = 'packRemoveCancel'; cancel.type = 'button';
+          cancel.addEventListener('click', cancelPackRemoval);
+          const remove = addCatalogText(buttons, 'button', 'manager-confirm-remove', 'Remove pack');
+          remove.type = 'button';
+          remove.addEventListener('click', () => removeImportedPack(pack.id));
+          confirm.appendChild(buttons);
+          row.appendChild(confirm);
+        }
+        section.appendChild(row);
+      }
+      host.appendChild(section);
+    }
+  }
+
   /* ---------- end imported workout packs ---------- */
 
   function normalizeWorkoutCatalog(raw) {
@@ -3818,9 +4027,7 @@
       track.packs.slice().reverse().forEach(entry => select.add(new Option(entry.pack.edition, entry.pack.id)));
       select.value = selected ? selected.pack.id : '';
       select.addEventListener('change', () => {
-        selectedPackEditions[track.id] = select.value;
-        store.set(PACK_EDITIONS_KEY, selectedPackEditions);
-        renderWorkoutCatalogView();
+        if (!selectWorkoutPack(track.id, select.value)) select.value = selected ? selected.pack.id : '';
         focusCatalogTarget('#wPackEdition');
       });
       field.appendChild(select);
@@ -3839,13 +4046,6 @@
       catalog.optional.forEach(plan => optionalList.appendChild(makeDayRow(plan)));
       optional.appendChild(optionalList);
       view.appendChild(optional);
-    }
-    const selected = selectedTrackPack(track);
-    if (selected) {
-      const remove = document.createElement('button');
-      remove.type = 'button'; remove.className = 'ghost pack-remove'; remove.textContent = 'Remove pack';
-      remove.addEventListener('click', () => removeImportedPack(selected.pack.id));
-      view.appendChild(remove);
     }
     host.appendChild(view);
     if (focusHeading) focusCatalogTarget('.day-row');
@@ -3875,6 +4075,7 @@
     try {
       workoutCatalog = normalizeWorkoutCatalog(await fetchSmallJson('./workouts/catalog.json', 'the workout catalog'));
       renderWorkoutCatalogView();
+      if ($('#workoutManager').open) renderWorkoutManager();
     } catch (_) {
       workoutCatalog = null;
       renderWorkoutCatalogView();
@@ -3882,7 +4083,19 @@
   }
 
   /* ---------- wiring ---------- */
-  $('#wImportPack').addEventListener('click', () => chooseFile('workout'));
+  $('#wManageWorkouts').addEventListener('click', openWorkoutManager);
+  $('#workoutManagerDone').addEventListener('click', () => closeWorkoutManager());
+  $('#workoutManager').addEventListener('cancel', e => {
+    e.preventDefault();
+    closeWorkoutManager();
+  });
+  $('#workoutManager').addEventListener('close', () => document.body.classList.remove('managing-workouts'));
+  $('#wImportPack').addEventListener('click', () => {
+    if (managerImportBusy) return;
+    $('#packFileInput').value = '';
+    $('#packFileInput').click();
+  });
+  $('#packFileInput').addEventListener('change', loadManagerPack);
   $('#wStart').addEventListener('click', startWorkout);
   $('#wEdit').addEventListener('click', () => {
     if (workoutPlan.layout !== 'blocks') return;
@@ -4001,6 +4214,7 @@
   document.addEventListener('fullscreenchange', renderFullscreen);
 
   document.addEventListener('keydown', (e) => {
+    if ($('#workoutManager').open) return;
     if (e.key === 'Escape' && !$('#modeMenu').classList.contains('hidden')) {
       e.preventDefault();
       closeModeMenu();

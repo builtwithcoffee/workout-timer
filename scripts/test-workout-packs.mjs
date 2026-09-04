@@ -26,11 +26,16 @@ function fixture(saved = new Map()) {
       removeAttribute(name) { delete this[name]; }
       addEventListener(name,fn) { this.handlers[name]=fn; }
       add(option) { this.children.push(option); }
+      showModal() { this.open=true; }
+      close() { this.open=false; }
+      focus() {}
+      scrollIntoView() {}
       set innerHTML(value) { this.children=[]; this.html=value; }
       get innerHTML() { return this.html||''; }
     }
     const elements=new Map(), $=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
-    const document={createElement:tag=>new Element(tag)};
+    const document={createElement:tag=>new Element(tag),body:new Element('body')};
+    const S={screen:'home'};
     const Option=function(text,value){this.textContent=text;this.value=value;};
     let quotaFailure=false, fetchFailure=false, confirms=true, fetches=0;
     const localStorage={setItem(k,v){if(quotaFailure)throw new Error('QuotaExceeded');saved.set(k,v);}};
@@ -45,7 +50,7 @@ function fixture(saved = new Map()) {
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async()=>{fetches++;if(fetchFailure)throw new Error('offline');throw new Error('Unexpected network request');};
-    return {normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+    return {openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
       get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
@@ -144,8 +149,8 @@ assert.deepEqual(restored.active,{packId:raw.id,workoutId:'push-focus'});
 assert.equal(restored.availableWorkoutCatalog().tracks[0].id,'forge','Packs remain available without the built-in catalog');
 restored.selectEdition('forge',raw.id);restored.renderWorkoutCatalogView();
 assert.equal(restored.walk(restored.elements.get('#wPlanLibrary')).filter(el=>el.className==='day-row').length,4);
-restored.setConfirm(false);restored.removeImportedPack(raw.id);assert.equal(restored.packs.length,2);
-restored.setConfirm(true);restored.removeImportedPack(raw.id);assert.equal(restored.packs.length,1);assert.equal(restored.active,null);assert.equal(restored.plan.name,'Push Focus Day');
+restored.openWorkoutManager();restored.requestPackRemoval(raw.id);restored.cancelPackRemoval();assert.equal(restored.packs.length,2);
+restored.removeImportedPack(raw.id);assert.equal(restored.packs.length,1);assert.equal(restored.active,null);assert.equal(restored.plan.name,'Push Focus Day');
 assert.equal(restored.saved.get('workoutTimerHistoryFallbackV1'),history);
 // Existing tracks can receive weekly packs without replacing their supplied catalog.
 const momentum=structuredClone(raw);momentum.id='momentum-test';momentum.track={id:'momentum',name:'Momentum'};
@@ -154,5 +159,68 @@ assert.equal(mt.plans.length,4);assert.equal(mt.packs.length,1);f.selectEdition(
 // Prototype-like IDs must never resolve to inherited object properties.
 const special=structuredClone(raw);special.id='constructor';special.track.id='constructor';special.workouts[0].id='constructor';
 f.importWorkoutPack(special);assert.equal(f.trackWorkoutPlans(f.availableWorkoutCatalog().tracks.find(t=>t.id==='constructor'))[0].name,'Lower Body Focus Day');
+
+// Management uses the real dialog handlers and preserves the loaded workout.
+const manager=fixture();manager.setCatalog(catalog);
+await upload(manager,initial);
+const beforeManager=manager.workoutFile();
+manager.openWorkoutManager();
+let managerNodes=manager.walk(manager.elements.get('#workoutManagerPacks'));
+assert.equal(managerNodes.filter(el=>el.className==='manager-pack').length,2);
+assert.equal(managerNodes.filter(el=>el.className==='manager-remove').length,0,'Starter packs cannot be removed');
+assert.deepEqual(manager.workoutFile(),beforeManager);
+const packUpload=async value=>manager.loadManagerPack({target:{files:[{size:JSON.stringify(value).length,text:async()=>JSON.stringify(value)}]}});
+await packUpload(raw);
+assert.equal(manager.elements.get('#workoutManager').open,false,'Success returns to day selection');
+assert.equal(manager.track,'forge');assert.deepEqual(manager.workoutFile(),beforeManager);
+manager.openWorkoutManager();
+await packUpload(raw);assert.equal(manager.packs.length,1,'Duplicate manager imports are harmless');
+manager.openWorkoutManager();
+await packUpload(initial);assert.equal(manager.elements.get('#workoutManager').open,true);
+assert.match(manager.elements.get('#workoutManagerMsg').textContent,/Choose a workout pack/);
+assert.equal(manager.packs.length,1);
+await manager.loadManagerPack({target:{files:[]}});assert.equal(manager.packs.length,1);
+await manager.loadManagerPack({target:{files:[{size:5,text:async()=>'{nope'}]}});
+assert.equal(manager.elements.get('#workoutManager').open,true);
+assert.equal(manager.elements.get('#wImportPack').disabled,false);
+let finishRead;
+const pendingImport=manager.loadManagerPack({target:{files:[{size:100,text:()=>new Promise(resolve=>finishRead=resolve)}]}});
+manager.closeWorkoutManager();assert.equal(manager.elements.get('#workoutManager').open,true,'Busy import blocks dismissal');
+assert.equal(manager.selectWorkoutPack('momentum','',true),false,'Busy import blocks pack switches');
+finishRead(JSON.stringify(next));await pendingImport;
+assert.equal(manager.packs.length,2);
+manager.openWorkoutManager();manager.setQuota(true);
+const third=structuredClone(next);third.id='forge-third-week';
+await packUpload(third);assert.equal(manager.packs.length,2);
+assert.equal(manager.elements.get('#workoutManager').open,true);
+assert.match(manager.elements.get('#workoutManagerMsg').textContent,/Could not save/);
+manager.setQuota(false);
+manager.selectWorkoutPack('forge',next.id,true);
+manager.openWorkoutManager();manager.removeImportedPack(raw.id);
+assert.equal(manager.selectedTrackPack(manager.availableWorkoutCatalog().tracks.find(t=>t.id==='forge')).pack.id,next.id,'Removing an older week preserves the selected week');
+assert.equal(manager.elements.get('#workoutManager').open,true);
+manager.importWorkoutPack(raw);manager.importWorkoutPack(next);
+manager.openWorkoutManager();manager.removeImportedPack(next.id);
+assert.equal(manager.selectedTrackPack(manager.availableWorkoutCatalog().tracks.find(t=>t.id==='forge')).pack.id,raw.id,'Selected removal falls back to remaining imported week');
+manager.removeImportedPack(raw.id);assert.equal(manager.track,'','Last pack removal returns to track selection');
+assert.deepEqual(manager.workoutFile(),beforeManager);
+manager.importWorkoutPack(momentum);
+manager.openWorkoutManager();manager.removeImportedPack(momentum.id);
+assert.equal(manager.track,'momentum');
+assert.equal(manager.selectedTrackPack(manager.availableWorkoutCatalog().tracks.find(t=>t.id==='momentum')),null,'Selected removal falls back to Starter Pack');
+manager.closeWorkoutManager();assert.equal(manager.elements.get('#workoutManager').open,false);
+// Save failures during Use pack and removal leave the current imported edit intact.
+manager.importWorkoutPack(raw);
+await manager.loadCatalogWorkout(manager.trackWorkoutPlans(manager.availableWorkoutCatalog().tracks.find(t=>t.id==='forge'))[3],{innerHTML:'Push',setAttribute(){},removeAttribute(){}});
+manager.prepareStructuredForEditing();manager.plan.blocks[1].items[0].setPlan[0].target='29 reps';
+manager.openWorkoutManager();manager.setQuota(true);
+assert.equal(manager.selectWorkoutPack('momentum','',true),false);
+assert.equal(manager.track,'forge');assert.equal(manager.elements.get('#workoutManager').open,true);
+manager.removeImportedPack(raw.id);assert.equal(manager.packs.length,1);
+manager.setQuota(false);manager.selectWorkoutPack('momentum','',true);
+assert.equal(manager.packs[0].edits['push-focus'].blocks[1].items[0].setPlan[0].target,'29 reps');
+manager.setOffline();await manager.renderWorkoutCatalog();manager.openWorkoutManager();
+assert.equal(manager.walk(manager.elements.get('#workoutManagerPacks')).filter(el=>el.className==='manager-pack').length,1,'Stored packs remain manageable offline');
+
 for(const file of await readdir(new URL('workouts/packs/',root))) if(file.endsWith('.workout-pack.json')) f.normalizeWorkoutPack(JSON.parse(await readFile(new URL('workouts/packs/'+file,root),'utf8')));
 console.log('Verified pack import/navigation, weekly editions, edit persistence, reload/offline access, duplicate/conflict handling, validation, storage failure, removal, and legacy single-workout import.');

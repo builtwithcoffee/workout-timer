@@ -17,7 +17,7 @@ Cycle/week labels describe the supplied programming, not a calendar schedule. Do
    ```
 
 4. Run `node scripts/test-workout-packs.mjs` and `node scripts/verify-release.mjs`. Review all prescription changes against the source.
-5. Share the resulting JSON as a file attachment with the community. Users download it into Files/Downloads, then choose **Import workout pack** in the workout chooser. No account or upload to a server is involved.
+5. Share the resulting JSON as a file attachment with the community. Users download it into Files/Downloads, then choose **Manage workouts → Import workout pack** in the workout chooser. No account or upload to a server is involved.
 
 The builder refuses to overwrite a distribution. Use a new ID for a correction, such as `forge-cycle-5-week-1-r2`, and an edition label such as `Cycle 5 · Week 1 (corrected)`. Keep original distributed files so re-importing an older edition remains reproducible.
 
@@ -65,7 +65,7 @@ Importing a pack selects its track and edition but does not load a day or replac
 
 The original pack and its personal edits are stored separately under `workoutTimerPacksV1` in local storage. Normal app/service-worker updates do not clear this key. History remains separate. The current saved workout carries a `packSource` reference so editing after reopening still updates the correct imported day; external single-workout imports are detached copies.
 
-Removing a pack requires confirmation and deletes its stored edits, while retaining the current workout and History. Export any personal days with **Workout files → Save** before removal or clearing browser data. Bulk export of personalized packs and automatic PR calculations are not included in this first version.
+Use **Manage workouts** in the chooser to import, see, use, or remove packs. Starter packs are listed alongside imported editions and cannot be removed. Import and Use pack return to the selected edition’s workout days. Removing a pack requires confirmation and deletes its stored edits, while retaining the current workout and History. Removing an unselected edition preserves the selected one; removing the selected edition falls back to Starter Pack or the latest remaining import in that track. Export any personal days with **Workout files → Save** before removal or clearing browser data. Bulk export of personalized packs and automatic PR calculations are not included in this first version.
 
 ## Verification before sharing
 

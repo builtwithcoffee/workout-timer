@@ -43,7 +43,7 @@ On first use, the workout picker asks you to select Momentum or Rise and then sh
 
 ## Import a workout pack
 
-A `.workout-pack.json` file contains a complete set of workout days. Download it to your device, open the workout chooser, and tap **Import workout pack**. The imported track appears alongside Momentum and Rise. Choose its **Workout pack** edition, then select a day.
+A `.workout-pack.json` file contains a complete set of workout days. Download it to your device, open the workout chooser, and choose **Manage workouts → Import workout pack**. The imported track appears alongside Momentum and Rise. Choose its **Workout pack** edition, then select a day.
 
 Imported workouts and their edits stay on your device, including when switching days or reopening offline. Importing the same pack again keeps your edits. Each new weekly edition has its own entry, so earlier weeks remain available. Importing or browsing a pack leaves the current workout and History unchanged.
 
@@ -62,7 +62,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.63**.
+- Current application release: **1.0.64**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.
