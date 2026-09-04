@@ -394,4 +394,22 @@ assert.equal(editActions.editing,true,'Failed save does not dismiss editing');
 editActions.setQuota(false);editActions.setWorkoutEditing(false);
 assert.equal(editActions.editing,false);
 assert.equal(editActions.packs[0].edits['push-focus'].blocks[1].items[0].setPlan[0].target,'31 reps');
+// Change enters the centered picker immediately, saving edits before clearing the day.
+const changeFlow=fixture();changeFlow.setCatalog(catalog);changeFlow.importWorkoutPack(raw);
+await changeFlow.loadCatalogWorkout(changeFlow.trackWorkoutPlans(changeFlow.availableWorkoutCatalog().tracks.find(t=>t.id==='forge'))[3],button());
+changeFlow.plan.name='My edited push';changeFlow.renderWorkoutCatalogView();
+const changeTrack=()=>changeFlow.walk(changeFlow.elements.get('#wPlanLibrary')).find(el=>el.className==='track-chip').handlers.click();
+changeFlow.setQuota(true);changeTrack();
+assert.equal(changeFlow.pending,false,'Save failure retains the current day');
+assert.equal(changeFlow.track,'forge');
+changeFlow.setQuota(false);changeTrack();
+assert.equal(changeFlow.pending,true,'Change clears the displayed workout before choosing a track');
+assert.equal(changeFlow.track,'');
+assert.equal(changeFlow.packs[0].edits['push-focus'].name,'My edited push');
+assert.ok(changeFlow.walk(changeFlow.elements.get('#wPlanLibrary')).some(el=>el.className==='track-choose'));
+assert.equal(JSON.parse(changeFlow.saved.get('workoutTimerSelectionPendingV1')),true);
+assert.equal(JSON.parse(changeFlow.saved.get('workoutTimerTrackId')),'');
+changeFlow.walk(changeFlow.elements.get('#wPlanLibrary')).find(el=>el.className==='track-card').handlers.click();
+assert.equal(changeFlow.pending,true,'Choosing a track still waits for a workout day');
+
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');

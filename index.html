@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-FCwuqDhmAs6tjur23r3I6ClSDrBhcDjpPwyd72tuQC4='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-K+4zzNLJAQhmYiLnf68aIOYGt6mdotiui16HyedxoS4='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -315,7 +315,7 @@
   .workout-selecting .plan-library-card>summary{display:none}
   .workout-selecting .plan-library-card[open]>summary{border-bottom:0}
   .workout-selecting .plan-library-body{padding:0}
-  .workout-selecting #wWorkoutTools{display:none}
+  .workout-selecting #wWorkoutTools,.workout-selecting #wHistory{display:none}
   .workout-context{color:var(--muted);margin:0 0 16px;line-height:1.5}
   .editing-pack #wEdit{display:none}
   .pack-edit-tools{margin-bottom:18px}
@@ -972,7 +972,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.71';
+  const APP_VERSION = '1.0.72';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -4223,9 +4223,15 @@
     addCatalogText(chip, 'span', 'track-chip-name', track.name + ' track');
     addCatalogText(chip, 'span', 'track-chip-change', 'Change');
     chip.addEventListener('click', () => {
-      const host = $('#wPlanLibrary');
-      host.innerHTML = '';
-      renderTrackChooser(catalog, host, true);
+      try {
+        saveCurrentWorkout();
+        store.set(TRACK_KEY, '');
+        selectedTrackId = '';
+        clearWorkoutSelection();
+        renderWorkoutCatalogView(true);
+      } catch (err) {
+        setCatalogMsg(err.message || 'Could not save this workout before changing tracks.', true);
+      }
     });
     view.appendChild(chip);
     if (track.plans.length || track.packs.length) {
