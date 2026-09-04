@@ -28,7 +28,9 @@ The running screen uses large type, strong phase colours, progress animation, co
 
 ## Workouts and your data
 
-Create basic or structured workouts in the app, or load a saved `.workout.json` or `.circuit.json` plan. Plans can be saved as portable files using the device's normal file controls.
+The primary flow is **import a weekly pack → choose a day → train**. Edits to BuiltSimple workouts save automatically to that day and pack on this device. Choose **Edit workout → Restore original** to discard only that day's edits.
+
+The secondary **My workouts** section supports creating basic or structured workouts, loading individual workout files, resuming your last personal draft, and saving it as a file. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
 
 Workout history is stored locally in the browser on that device. It is never uploaded. Plan files and workout-history backups are deliberately separate: loading a plan does not bring its previous sessions with it.
 
@@ -36,7 +38,7 @@ Use **Export history** to make a backup or move history to another device. On th
 
 ## Included workout plans
 
-On first use, the workout picker asks you to select Momentum or Rise and then shows the workout days for that track. It remembers your track on the device, while shared optional workouts are listed once. Each supplied workout is stored as an individual JSON file, so it can be selected in the app, edited, and saved as a personal copy.
+On first use, the workout picker asks you to select Momentum or Rise and then shows the workout days for that track. It remembers your track on the device, while shared optional workouts are listed once. Starter workout edits persist by track and day, with an untouched original available to restore offline after that day has been loaded.
 
 - [Momentum workout files](workouts/momentum/)
 - [Rise workout files](workouts/rise/)
@@ -45,9 +47,9 @@ On first use, the workout picker asks you to select Momentum or Rise and then sh
 
 A `.workout-pack.json` file contains a complete set of workout days. Download it to your device, open the workout chooser, and choose **Manage workouts → Import workout pack**. The imported track appears alongside Momentum and Rise. Choose its **Workout pack** edition, then select a day.
 
-Imported workouts and their edits stay on your device, including when switching days or reopening offline. Importing the same pack again keeps your edits. Each new weekly edition has its own entry, so earlier weeks remain available. Importing or browsing a pack leaves the current workout and History unchanged.
+Imported workouts and their edits stay on your device, including when switching days or reopening offline. Importing the same pack again keeps your edits. Each new weekly edition has its own entry, so earlier weeks remain available. Switching to a different track or pack clears the displayed workout until a day is selected, including after a reload. Opening and closing Manage workouts, choosing the same pack, or re-importing it does not clear the day. History is unchanged.
 
-The first [Forge pack](workouts/packs/forge-2026-09-03.workout-pack.json) contains Lower Body, Dip, Pull, and Push. PR-based targets are instructions to enter the reps from your current assignment; the app does not calculate them. Use **Workout files → Save** to back up a personalized workout before removing a pack or clearing browser data.
+The first [Forge pack](workouts/packs/forge-2026-09-03.workout-pack.json) contains Lower Body, Dip, Pull, and Push. PR-based targets are instructions to enter the reps from your current assignment; the app does not calculate them. Removing a pack removes its edits after confirmation. Keep the original pack file for re-import; edited pack export is outside this release.
 
 For preparing weekly distributions, see [Workout pack publishing](docs/workout-packs.md).
 
@@ -62,7 +64,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.64**.
+- Current application release: **1.0.65**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.

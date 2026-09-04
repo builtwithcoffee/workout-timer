@@ -1,6 +1,6 @@
-# Manage workouts — proposed first version
+# Manage workouts
 
-Status: implemented in local app release 1.0.64; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.65; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -41,10 +41,10 @@ Optional Cardio remains shared and selectable in the normal workout chooser. It 
 
 ### Import
 
-- Open the existing file picker and accept the existing workout-pack format. Cancellation leaves the manager unchanged. Keep standalone workout/circuit imports in More workout tools.
+- Open the existing file picker and accept the existing workout-pack format. Cancellation leaves the manager unchanged. Keep individual workout imports in My workouts and circuit imports in Circuit.
 - Validate and save using the existing importer. Keep duplicate/conflict, size, queue, and storage protections.
 - On success, select the imported track and edition, close the manager, reveal its days, and show “Forge · Cycle 4 · Week 3 imported. Choose a workout day.” Focus the first day.
-- The previously loaded workout stays intact until a day is chosen. Save any pending imported-workout edit before switching context; if it cannot be saved, stay put and show the error.
+- A different track or edition clears the displayed workout until a day is chosen. This empty selection survives reload; the same edition keeps the current day. Save any pending imported-workout edit before switching context; if it cannot be saved, stay put and show the error.
 - Re-importing an identical pack uses the same flow with “Already imported. Your edits are unchanged.” It never creates another copy.
 - Show malformed-file, conflicting-edition, and storage errors inside the still-open manager, next to the import action. Do not hide them behind the dialog.
 - Disable repeated import actions while reading/saving a file. Do not close the manager while a write is underway.
@@ -53,17 +53,17 @@ Optional Cardio remains shared and selectable in the normal workout chooser. It 
 
 - Select that track and edition, close the manager, and reveal the normal day list.
 - Save pending edits first; failed saves keep the manager open and preserve the current workout.
-- Selecting a pack does not start or replace a workout. The member chooses a day to do that.
+- Selecting a different pack clears the displayed day; it never starts a workout. Selecting the same pack retains its day. Returning from a personal workout to a pack asks for a day again.
 
 ### Remove
 
 - Only imported packs have Remove. Starter packs remain available and cannot be removed in this first version.
-- Confirm the exact track and edition: “Remove Forge · Cycle 4 · Week 3 and its saved edits from this device? Your current workout and History will remain.” Provide **Cancel** and **Remove pack**.
-- Explain in the confirmation that edited days should be saved using Workout files → Save if they are needed later. Do not add bulk export to this scope.
+- Confirm the exact track and edition: “Remove Forge · Cycle 4 · Week 3 and its saved edits from this device? Your History will remain. If this pack is selected, choose another workout afterward.” Provide **Cancel** and **Remove pack**.
+- Pack edits stay with their pack; there is no Save as/new personal workout path or edited-pack export. Removal explicitly includes those edits.
 - Save any pending current edit before removal. After success, refresh the manager and chooser; remain in the manager, announce the removal, and place focus on a nearby remaining row or Import.
 - If removing the selected edition, fall back to Starter Pack in that track, otherwise the most recently imported remaining edition. If the track has no packs left, remove its library group and return the underlying chooser to track selection.
 - Removing an unselected edition must preserve the current chooser selection. The current removal handler clears the track's edition choice unconditionally; narrow that behavior during implementation.
-- Keep the loaded workout and History. If its source pack was removed, detach the working copy from the removed pack as the current implementation does.
+- Clear the displayed day when its source or selected pack is removed. Keep unrelated pack edits and History. Do not silently turn a removed pack day into a personal workout.
 - A failed storage write leaves the pack and selection intact and displays the error in the manager.
 
 ## Scope and implementation size
@@ -77,7 +77,7 @@ Exclude search, filters, folders, drag ordering, bulk deletion, automatic downlo
 ## Acceptance checks
 
 - Fresh install: Momentum and Rise starter rows appear; both Use actions work; no Remove actions are shown for starters.
-- Import Forge: track and edition appear, the manager closes to its day list, and the loaded workout/history are preserved.
+- Import Forge: track and edition appear, the manager closes to its day list, the previous day is hidden, and edits/History are preserved.
 - Import another week: both editions remain available in the manager and top dropdown; edits stay with their original edition.
 - Existing imported libraries and the earlier dated Forge pack require no migration.
 - Duplicate, invalid, conflicting, cancelled, and storage-failed imports behave clearly without losing data.
@@ -88,3 +88,9 @@ Exclude search, filters, folders, drag ordering, bulk deletion, automatic downlo
 - Run the pack regression suite and release/CSP verification. Test the existing workout and History preservation paths where affected.
 
 Recommended next step: try importing and removing a second test week on the installed iPhone app before community distribution.
+
+## BuiltSimple and My workouts separation (1.0.65)
+
+BuiltSimple remains the primary workflow. Day edits save automatically to their original track/week. Edit workout exposes a confirmed Restore original action that replaces only that day’s edited copy. Starter days use the same behavior with a retained local original after first load. Opening and dismissing management alone does not clear the day. The workout preview identifies its track and pack.
+
+My workouts is a quiet, separate disclosure containing the existing basic/structured creation and individual-file controls, plus Resume my workout for the last personal draft. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.

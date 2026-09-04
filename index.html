@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0PyG5hfqCd/hjfmcKkR5yDbfKvP3YkTBXHiCC8JfmFs='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cXW6vC2y+HBFGGdpaDkgItnuLY8fIPgbHWAIR15DnHg='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -307,7 +307,6 @@
     .manager-body{padding:20px 20px calc(24px + env(safe-area-inset-bottom))}
     .manager-header h2{font-size:23px}
   }
-  .track-custom-toggle{display:none;width:100%;margin-top:20px}
   .workout-selecting .panelhead,.workout-selecting .workout-primary{display:none}
   .workout-selecting .layout{display:block}
   .workout-selecting .workout-sidebar{width:min(720px,100%);margin:24px auto 0}
@@ -315,12 +314,14 @@
   .workout-selecting .plan-library-card>summary{display:none}
   .workout-selecting .plan-library-card[open]>summary{border-bottom:0}
   .workout-selecting .plan-library-body{padding:0}
-  .workout-selecting .track-custom-toggle{display:block}
-  .workout-selecting .workout-setup-card,.workout-selecting .workout-tools-card{display:none}
-  .workout-selecting.custom-tools-open .workout-tools-card{display:block;padding:0;background:transparent}
-  .workout-selecting.custom-tools-open .workout-tools-card>summary{display:none}
-  .workout-selecting.custom-tools-open .workout-tools-body{padding:0}
-  .workout-selecting.custom-tools-open .workout-colour-card{display:none}
+  .workout-selecting #wWorkoutTools{display:none}
+  .workout-context{color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .pack-edit-tools{margin-bottom:18px}
+  .pack-edit-tools p{margin:0 0 12px;line-height:1.5}
+  .my-workouts-card{margin-top:18px}
+  .my-workouts-card>summary{color:var(--muted)}
+  .my-workouts-card .note{margin:0 0 14px;line-height:1.5}
+  .workout-history-link{margin-top:14px;width:100%}
 
   .swatches{display:flex;gap:8px;flex-wrap:wrap}
   .swatch{width:44px;height:44px;border-radius:12px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
@@ -598,6 +599,15 @@
     </div>
     <div class="layout">
       <div class="workout-primary">
+        <p class="mono workout-context" id="wWorkoutContext"></p>
+        <div class="card pack-edit-tools hidden" id="wPackEditTools">
+          <p class="note">Edits save automatically to this workout on this device.</p>
+          <button class="ghost" id="wRestoreOriginal" type="button">Restore original</button>
+          <div class="hidden" id="wRestoreConfirm" role="group" aria-label="Restore original workout">
+            <p>Restore this workout to the original pack version? Only this day's edits will be removed. Your History stays.</p>
+            <div class="actions"><button class="ghost" id="wRestoreCancel" type="button">Cancel</button><button class="ghost" id="wRestoreApply" type="button">Restore original</button></div>
+          </div>
+        </div>
         <div class="tiles" id="wExercises"></div>
         <div class="msg" id="wMsg" aria-live="polite" style="margin-top:12px"></div>
       </div>
@@ -608,26 +618,11 @@
             <div class="plan-library" id="wPlanLibrary"><p class="note plan-library-status">Loading workouts…</p></div>
             <div class="msg plan-library-message" id="wCatalogMsg" aria-live="polite"></div>
             <button class="ghost pack-import" id="wManageWorkouts" type="button" aria-haspopup="dialog">Manage workouts</button>
-            <button class="ghost track-custom-toggle" id="wCustomToolsToggle" type="button" aria-expanded="false">Create or load my own workout</button>
           </div>
         </details>
         <details class="card workout-tools-card" id="wWorkoutTools">
-          <summary><span class="mono">More workout tools</span></summary>
+          <summary><span class="mono">Workout options</span></summary>
           <div class="workout-tools-body">
-            <div class="card custom-workout-card">
-              <span class="mono card-label">Create workout</span>
-              <div class="plan-actions">
-                <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
-                <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
-              </div>
-            </div>
-            <div class="card custom-workout-card">
-              <span class="mono card-label">Workout files</span>
-              <div class="actions">
-                <button class="ghost" id="wLoad" type="button">Load</button>
-                <button class="ghost" id="wSave" type="button">Save</button>
-              </div>
-            </div>
             <div class="card custom-workout-card workout-setup-card">
               <div class="field">
                 <span class="mono">Workout start delay</span>
@@ -650,17 +645,25 @@
                   <span class="note">Rest</span>
                   <div class="swatches" id="wSwRest"></div>
                 </div>
-                <div class="note" style="margin-top:12px">These colours affect this workout only and are included in saved workout files.</div>
+                <div class="note" style="margin-top:12px">These colours apply only to this workout and save on this device.</div>
               </div>
             </details>
-            <div class="card custom-workout-card">
-              <span class="mono card-label">Workout history</span>
-              <div class="actions">
-                <button class="ghost" id="wHistory" type="button">History</button>
-              </div>
+          </div>
+        </details>
+        <details class="card workout-tools-card my-workouts-card" id="wMyWorkouts">
+          <summary><span class="mono">My workouts</span></summary>
+          <div class="workout-tools-body">
+            <p class="note" id="wMyWorkoutStatus">Create a basic or structured workout, or load your own file.</p>
+            <div class="plan-actions">
+              <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume my workout</button>
+              <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
+              <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
+              <button class="ghost" id="wLoad" type="button">Load workout file</button>
+              <button class="ghost" id="wSave" type="button">Save workout file</button>
             </div>
           </div>
         </details>
+        <button class="ghost workout-history-link" id="wHistory" type="button">History</button>
       </div>
     </div>
   </section>
@@ -949,13 +952,16 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.64';
+  const APP_VERSION = '1.0.65';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
   const PACK_FORMAT = 'workout-timer-pack';
   const PACKS_KEY = 'workoutTimerPacksV1';
   const PACK_EDITIONS_KEY = 'workoutTimerPackEditionsV1';
+  const STARTER_WORKOUTS_KEY = 'workoutTimerStarterWorkoutsV1';
+  const MY_WORKOUT_KEY = 'workoutTimerMyWorkoutV1';
+  const SELECTION_PENDING_KEY = 'workoutTimerSelectionPendingV1';
   const MAX_PACK_BYTES = 512 * 1024;
   const MAX_WORKOUT_QUEUE_ITEMS = 20000;
   const AMRAP_QUEUE_ROUNDS = 200;
@@ -1393,20 +1399,23 @@
 
   let importedPacks = readImportedPacks();
   let activePackWorkout = null;
+  let starterWorkouts = readStarterWorkouts();
+  let workoutLoadGeneration = 0;
   let selectedPackEditions = store.get(PACK_EDITIONS_KEY, {});
   if (!selectedPackEditions || typeof selectedPackEditions !== 'object' || Array.isArray(selectedPackEditions)) selectedPackEditions = {};
   let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
   let workoutTheme = defaultTheme(), circuitTheme = defaultTheme();
   let editingStructuredWorkout = false;
   let workoutSelectionPending = true;
-  await (async function restorePlans() {
+  function restorePlans() {
     let restoredWorkout = false, restoredCircuit = false;
     const savedWorkout = store.get('workoutTimerWorkoutPlanV7', null) || store.get('workoutTimerWorkoutPlanV6', null) || store.get('workoutTimerWorkoutPlanV5', null);
     const savedCircuit = store.get('workoutTimerCircuitPlanV7', null) || store.get('workoutTimerCircuitPlanV6', null) || store.get('workoutTimerCircuitPlanV5', null);
     if (savedWorkout) try {
-      const normalized = normalizeWorkout(savedWorkout);
-      setWorkoutPlan(normalized);
-      if (importedWorkoutSource(savedWorkout.packSource)) activePackWorkout = { packId: savedWorkout.packSource.packId, workoutId: savedWorkout.packSource.workoutId };
+      const source = workoutSource(savedWorkout.packSource);
+      const raw = source ? (source.starter ? source.starter.edited || source.original : source.entry.edits[source.item.id] || source.original) : savedWorkout;
+      setWorkoutPlan(normalizeWorkout(raw));
+      if (source) activePackWorkout = { ...savedWorkout.packSource };
       restoredWorkout = true; workoutSelectionPending = false;
     } catch (_) {}
     if (savedCircuit) try { const p = normalizeCircuit(savedCircuit); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; restoredCircuit = true; } catch (_) {}
@@ -1418,12 +1427,16 @@
         if (!restoredCircuit && split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; restoredCircuit = true; }
       } catch (_) {}
     }
-  })();
+    if (store.get(SELECTION_PENDING_KEY, false) === true) workoutSelectionPending = true;
+  }
+  restorePlans();
 
   function persistPlans() {
-    try { saveImportedWorkoutEdit(); } catch (err) { setPlanMsg('workout', err.message, true); }
+    try { saveCurrentWorkout(); } catch (err) { setPlanMsg('workout', err.message, true); return false; }
     if (!workoutSelectionPending) store.set('workoutTimerWorkoutPlanV7', workoutFile());
+    store.set(SELECTION_PENDING_KEY, workoutSelectionPending);
     store.set('workoutTimerCircuitPlanV7', circuitFile());
+    return true;
   }
 
   let restPresets = (() => {
@@ -1782,6 +1795,7 @@
     const libraryCard = $('#wPlanLibraryCard');
     host.innerHTML = '';
     panel.classList.toggle('workout-selecting', workoutSelectionPending);
+    renderWorkoutOwnership();
     if (workoutSelectionPending) {
       libraryCard.open = true;
       host.className = 'tiles';
@@ -1792,10 +1806,7 @@
       return;
     }
     libraryCard.open = !(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
-    panel.classList.remove('custom-tools-open');
     $('#wWorkoutTools').open = false;
-    $('#wCustomToolsToggle').setAttribute('aria-expanded', 'false');
-    $('#wCustomToolsToggle').textContent = 'Create or load my own workout';
     host.className = workoutPlan.layout === 'blocks' ? 'structured-list' : 'tiles';
     $('#wStart').disabled = false;
     $('#wName').disabled = false;
@@ -3428,6 +3439,7 @@
   }
   function currentFile(kind) { return kind === 'circuit' ? circuitFile() : workoutFile(); }
   function savePlan(kind) {
+    if (kind === 'workout' && (workoutSelectionPending || workoutSource(activePackWorkout))) return;
     try {
       const blob = new Blob([JSON.stringify(currentFile(kind), null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -3455,14 +3467,14 @@
       if ([5, 6, PLAN_VERSION].includes(v) && (raw.kind === 'workout' || raw.kind === 'circuit')) {
         if (raw.kind === 'workout') {
           const plan = normalizeWorkout(raw);
-          saveImportedWorkoutEdit(); activePackWorkout = null;
+          saveCurrentWorkout(); workoutLoadGeneration++; activePackWorkout = null;
           setWorkoutPlan(plan); workoutSelectionPending = false; loaded.push('workout');
         } else if (raw.kind === 'circuit') {
           const p = normalizeCircuit(raw); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; loaded.push('circuit');
         }
       } else {
         const split = splitLegacy(raw);
-        if (split.workout) { saveImportedWorkoutEdit(); activePackWorkout = null; setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
+        if (split.workout) { saveCurrentWorkout(); workoutLoadGeneration++; activePackWorkout = null; setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
         if (split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; loaded.push('circuit'); }
       }
       if (!loaded.length) throw new Error('No usable exercises or timed circuit stations were found.');
@@ -3502,8 +3514,9 @@
       newWorkoutTimer = setTimeout(disarmNewWorkout, 3000);
       return;
     }
-    try { saveImportedWorkoutEdit(); } catch (err) { setPlanMsg('workout', err.message, true); return; }
+    try { saveCurrentWorkout(); } catch (err) { setPlanMsg('workout', err.message, true); return; }
     disarmNewWorkout();
+    workoutLoadGeneration++;
     activePackWorkout = null;
     if (structured) setWorkoutPlan(defaultStructuredWorkout());
     else workoutPlan = defaultWorkout();
@@ -3517,7 +3530,8 @@
   }
 
   function applyBuiltInWorkout(plan, source = null) {
-    saveImportedWorkoutEdit();
+    saveCurrentWorkout();
+    workoutLoadGeneration++;
     activePackWorkout = source;
     setWorkoutPlan(plan);
     workoutSelectionPending = false;
@@ -3595,7 +3609,7 @@
   function writeImportedPacks(next) {
     const serialized = JSON.stringify(next);
     if (next.length > 52 || serialized.length > 2 * 1024 * 1024) {
-      throw new Error('Your pack library is full. Save any edits you need, then remove an older pack.');
+      throw new Error('Your pack library is full. Remove an older pack you no longer need.');
     }
     try { localStorage.setItem(PACKS_KEY, serialized); }
     catch (_) { throw new Error('Could not save the pack library on this device. Free some browser storage and try again.'); }
@@ -3609,24 +3623,135 @@
     return item ? { entry, item } : null;
   }
 
-  function saveImportedWorkoutEdit() {
-    const source = importedWorkoutSource(activePackWorkout);
-    if (!source || workoutSelectionPending) return;
+  function readStarterWorkouts() {
+    const saved = store.get(STARTER_WORKOUTS_KEY, []);
+    if (!Array.isArray(saved) || saved.length > 200) return [];
+    const keys = new Set();
+    return saved.flatMap(entry => {
+      try {
+        if (!/^[a-z0-9-]{1,40}$/.test(entry.trackId) || !/^[a-z0-9-]{1,80}$/.test(entry.workoutId)) return [];
+        const key = entry.trackId + '/' + entry.workoutId;
+        if (keys.has(key)) return [];
+        keys.add(key);
+        const original = packWorkoutFile(entry.original);
+        let edited;
+        try { if (entry.edited) edited = packWorkoutFile(entry.edited); } catch (_) {}
+        return [{ trackId: entry.trackId, workoutId: entry.workoutId, original, ...(edited ? { edited } : {}) }];
+      } catch (_) { return []; }
+    });
+  }
+
+  function writeStarterWorkouts(next) {
+    const serialized = JSON.stringify(next);
+    if (next.length > 200 || serialized.length > 2 * 1024 * 1024) throw new Error('Your saved starter workouts are too large.');
+    try { localStorage.setItem(STARTER_WORKOUTS_KEY, serialized); }
+    catch (_) { throw new Error('Could not save this starter workout on this device. Free some browser storage and try again.'); }
+    starterWorkouts = next;
+  }
+
+  function workoutSource(source) {
+    const imported = importedWorkoutSource(source);
+    if (imported) return { ...imported, original: imported.item.workout };
+    const starter = source && starterWorkouts.find(entry => entry.trackId === source.starterTrackId && entry.workoutId === source.workoutId);
+    return starter ? { starter, original: starter.original } : null;
+  }
+
+  function saveCurrentWorkout() {
+    if (workoutSelectionPending) return;
+    const source = workoutSource(activePackWorkout);
     const workout = packWorkoutFile(workoutFile());
-    const previous = Object.hasOwn(source.entry.edits, source.item.id) ? source.entry.edits[source.item.id] : source.item.workout;
-    if (JSON.stringify(previous) === JSON.stringify(workout)) return;
-    writeImportedPacks(importedPacks.map(entry => entry === source.entry
-      ? { pack: entry.pack, edits: { ...entry.edits, [source.item.id]: workout } } : entry));
+    if (!source) {
+      try { localStorage.setItem(MY_WORKOUT_KEY, JSON.stringify(workout)); }
+      catch (_) { throw new Error('Could not save your workout on this device. Free some browser storage and try again.'); }
+      return;
+    }
+    if (source.starter) {
+      const entry = source.starter;
+      if (JSON.stringify(entry.edited || entry.original) === JSON.stringify(workout)) return;
+      writeStarterWorkouts(starterWorkouts.map(item => item === entry ? { ...entry, edited: workout } : item));
+    } else {
+      const previous = Object.hasOwn(source.entry.edits, source.item.id) ? source.entry.edits[source.item.id] : source.original;
+      if (JSON.stringify(previous) === JSON.stringify(workout)) return;
+      writeImportedPacks(importedPacks.map(entry => entry === source.entry
+        ? { pack: entry.pack, edits: { ...entry.edits, [source.item.id]: workout } } : entry));
+    }
+  }
+
+  // Leave the last plan in memory/storage for compatibility, but never display or run it
+  // in a different track/week. Its pack edit or personal draft is saved before this call.
+  function clearWorkoutSelection() {
+    workoutLoadGeneration++;
+    workoutSelectionPending = true;
+    editingStructuredWorkout = false;
+    activePackWorkout = null;
+    store.set(SELECTION_PENDING_KEY, true);
+    renderWorkoutExercises();
+    setPlanMsg('workout', '');
+  }
+
+  function restoreOriginalWorkout() {
+    const source = workoutSource(activePackWorkout);
+    if (!source || workoutSelectionPending) return;
+    try {
+      const plan = normalizeWorkout(source.original);
+      if (source.starter) {
+        writeStarterWorkouts(starterWorkouts.map(entry => entry === source.starter
+          ? { trackId: entry.trackId, workoutId: entry.workoutId, original: entry.original } : entry));
+      } else {
+        const edits = { ...source.entry.edits };
+        delete edits[source.item.id];
+        writeImportedPacks(importedPacks.map(entry => entry === source.entry ? { pack: entry.pack, edits } : entry));
+      }
+      setWorkoutPlan(plan);
+      editingStructuredWorkout = false;
+      persistPlans(); renderSwatches(); renderWorkoutExercises(); renderFields(); renderSummaries();
+      renderWorkoutCatalogView();
+      setPlanMsg('workout', 'Original workout restored. Your History is unchanged.');
+      focusCatalogTarget('#wEdit');
+    } catch (err) { setPlanMsg('workout', err.message, true); }
+  }
+
+  function resumeMyWorkout() {
+    try {
+      const raw = store.get(MY_WORKOUT_KEY, null);
+      if (!raw) return;
+      applyBuiltInWorkout(normalizeWorkout(raw));
+      $('#wMyWorkouts').open = true;
+      focusCatalogTarget('#wName');
+    } catch (err) { setCatalogMsg(err.message, true); }
+  }
+
+  function renderWorkoutOwnership() {
+    const source = workoutSource(activePackWorkout);
+    const owned = !!source && !workoutSelectionPending;
+    if (owned) $('#wMyWorkouts').open = false;
+    $('#wSave').disabled = workoutSelectionPending || owned;
+    $('#wSave').classList.toggle('hidden', workoutSelectionPending || owned);
+    $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));
+    $('#wPackEditTools').classList.toggle('hidden', !owned || !editingStructuredWorkout);
+    $('#wRestoreConfirm').classList.add('hidden');
+    $('#wRestoreOriginal').classList.remove('hidden');
+    $('#wName').readOnly = owned && !editingStructuredWorkout;
+    let context = 'My workouts';
+    if (source && source.entry) context = source.entry.pack.track.name + ' · ' + source.entry.pack.edition;
+    else if (source && source.starter) {
+      const track = availableWorkoutCatalog().tracks.find(track => track.id === source.starter.trackId);
+      context = (track ? track.name : source.starter.trackId) + ' · ' + (source.starter.workoutId === 'optional-cardio-burpees' ? 'Optional cardio' : 'Starter Pack');
+    }
+    $('#wWorkoutContext').textContent = context;
+    $('#wMyWorkoutStatus').textContent = owned ? 'Create or load your own workout here. Track workout edits save automatically to their pack.' : 'Create a basic or structured workout, or load your own file.';
   }
 
   function importWorkoutPack(raw) {
     const pack = normalizeWorkoutPack(raw);
-    saveImportedWorkoutEdit();
+    saveCurrentWorkout();
     const existing = importedPacks.find(entry => entry.pack.id === pack.id);
     if (existing && JSON.stringify(existing.pack) !== JSON.stringify(pack)) {
       throw new Error('A different edition already uses this pack ID. Give the updated pack a new ID so existing workouts and edits stay intact.');
     }
     if (!existing) writeImportedPacks([...importedPacks, { pack, edits: {} }]);
+    const changed = selectedTrackId !== pack.track.id || selectedPackEditions[pack.track.id] !== pack.id || (!workoutSelectionPending && !workoutSource(activePackWorkout));
+    if (changed) clearWorkoutSelection();
     selectedTrackId = pack.track.id;
     selectedPackEditions[pack.track.id] = pack.id;
     store.set(TRACK_KEY, selectedTrackId);
@@ -3673,7 +3798,12 @@
     return entry ? entry.pack.workouts.map(item => {
       const workout = Object.hasOwn(entry.edits, item.id) ? entry.edits[item.id] : item.workout;
       return { id: item.id, name: workout.name, summary: importedWorkoutSummary(workout), workout, source: { packId: entry.pack.id, workoutId: item.id } };
-    }) : track.plans;
+    }) : track.plans.map(plan => starterWorkoutPlan(plan, track.id));
+  }
+
+  function starterWorkoutPlan(plan, trackId) {
+    const entry = starterWorkouts.find(entry => entry.trackId === trackId && entry.workoutId === plan.id);
+    return entry && entry.edited ? { ...plan, name: entry.edited.name } : plan;
   }
 
   function removeImportedPack(packId) {
@@ -3681,11 +3811,11 @@
     const entry = importedPacks.find(entry => entry.pack.id === packId);
     if (!entry) return;
     try {
-      saveImportedWorkoutEdit();
+      saveCurrentWorkout();
       const track = availableWorkoutCatalog().tracks.find(track => track.id === entry.pack.track.id);
       const selected = track && selectedTrackPack(track);
       writeImportedPacks(importedPacks.filter(entry => entry.pack.id !== packId));
-      if (activePackWorkout && activePackWorkout.packId === packId) activePackWorkout = null;
+      if ((activePackWorkout && activePackWorkout.packId === packId) || (selectedTrackId === entry.pack.track.id && selected && selected.pack.id === packId)) clearWorkoutSelection();
       if (selected && selected.pack.id === packId) {
         const remaining = importedPacks.filter(item => item.pack.track.id === entry.pack.track.id);
         selectedPackEditions[entry.pack.track.id] = track.plans.length || !remaining.length ? '' : remaining[remaining.length - 1].pack.id;
@@ -3695,7 +3825,7 @@
       managerRemovalId = '';
       renderWorkoutCatalogView();
       renderWorkoutManager();
-      setManagerMsg(entry.pack.track.name + ' · ' + entry.pack.edition + ' removed. Your current workout and History are unchanged.');
+      setManagerMsg(entry.pack.track.name + ' · ' + entry.pack.edition + ' removed. Your History is unchanged.');
       focusCatalogTarget('#wImportPack');
     } catch (err) { setManagerMsg(err.message, true); }
   }
@@ -3741,7 +3871,10 @@
       if (!track || (packId ? !track.packs.some(entry => entry.pack.id === packId) : !track.plans.length)) {
         throw new Error('That workout pack is no longer available.');
       }
-      saveImportedWorkoutEdit();
+      saveCurrentWorkout();
+      const previousTrack = availableWorkoutCatalog().tracks.find(item => item.id === selectedTrackId);
+      const previousPack = previousTrack && selectedTrackPack(previousTrack);
+      if (selectedTrackId !== trackId || (previousPack ? previousPack.pack.id : '') !== packId || (!workoutSelectionPending && !workoutSource(activePackWorkout))) clearWorkoutSelection();
       selectedTrackId = trackId;
       selectedPackEditions[trackId] = packId;
       store.set(TRACK_KEY, selectedTrackId);
@@ -3765,7 +3898,7 @@
     try {
       if (file.size > MAX_PACK_BYTES) throw new Error('Workout packs must be smaller than 512 KB.');
       const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
-      if (!raw || raw.format !== PACK_FORMAT) throw new Error('Choose a workout pack. For an individual workout file, use More workout tools → Workout files → Load.');
+      if (!raw || raw.format !== PACK_FORMAT) throw new Error('Choose a workout pack. For an individual workout file, use My workouts → Load workout file.');
       importWorkoutPack(raw);
       setManagerBusy(false);
       closeWorkoutManager(false);
@@ -3836,9 +3969,8 @@
           confirm.className = 'manager-confirm';
           confirm.setAttribute('role', 'group');
           confirm.setAttribute('aria-labelledby', 'packRemoveQuestion');
-          const question = addCatalogText(confirm, 'p', '', 'Remove ' + track.name + ' · ' + pack.name + ' and its saved edits from this device? Your current workout and History will remain.');
+          const question = addCatalogText(confirm, 'p', '', 'Remove ' + track.name + ' · ' + pack.name + ' and its saved edits from this device? Your History will remain. If this pack is selected, choose another workout afterward.');
           question.id = 'packRemoveQuestion';
-          addCatalogText(confirm, 'p', 'manager-save-hint', 'Need to keep edited days? Cancel and save them using More workout tools → Workout files → Save first.');
           const buttons = document.createElement('div');
           buttons.className = 'manager-actions';
           const cancel = addCatalogText(buttons, 'button', '', 'Cancel');
@@ -3906,15 +4038,24 @@
   }
   async function loadCatalogWorkout(plan, button) {
     const original = button.innerHTML;
+    const generation = ++workoutLoadGeneration;
+    const source = plan.source || { starterTrackId: selectedTrackId, workoutId: plan.id };
     setCatalogMsg('');
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
     button.textContent = 'Loading…';
     try {
-      const raw = plan.workout || await fetchSmallJson(plan.file, plan.name);
-      applyBuiltInWorkout(normalizeWorkout(raw), plan.source || null);
+      saveCurrentWorkout();
+      const stored = workoutSource(source);
+      const raw = stored ? (stored.starter ? stored.starter.edited || stored.original : stored.entry.edits[stored.item.id] || stored.original)
+        : plan.workout || await fetchSmallJson(plan.file, plan.name);
+      if (generation !== workoutLoadGeneration) return;
+      const normalized = normalizeWorkout(raw);
+      saveCurrentWorkout();
+      if (!plan.source && !stored) writeStarterWorkouts([...starterWorkouts, { trackId: source.starterTrackId, workoutId: source.workoutId, original: packWorkoutFile(raw) }]);
+      applyBuiltInWorkout(normalized, source);
     } catch (err) {
-      setCatalogMsg(err.message || 'Could not load ' + plan.name + '.', true);
+      if (generation === workoutLoadGeneration) setCatalogMsg(err.message || 'Could not load ' + plan.name + '.', true);
     } finally {
       button.disabled = false;
       button.removeAttribute('aria-busy');
@@ -3991,9 +4132,8 @@
       const chevron = addCatalogText(button, 'span', 'track-card-chevron', '›');
       chevron.setAttribute('aria-hidden', 'true');
       button.addEventListener('click', () => {
-        selectedTrackId = track.id;
-        store.set(TRACK_KEY, selectedTrackId);
-        renderWorkoutCatalogView(true);
+        const pack = selectedTrackPack(track);
+        if (selectWorkoutPack(track.id, pack ? pack.pack.id : '')) focusCatalogTarget('.day-row');
       });
       list.appendChild(button);
     });
@@ -4011,9 +4151,9 @@
     addCatalogText(chip, 'span', 'track-chip-name', track.name + ' track');
     addCatalogText(chip, 'span', 'track-chip-change', 'Change');
     chip.addEventListener('click', () => {
-      selectedTrackId = '';
-      store.remove(TRACK_KEY);
-      renderWorkoutCatalogView(true);
+      const host = $('#wPlanLibrary');
+      host.innerHTML = '';
+      renderTrackChooser(catalog, host, true);
     });
     view.appendChild(chip);
     if (track.plans.length || track.packs.length) {
@@ -4043,7 +4183,7 @@
       addCatalogText(optional, 'div', 'day-optional-heading', 'Optional');
       const optionalList = document.createElement('div');
       optionalList.className = 'day-list';
-      catalog.optional.forEach(plan => optionalList.appendChild(makeDayRow(plan)));
+      catalog.optional.forEach(plan => optionalList.appendChild(makeDayRow(starterWorkoutPlan(plan, track.id))));
       optional.appendChild(optionalList);
       view.appendChild(optional);
     }
@@ -4099,9 +4239,11 @@
   $('#wStart').addEventListener('click', startWorkout);
   $('#wEdit').addEventListener('click', () => {
     if (workoutPlan.layout !== 'blocks') return;
+    if (!persistPlans()) return;
     editingStructuredWorkout = !editingStructuredWorkout;
-    persistPlans(); renderWorkoutExercises(); renderSummaries();
-    setPlanMsg('workout', editingStructuredWorkout ? 'Editing structured workout.' : 'Workout changes saved on this device.');
+    renderWorkoutExercises(); renderSummaries();
+    if (!editingStructuredWorkout) renderWorkoutCatalogView();
+    setPlanMsg('workout', editingStructuredWorkout ? (activePackWorkout ? 'Edits save automatically to this workout on this device.' : 'Editing structured workout.') : 'Workout changes saved on this device.');
   });
   $('#cStart').addEventListener('click', startCircuit);
   $('#sStart').addEventListener('click', startStopwatch);
@@ -4109,15 +4251,18 @@
   $('#wLoad').addEventListener('click', () => chooseFile('workout'));
   $('#wNewBasic').addEventListener('click', () => createWorkout('basic'));
   $('#wNewStructured').addEventListener('click', () => createWorkout('structured'));
-  $('#wCustomToolsToggle').addEventListener('click', () => {
-    const panel = $('#panel-workout');
-    const opening = !panel.classList.contains('custom-tools-open');
-    panel.classList.toggle('custom-tools-open', opening);
-    $('#wWorkoutTools').open = opening;
-    $('#wCustomToolsToggle').setAttribute('aria-expanded', String(opening));
-    $('#wCustomToolsToggle').textContent = opening ? 'Hide my workout tools' : 'Create or load my own workout';
-    if (opening) requestAnimationFrame(() => $('#wNewBasic').focus());
+  $('#wResumeMyWorkout').addEventListener('click', resumeMyWorkout);
+  $('#wRestoreOriginal').addEventListener('click', () => {
+    $('#wRestoreConfirm').classList.remove('hidden');
+    $('#wRestoreOriginal').classList.add('hidden');
+    $('#wRestoreCancel').focus();
   });
+  $('#wRestoreCancel').addEventListener('click', () => {
+    $('#wRestoreConfirm').classList.add('hidden');
+    $('#wRestoreOriginal').classList.remove('hidden');
+    $('#wRestoreOriginal').focus();
+  });
+  $('#wRestoreApply').addEventListener('click', restoreOriginalWorkout);
   await renderWorkoutCatalog();
   $('#cSave').addEventListener('click', () => savePlan('circuit'));
   $('#cLoad').addEventListener('click', () => chooseFile('circuit'));
@@ -4226,7 +4371,7 @@
       closeInstallHelp();
       return;
     }
-    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement && document.activeElement.tagName)) return;
+    if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'A', 'SUMMARY'].includes(document.activeElement && document.activeElement.tagName)) return;
     const k = e.key.toLowerCase();
     if (e.code === 'Space') {
       e.preventDefault();

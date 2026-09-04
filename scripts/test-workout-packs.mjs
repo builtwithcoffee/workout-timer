@@ -8,11 +8,11 @@ const extract = name => {
   if (!match) throw new Error(`Missing ${name}`);
   return match[0];
 };
-const constants = ['FORMAT', 'PLAN_VERSION', 'TRACK_KEY', 'PACK_FORMAT', 'PACKS_KEY', 'PACK_EDITIONS_KEY', 'MAX_PACK_BYTES', 'MAX_WORKOUT_QUEUE_ITEMS', 'AMRAP_QUEUE_ROUNDS', 'HEX']
+const constants = ['FORMAT', 'PLAN_VERSION', 'TRACK_KEY', 'PACK_FORMAT', 'PACKS_KEY', 'PACK_EDITIONS_KEY', 'STARTER_WORKOUTS_KEY', 'MY_WORKOUT_KEY', 'SELECTION_PENDING_KEY', 'MAX_PACK_BYTES', 'MAX_WORKOUT_QUEUE_ITEMS', 'AMRAP_QUEUE_ROUNDS', 'HEX']
   .map(name => html.match(new RegExp(`  const ${name} = [^\\n]+`))[0]).join('\n');
 const helpers = html.slice(html.indexOf('  const defaultTheme ='), html.indexOf('  function textOn('));
 const packSource = html.split('  /* ---------- imported workout packs ---------- */')[1].split('  /* ---------- end imported workout packs ---------- */')[0];
-const functions = ['validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
+const functions = ['validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
 
 function fixture(saved = new Map()) {
   // Use the production handlers and renderer with a minimal DOM/storage boundary.
@@ -37,24 +37,26 @@ function fixture(saved = new Map()) {
     const document={createElement:tag=>new Element(tag),body:new Element('body')};
     const S={screen:'home'};
     const Option=function(text,value){this.textContent=text;this.value=value;};
-    let quotaFailure=false, fetchFailure=false, confirms=true, fetches=0;
+    let quotaFailure=false, fetchFailure=false, confirms=true, fetches=0, fetchHandler=null;
     const localStorage={setItem(k,v){if(quotaFailure)throw new Error('QuotaExceeded');saved.set(k,v);}};
     const store={get(k,f){try{return saved.has(k)?JSON.parse(saved.get(k)):f;}catch{return f;}},set(k,v){localStorage.setItem(k,JSON.stringify(v));},remove(k){saved.delete(k);}};
     const window={matchMedia:()=>({matches:false}),scrollTo(){},confirm:()=>confirms};
     const cfg={workout:{prep:5},circuit:{prep:5,rounds:1}};
+    let newWorkoutArmed='',newWorkoutTimer=0;
+    let starterWorkouts=readStarterWorkouts(),workoutLoadGeneration=0;
     let importedPacks=readImportedPacks(), activePackWorkout=null, selectedPackEditions=store.get(PACK_EDITIONS_KEY,{});
-    let workoutCatalog=null,selectedTrackId='',workoutSelectionPending=true,editingStructuredWorkout=false,pendingLoadKind='workout';
+    let workoutCatalog=null,selectedTrackId=store.get(TRACK_KEY,''),workoutSelectionPending=true,editingStructuredWorkout=false,pendingLoadKind='workout';
     let workoutPlan,workoutTheme={work:'#f04e23',rest:'#1668c4'},circuitPlan={name:'Circuit',segments:[{label:'Station',phase:'work',seconds:30}]},circuitTheme={...workoutTheme};
     const renderSwatches=()=>{},renderWorkoutExercises=()=>{},renderCircuitTiles=()=>{},renderFields=()=>{},renderSummaries=()=>{},selectMode=()=>{},focusCatalogTarget=()=>{};
     const messages=[];
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
-    const fetchSmallJson=async()=>{fetches++;if(fetchFailure)throw new Error('offline');throw new Error('Unexpected network request');};
-    return {openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
-      get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
-      setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
+    const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
+    return {createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+      get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
+      setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
-      restoreCurrent(){const raw=store.get('workoutTimerWorkoutPlanV7',null);if(raw){setWorkoutPlan(normalizeWorkout(raw));workoutSelectionPending=false;if(importedWorkoutSource(raw.packSource))activePackWorkout=raw.packSource;}},
+      restoreCurrent:restorePlans,
       walk(node){return [node,...(node.children||[]).flatMap(child=>this.walk(child))];}
     };
   `)(saved);
@@ -139,6 +141,9 @@ assert.throws(()=>f.normalizeWorkoutPack(overQueue),/timer steps/);
 const quota=structuredClone(raw);quota.id='forge-quota';f.setQuota(true);
 assert.throws(()=>f.importWorkoutPack(quota),/Could not save/);
 assert.equal(JSON.stringify(f.packs),beforeFailure);
+f.setQuota(false);
+await f.loadCatalogWorkout(f.trackWorkoutPlans(forge())[3],{innerHTML:'Push',setAttribute(){},removeAttribute(){}});
+f.setQuota(true);
 f.plan.blocks[1].items[0].setPlan[0].target='26 reps';
 await f.loadCatalogWorkout(f.trackWorkoutPlans(forge())[1],{innerHTML:'Dip',setAttribute(){},removeAttribute(){}});
 assert.equal(f.plan.name,'Push Focus Day','A failed draft write must prevent switching workouts');
@@ -155,7 +160,7 @@ assert.equal(restored.saved.get('workoutTimerHistoryFallbackV1'),history);
 // Existing tracks can receive weekly packs without replacing their supplied catalog.
 const momentum=structuredClone(raw);momentum.id='momentum-test';momentum.track={id:'momentum',name:'Momentum'};
 f.importWorkoutPack(momentum);const mt=f.availableWorkoutCatalog().tracks.find(t=>t.id==='momentum');
-assert.equal(mt.plans.length,4);assert.equal(mt.packs.length,1);f.selectEdition('momentum','');assert.equal(f.trackWorkoutPlans(mt),mt.plans);
+assert.equal(mt.plans.length,4);assert.equal(mt.packs.length,1);f.selectEdition('momentum','');assert.deepEqual(f.trackWorkoutPlans(mt),mt.plans);
 // Prototype-like IDs must never resolve to inherited object properties.
 const special=structuredClone(raw);special.id='constructor';special.track.id='constructor';special.workouts[0].id='constructor';
 f.importWorkoutPack(special);assert.equal(f.trackWorkoutPlans(f.availableWorkoutCatalog().tracks.find(t=>t.id==='constructor'))[0].name,'Lower Body Focus Day');
@@ -222,5 +227,108 @@ assert.equal(manager.packs[0].edits['push-focus'].blocks[1].items[0].setPlan[0].
 manager.setOffline();await manager.renderWorkoutCatalog();manager.openWorkoutManager();
 assert.equal(manager.walk(manager.elements.get('#workoutManagerPacks')).filter(el=>el.className==='manager-pack').length,1,'Stored packs remain manageable offline');
 
+// BuiltSimple ownership: day/week selection, original restore and personal drafts.
+const flow=fixture();flow.setCatalog(catalog);
+const button=()=>({innerHTML:'Day',setAttribute(){},removeAttribute(){}});
+await upload(flow,initial);
+flow.plan.name='My own push workout';flow.persistPlans();
+flow.importWorkoutPack(raw);
+assert.equal(flow.pending,true,'Importing a new week requires day selection');
+assert.equal(JSON.parse(flow.saved.get('workoutTimerMyWorkoutV1')).name,'My own push workout');
+const flowTrack=()=>flow.availableWorkoutCatalog().tracks.find(t=>t.id==='forge');
+await flow.loadCatalogWorkout(flow.trackWorkoutPlans(flowTrack())[3],button());
+flow.plan.blocks[1].items[0].setPlan[0].target='24 reps';flow.persistPlans();
+flow.renderWorkoutOwnership();
+assert.equal(flow.elements.get('#wSave').disabled,true,'Pack days cannot be exported as new personal workouts');
+assert.match(flow.elements.get('#wWorkoutContext').textContent,/Forge/);
+flow.openWorkoutManager();flow.closeWorkoutManager();
+assert.equal(flow.pending,false,'Opening and dismissing management keeps the day');
+flow.selectWorkoutPack('forge',raw.id,true);
+assert.equal(flow.pending,false,'Choosing the same pack retains its selected day');
+flow.importWorkoutPack(raw);assert.equal(flow.pending,false,'Reimporting the same edition keeps the day and edits');
+flow.importWorkoutPack(next);assert.equal(flow.pending,true);
+const pendingReload=fixture(new Map(flow.saved));pendingReload.restoreCurrent();
+assert.equal(pendingReload.pending,true,'Reload must not bring back a workout from the previous edition');
+flow.selectWorkoutPack('forge',raw.id);
+await flow.loadCatalogWorkout(flow.trackWorkoutPlans(flowTrack())[1],button());
+flow.plan.name='Edited dip';flow.persistPlans();
+await flow.loadCatalogWorkout(flow.trackWorkoutPlans(flowTrack())[3],button());
+flow.saved.set('workoutTimerHistoryFallbackV1',history);
+flow.setQuota(true);flow.restoreOriginalWorkout();
+assert.equal(flow.plan.blocks[1].items[0].setPlan[0].target,'24 reps','Failed restore preserves the edit');
+flow.setQuota(false);flow.restoreOriginalWorkout();
+assert.equal(flow.packs.find(e=>e.pack.id===raw.id).edits['push-focus'],undefined);
+assert.equal(flow.plan.blocks[1].items[0].setPlan[0].target,raw.workouts[3].workout.blocks[1].items[0].setPlan[0].target);
+assert.equal(flow.packs.find(e=>e.pack.id===raw.id).edits['dip-focus'].name,'Edited dip','Restore affects only one day');
+assert.equal(flow.packs.find(e=>e.pack.id===next.id).pack.edition,next.edition,'Restore does not affect another week');
+assert.equal(flow.saved.get('workoutTimerHistoryFallbackV1'),history);
+flow.resumeMyWorkout();
+assert.equal(flow.plan.name,'My own push workout');assert.equal(flow.active,null);
+flow.renderWorkoutOwnership();assert.equal(flow.elements.get('#wSave').disabled,false);
+assert.equal(flow.elements.get('#wWorkoutContext').textContent,'My workouts');
+
+// Starter originals are cached separately from edits, including offline restore.
+const starter=fixture();starter.setCatalog(catalog);
+const fileMap=new Map();
+for(const plan of [...catalog.tracks.flatMap(t=>t.plans),...catalog.optional]) fileMap.set(plan.file,JSON.parse(await readFile(new URL(plan.file,root),'utf8')));
+starter.setFetch(file=>fileMap.get(file));
+starter.selectWorkoutPack('momentum','');
+const starterTrack=()=>starter.availableWorkoutCatalog().tracks.find(t=>t.id==='momentum');
+await starter.loadCatalogWorkout(starter.trackWorkoutPlans(starterTrack())[3],button());
+assert.equal(starter.starters.length,1);assert.equal(starter.pending,false);
+starter.plan.name='My starter push';starter.persistPlans();
+const savedStarter=fixture(new Map(starter.saved));savedStarter.restoreCurrent();savedStarter.setCatalog(catalog);
+assert.equal(savedStarter.plan.name,'My starter push');assert.ok(savedStarter.active.starterTrackId);
+starter.selectWorkoutPack('rise','');assert.equal(starter.pending,true);
+starter.selectWorkoutPack('momentum','');starter.setOffline();
+const starterFetches=starter.fetches;
+await starter.loadCatalogWorkout(starter.trackWorkoutPlans(starterTrack())[3],button());
+assert.equal(starter.plan.name,'My starter push');assert.equal(starter.fetches,starterFetches,'Saved starter day works offline');
+starter.setQuota(true);starter.restoreOriginalWorkout();assert.equal(starter.plan.name,'My starter push');
+starter.setQuota(false);starter.restoreOriginalWorkout();assert.equal(starter.plan.name,initial.name);
+assert.equal(starter.starters[0].edited,undefined);
+assert.equal(starter.fetches,starterFetches,'Restoring a starter does not require a download');
+savedStarter.plan.name='Still editing';savedStarter.setQuota(true);
+assert.equal(savedStarter.selectWorkoutPack('rise',''),false);
+assert.equal(savedStarter.pending,false,'Failed starter save prevents clearing the editor');
+savedStarter.setQuota(false);savedStarter.persistPlans();
+await savedStarter.loadCatalogWorkout(catalog.optional[0],button()); // no network handler: current day must survive
+assert.equal(savedStarter.plan.name,'Still editing');
+
+// Creation stays separate and never changes a pack's stored day.
+flow.selectWorkoutPack('forge',raw.id);
+await flow.loadCatalogWorkout(flow.trackWorkoutPlans(flowTrack())[1],button());
+const retainedDip=JSON.stringify(flow.packs[0].edits['dip-focus']);
+flow.createWorkout('basic');flow.createWorkout('basic');
+assert.equal(flow.plan.layout,'simple');assert.equal(flow.active,null);assert.equal(flow.pending,false);
+assert.equal(JSON.stringify(flow.packs[0].edits['dip-focus']),retainedDip);
+flow.createWorkout('structured');flow.createWorkout('structured');
+assert.equal(flow.plan.layout,'blocks');assert.equal(flow.active,null);
+assert.equal(JSON.parse(flow.saved.get('workoutTimerMyWorkoutV1')).name,'Structured Workout');
+
+// Shared optional cardio gets its own original/edit and clears on a track change.
+const cardio=fixture();cardio.setCatalog(catalog);cardio.setFetch(file=>fileMap.get(file));
+cardio.selectWorkoutPack('momentum','');await cardio.loadCatalogWorkout(catalog.optional[0],button());
+cardio.plan.name='My optional cardio';cardio.persistPlans();
+cardio.selectWorkoutPack('rise','');assert.equal(cardio.pending,true);
+await cardio.loadCatalogWorkout(catalog.optional[0],button());assert.equal(cardio.plan.name,fileMap.get(catalog.optional[0].file).name);
+cardio.selectWorkoutPack('momentum','');cardio.setOffline();
+await cardio.loadCatalogWorkout(catalog.optional[0],button());assert.equal(cardio.plan.name,'My optional cardio');
+cardio.restoreOriginalWorkout();assert.equal(cardio.plan.name,fileMap.get(catalog.optional[0].file).name);
+
+// A slow starter download cannot load a day after a track switch.
+const racing=fixture();racing.setCatalog(catalog);racing.selectWorkoutPack('momentum','');
+let finishDownload;racing.setFetch(()=>new Promise(resolve=>finishDownload=resolve));
+const download=racing.loadCatalogWorkout(catalog.tracks[0].plans[3],button());
+racing.selectWorkoutPack('rise','');finishDownload(initial);await download;
+assert.equal(racing.pending,true);assert.equal(racing.track,'rise');assert.equal(racing.active,null);
+
+// Legacy standalone/current workouts are retained as the personal draft on first switch.
+const legacy=fixture(new Map([['workoutTimerWorkoutPlanV7',JSON.stringify(initial)]]));
+legacy.restoreCurrent();legacy.setCatalog(catalog);
+legacy.selectWorkoutPack('rise','');legacy.resumeMyWorkout();
+assert.equal(legacy.plan.name,initial.name);assert.equal(legacy.pending,false);
+assert.equal(legacy.active,null);
+
 for(const file of await readdir(new URL('workouts/packs/',root))) if(file.endsWith('.workout-pack.json')) f.normalizeWorkoutPack(JSON.parse(await readFile(new URL('workouts/packs/'+file,root),'utf8')));
-console.log('Verified pack import/navigation, weekly editions, edit persistence, reload/offline access, duplicate/conflict handling, validation, storage failure, removal, and legacy single-workout import.');
+console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');
