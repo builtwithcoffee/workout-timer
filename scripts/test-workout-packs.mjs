@@ -267,7 +267,7 @@ assert.equal(flow.saved.get('workoutTimerHistoryFallbackV1'),history);
 flow.resumeMyWorkout();
 assert.equal(flow.plan.name,'My own push workout');assert.equal(flow.active,null);
 flow.renderWorkoutOwnership();assert.equal(flow.elements.get('#wSave').disabled,false);
-assert.equal(flow.elements.get('#wWorkoutContext').textContent,'My workouts');
+assert.equal(flow.elements.get('#wWorkoutContext').textContent,'Custom workouts');
 
 // Starter originals are cached separately from edits, including offline restore.
 const starter=fixture();starter.setCatalog(catalog);

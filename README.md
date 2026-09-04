@@ -18,6 +18,8 @@ You can then use it at the gym without a network connection. When a new version 
 
 ## What it does
 
+Workout, Circuit, and Intervals are the main navigation choices. **More** contains Rest, Stopwatch, and Custom workouts on phones, tablets, and desktop.
+
 - **Workout** — Run rep- and set-based workouts, including mixed bodyweight and weighted movements.
 - **Circuit** — Repeat timed stations and rests for a chosen number of rounds.
 - **Rest** — Start a countdown from editable one-tap presets.
@@ -30,7 +32,7 @@ The running screen uses large type, strong phase colours, progress animation, co
 
 The primary flow is **import a weekly pack → choose a day → train**. Edits to BuiltSimple workouts save automatically to that day and pack on this device. Choose **Edit workout → Restore original** to discard only that day's edits.
 
-The separate **More → My workouts** screen supports creating basic or structured workouts, loading individual workout files, resuming your last personal draft, and saving it as a file. Personal creation and file controls are absent from BuiltSimple track/day selection. Personal editing also hides the track chooser. Use the **Workout** tab to return to BuiltSimple. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
+The separate **More → Custom workouts** screen supports creating basic or structured workouts, loading individual workout files, resuming your last personal draft, and saving it as a file. Personal creation and file controls are absent from BuiltSimple track/day selection. Personal editing also hides the track chooser. Use the **Workout** tab to return to BuiltSimple. BuiltSimple workouts stay with their packs; they cannot be saved as new personal workouts. Circuit file controls remain in Circuit.
 
 Workout history is stored locally in the browser on that device. It is never uploaded. Plan files and workout-history backups are deliberately separate: loading a plan does not bring its previous sessions with it.
 
@@ -64,7 +66,7 @@ The project was primarily vibe-coded with OpenAI Codex. Its initial interface an
 - Static, dependency-free HTML, CSS, and JavaScript; the main application is in `index.html`.
 - Installable/offline PWA behavior is provided by `manifest.webmanifest` and `sw.js`.
 - Plans and settings use local storage; workout history uses IndexedDB with a local-storage fallback.
-- Current application release: **1.0.66**.
+- Current application release: **1.0.67**.
 - Current workout-plan format: **version 7**, with compatibility for older supported plan files.
 - App updates replace cached code and assets without clearing saved plans or workout history.
 - `node scripts/verify-release.mjs` checks the synchronized app version, CSP script hash, and JSON assets before release.

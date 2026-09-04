@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WdIm17iqSnJaXkF0aSAvpRPhTXhEqppjDXdQhgeN8Bs='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3yB3gYA+6d1/xiwdFoOxwplPlNJpZI7VAjABp9caKlo='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -39,16 +39,17 @@
     padding:calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
     max-width:1180px;margin:0 auto;width:100%}
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-  .mode-cluster{display:flex;align-items:stretch;gap:4px;min-width:0}
-  .modes{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:14px}
+  .mode-cluster{display:flex;align-items:stretch;gap:4px;min-width:0;background:var(--card);padding:4px;border-radius:14px}
+  .modes{display:flex;gap:4px}
   .modes button{min-height:46px;padding:0 18px;border-radius:10px;font-size:15px;font-weight:600;color:var(--muted)}
   .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-text)}
   .mode-more{display:block;position:relative;flex:none}
-  .mode-more-toggle{height:54px;padding:0 12px;border-radius:14px;background:var(--card);color:var(--muted);font-size:11px;font-weight:700}
+  .mode-more-toggle{display:flex;align-items:center;justify-content:center;gap:7px;min-height:46px;height:100%;padding:0 18px;border-radius:10px;color:var(--muted);font-size:15px;font-weight:600}
+  .mode-more-chevron{font-size:11px;line-height:1}
+  .mode-more-toggle[aria-expanded="true"] .mode-more-chevron{transform:rotate(180deg)}
   .mode-more-toggle.active{background:var(--accent);color:var(--accent-text)}
   .mode-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:30;min-width:168px;padding:7px;border:1px solid var(--line);border-radius:13px;background:var(--card);box-shadow:0 16px 38px rgba(0,0,0,.42)}
   .mode-menu button{display:block;width:100%;min-height:44px;padding:0 12px;border-radius:9px;color:var(--text);font-size:14px;font-weight:700;text-align:left}
-  .mode-menu button[data-mode]{display:none}
   .mode-menu button:hover{background:var(--card2)}
   .mode-menu button[aria-checked="true"]{background:var(--accent);color:var(--accent-text)}
   .util{display:flex;gap:8px;margin-left:auto}
@@ -477,9 +478,7 @@
     .mode-cluster{flex:1}
     .modes{width:auto;flex:1;min-width:0}
     .modes button{flex:1;min-width:0;padding:0 5px;font-size:11px;white-space:nowrap}
-    .modes button[data-mode="rest"],.modes button[data-mode="stopwatch"]{display:none}
-    .mode-more{display:block}
-    .mode-menu button[data-mode]{display:block}
+    .mode-more-toggle{padding:0 8px;font-size:11px;gap:5px}
     .util{flex:none;margin-left:0}
     #fsBtn{display:none}
     .exercise-fields,.add-row{grid-template-columns:1fr}
@@ -562,16 +561,14 @@
       <nav class="modes" id="modes" role="tablist" aria-label="Timer modes">
         <button role="tab" data-mode="workout" aria-selected="true">Workout</button>
         <button role="tab" data-mode="circuit" aria-selected="false">Circuit</button>
-        <button role="tab" data-mode="rest" aria-selected="false">Rest</button>
-        <button role="tab" data-mode="stopwatch" aria-selected="false">Stopwatch</button>
         <button role="tab" data-mode="intervals" aria-selected="false">Intervals</button>
       </nav>
       <div class="mode-more" id="modeMore">
-        <button class="mode-more-toggle" id="modeMoreBtn" type="button" aria-label="More tools" aria-haspopup="menu" aria-controls="modeMenu" aria-expanded="false">More</button>
+        <button class="mode-more-toggle" id="modeMoreBtn" type="button" aria-label="More tools" aria-haspopup="menu" aria-controls="modeMenu" aria-expanded="false">More <span class="mode-more-chevron" aria-hidden="true">▾</span></button>
         <div class="mode-menu hidden" id="modeMenu" role="menu" aria-label="More tools">
           <button type="button" role="menuitemradio" data-mode="rest" aria-checked="false">Rest</button>
           <button type="button" role="menuitemradio" data-mode="stopwatch" aria-checked="false">Stopwatch</button>
-          <button type="button" role="menuitemradio" id="myWorkoutsNav" aria-checked="false">My workouts</button>
+          <button type="button" role="menuitemradio" id="myWorkoutsNav" aria-checked="false">Custom workouts</button>
         </div>
       </div>
     </div>
@@ -657,7 +654,7 @@
         <div class="card hidden" id="wPersonalActions">
           <div class="plan-actions">
             <button class="ghost" id="wSave" type="button">Save workout file</button>
-            <button class="ghost" id="wBackToMyWorkouts" type="button">Back to My workouts</button>
+            <button class="ghost" id="wBackToMyWorkouts" type="button">Back to Custom workouts</button>
           </div>
         </div>
         <button class="ghost workout-history-link" id="wHistory" type="button">History</button>
@@ -668,13 +665,13 @@
   <!-- PERSONAL WORKOUTS: separate from the BuiltSimple chooser -->
   <section class="panel personal-library hidden" id="panel-my-workouts" aria-labelledby="myWorkoutsTitle">
     <div class="panelhead">
-      <h2 class="title" id="myWorkoutsTitle" tabindex="-1">My workouts</h2>
+      <h2 class="title" id="myWorkoutsTitle" tabindex="-1">Custom workouts</h2>
       <button class="ghost" id="myWorkoutsBack" type="button">Back to BuiltSimple workouts</button>
     </div>
     <p class="note">Create and load your own workouts here. For a BuiltSimple weekly pack, use Manage workouts in the Workout section.</p>
     <div class="card">
       <div class="plan-actions">
-        <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume my workout</button>
+        <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume custom workout</button>
         <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
         <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
         <button class="ghost" id="wLoad" type="button">Load workout file</button>
@@ -967,7 +964,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.66';
+  const APP_VERSION = '1.0.67';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3761,7 +3758,7 @@
     $('#modes button[data-mode="workout"]').setAttribute('aria-selected', String(S.mode === 'workout' && !personal));
     if (S.mode === 'workout') {
       $('#modeMoreBtn').classList.toggle('active', personal);
-      $('#modeMoreBtn').setAttribute('aria-label', personal ? 'More tools, My workouts selected' : 'More tools');
+      $('#modeMoreBtn').setAttribute('aria-label', personal ? 'More tools, Custom workouts selected' : 'More tools');
     }
   }
 
@@ -3804,7 +3801,7 @@
     $('#wRestoreConfirm').classList.add('hidden');
     $('#wRestoreOriginal').classList.remove('hidden');
     $('#wName').readOnly = owned && !editingStructuredWorkout;
-    let context = 'My workouts';
+    let context = 'Custom workouts';
     if (source && source.entry) context = source.entry.pack.track.name + ' · ' + source.entry.pack.edition;
     else if (source && source.starter) {
       const track = availableWorkoutCatalog().tracks.find(track => track.id === source.starter.trackId);
@@ -3973,7 +3970,7 @@
     try {
       if (file.size > MAX_PACK_BYTES) throw new Error('Workout packs must be smaller than 512 KB.');
       const raw = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
-      if (!raw || raw.format !== PACK_FORMAT) throw new Error('Choose a workout pack. For an individual workout file, use My workouts → Load workout file.');
+      if (!raw || raw.format !== PACK_FORMAT) throw new Error('Choose a workout pack. For an individual workout file, use Custom workouts → Load workout file.');
       importWorkoutPack(raw);
       setManagerBusy(false);
       closeWorkoutManager(false);

@@ -1,6 +1,6 @@
 # Manage workouts
 
-Status: implemented in local app release 1.0.66; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.67; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -41,7 +41,7 @@ Optional Cardio remains shared and selectable in the normal workout chooser. It 
 
 ### Import
 
-- Open the existing file picker and accept the existing workout-pack format. Cancellation leaves the manager unchanged. Keep individual workout imports in My workouts and circuit imports in Circuit.
+- Open the existing file picker and accept the existing workout-pack format. Cancellation leaves the manager unchanged. Keep individual workout imports in Custom workouts and circuit imports in Circuit.
 - Validate and save using the existing importer. Keep duplicate/conflict, size, queue, and storage protections.
 - On success, select the imported track and edition, close the manager, reveal its days, and show “Forge · Cycle 4 · Week 3 imported. Choose a workout day.” Focus the first day.
 - A different track or edition clears the displayed workout until a day is chosen. This empty selection survives reload; the same edition keeps the current day. Save any pending imported-workout edit before switching context; if it cannot be saved, stay put and show the error.
@@ -89,8 +89,8 @@ Exclude search, filters, folders, drag ordering, bulk deletion, automatic downlo
 
 Recommended next step: try importing and removing a second test week on the installed iPhone app before community distribution.
 
-## BuiltSimple and My workouts separation (1.0.65)
+## BuiltSimple and Custom workouts separation (1.0.65)
 
 BuiltSimple remains the primary workflow. Day edits save automatically to their original track/week. Edit workout exposes a confirmed Restore original action that replaces only that day’s edited copy. Starter days use the same behavior with a retained local original after first load. Opening and dismissing management alone does not clear the day. The workout preview identifies its track and pack.
 
-My workouts is a separate screen reached through More → My workouts, containing the existing basic/structured creation and individual-file loading, plus Resume my workout for the last personal draft. Personal editing hides the BuiltSimple track/day chooser and exposes Save workout file and Back to My workouts. The Workout tab and Back to BuiltSimple workouts return to the primary flow. No personal creation/loading controls appear beside Manage workouts. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
+Custom workouts is a separate screen reached through More → Custom workouts, containing the existing basic/structured creation and individual-file loading, plus Resume custom workout for the last personal draft. Personal editing hides the BuiltSimple track/day chooser and exposes Save workout file and Back to Custom workouts. The Workout tab and Back to BuiltSimple workouts return to the primary flow. No personal creation/loading controls appear beside Manage workouts. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
