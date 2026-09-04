@@ -21,11 +21,14 @@ node scripts/test-workout-packs.mjs
 node scripts/test-workout-logging.mjs
 node scripts/test-workout-transition.mjs
 node scripts/test-workout-overview.mjs
+node scripts/test-runtime-regressions.mjs
 node scripts/verify-release.mjs
 git diff --check
 ```
 
 Pack tests simulate DOM/storage and fetch boundaries. They do not establish that iOS file pickers, installation, backgrounding, or layout work on a physical device. For documentation-only updates, check links, source/UI consistency, guide rendering, and the release/CSP gate; do not claim timer regressions were rerun unless they were.
+
+The runtime regression suite exercises production queue/timer/logging functions with controlled clocks and storage failures, including all 12 days in the current Momentum, Rise, and Forge packs. See [runtime reliability notes](runtime-reliability.md) for the 1.0.81 fixes and device checks.
 
 ## App update checks
 

@@ -4,7 +4,7 @@ A local-first workout timer for an iPhone or iPad at the gym. No account, subscr
 
 **[Open Workout Timer](https://builtwithcoffee.github.io/workout-timer/)** · **[Read the guide](https://builtwithcoffee.github.io/workout-timer/guide.html)**
 
-This repository describes app release **1.0.80**. A local commit does not update the shared site; check the version in the app footer against the release announced to the community.
+This repository describes app release **1.0.81**. A local commit does not update the shared site; check the version in the app footer against the release announced to the community.
 
 ## Start with a workout pack
 
@@ -76,7 +76,7 @@ History backups do not contain the installed pack library or its current edits. 
 
 The app is dependency-free HTML, CSS, and JavaScript, primarily in `index.html`. `sw.js`, `manifest.webmanifest`, and local icons provide the PWA shell. There is no application server or package-install/build step. Use a localhost HTTP server for development; opening `index.html` as a file does not reliably load the JSON catalog.
 
-Application release **1.0.80**, workout-plan format **7**, and pack format **1** are separate version numbers. Plans/settings use local storage; History uses IndexedDB with a local-storage fallback. Keep `APP_VERSION` synchronized in `index.html` and `sw.js`, and keep the CSP script hash current.
+Application release **1.0.81**, workout-plan format **7**, and pack format **1** are separate version numbers. Plans/settings use local storage; History uses IndexedDB with a local-storage fallback. Keep `APP_VERSION` synchronized in `index.html` and `sw.js`, and keep the CSP script hash current.
 
 - [Weekly pack publishing and format](docs/workout-packs.md)
 - [Pack management behavior](docs/manage-workouts-spec.md)

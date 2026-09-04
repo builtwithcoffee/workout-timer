@@ -112,7 +112,8 @@ assert.doesNotMatch(html, /class="home-motto"/);
 assert.match(html, /class="done-motto hidden" id="doneMotto"><span class="done-motto-accent">1%<\/span> better every day<\/div>/);
 assert.match(html, /\.done-motto\{[^}]*border-top:1px solid var\(--line\)/);
 assert.match(html, /\$\('#doneMotto'\)\.classList\.toggle\('hidden', !canLogWorkout\)/);
-assert.match(guide, /Enter the completed reps and weight, then tap <strong>Set done<\/strong>/);
+const guideText = guide.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+assert.match(guideText, /manual sets[^.]*reps and weight[^.]*before Set done/i);
 assert.doesNotMatch(guide, /adjust the completed reps and weight[^.]*rest/i);
 
 console.log(`Workout logging tests passed for ${plans.length} supplied workouts, ${groupedBlocks} grouped density blocks, ${groupedAmrapBlocks} grouped AMRAP blocks, and ${emomBlocks} EMOM block.`);

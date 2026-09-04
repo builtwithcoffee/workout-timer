@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TbzS7Y1fJi3mK5GZ+sNEZH9UwN6qwRtoyb2scLWknHo='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pzlNuj2N3jehXT1ABRQlOaBUN5tTf/idMgZUKZp6bbQ='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -977,7 +977,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.80';
+  const APP_VERSION = '1.0.81';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -1058,7 +1058,12 @@
       });
     } catch (_) {
       const rows = cleanHistoryRows(fallbackHistory()).filter(x => x.id !== session.id);
-      rows.push(session); store.set('workoutTimerHistoryFallbackV1', rows.slice(-500));
+      rows.push(session);
+      try {
+        localStorage.setItem('workoutTimerHistoryFallbackV1', JSON.stringify(rows.slice(-500)));
+      } catch (_) {
+        throw new Error('Could not save workout history on this device. Free some storage and try again.');
+      }
     }
   }
   async function historyMerge(sessions) {
@@ -1510,7 +1515,7 @@
   /* ---------- state ---------- */
   const S = { mode: 'workout', sound: true, screen: 'home', running: false, paused: false, queue: [], qi: 0, accum: 0, from: 0,
     blockId: null, blockAccum: 0, blockFrom: 0, raf: 0, lastBeep: null, lastBlockBeep: null, wakeLock: null, doneTotal: 0, variableDuration: false,
-    sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionBlockTimes: {}, sessionBlockProgress: {}, sessionSkippedBlocks: {}, sessionEarlyEndedBlocks: {}, pendingSession: null,
+    sessionPlan: null, sessionStartedAt: null, sessionStartedMs: 0, sessionFinishedMs: null, sessionBlockTimes: {}, sessionBlockProgress: {}, sessionSkippedBlocks: {}, sessionEarlyEndedBlocks: {}, pendingSession: null,
     sessionSetResults: {}, sessionAmrapResults: {}, previousExercises: {}, restLogKey: null, sessionUnit: 'lb', pauseHintEligible: false, pauseHintShown: false, pauseHintTimer: 0 };
 
   /* ---------- audio ---------- */
@@ -2448,7 +2453,7 @@
       tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps', actualReps: previous && previous.set && previous.set.actualReps != null ? previous.set.actualReps : targetReps(item.target),
       weight: item.tracking === 'weight-reps'
         ? (item.addedWeight != null ? convertedAddedWeight(item.addedWeight, item.weightUnit, S.sessionUnit)
-          : priorToday && priorToday.weight != null ? priorToday.weight : previous && previous.set && previous.set.weight != null ? previous.set.weight : null) : null,
+          : priorToday && priorToday.weight != null ? priorToday.weight : previous && previous.set && previous.set.weight != null ? convertedAddedWeight(previous.set.weight, previous.unit, S.sessionUnit) : null) : null,
       previousReps: previous && previous.set ? previous.set.actualReps : null,
       previousWeight: previous && previous.set ? previous.set.weight : null,
       previousUnit: previous ? previous.unit : S.sessionUnit
@@ -2506,26 +2511,35 @@
       '<div class="setlogger-saved">SAVED FOR FINAL REVIEW</div></div>';
     host.classList.remove('hidden');
   }
-  function captureActiveBlock() {
+  function captureActiveBlock(lateMs = 0) {
     if (S.mode !== 'workout' || !S.blockId || !S.sessionPlan) return;
     const item = S.queue[S.qi] || {};
-    S.sessionBlockTimes[S.blockId] = Math.max(0, Math.round(blockElapsed() / 1000));
+    S.sessionBlockTimes[S.blockId] = Math.max(0, Math.round((blockElapsed() - lateMs) / 1000));
     S.sessionBlockProgress[S.blockId] = { round: Number(item.round) || 0, label: String(item.label || '') };
   }
-  function logSets(item, exercisePlanId) {
+  function logSets(item, exercisePlanId, block, completedSets) {
     const completion = String(item.completion || (item.seconds ? 'timed' : 'manual'));
     const source = Array.isArray(item.setPlan) && item.setPlan.length
       ? item.setPlan
       : Array.from({ length: clamp(Number(item.sets) || 1, 1, 100) }, () => completion === 'timed'
         ? { seconds: Number(item.seconds) || 1, restSeconds: Number(item.restSeconds) || 0 }
         : { target: String(item.target || 'Complete set'), restSeconds: Number(item.restSeconds) || 0 });
-    return source.map((set, index) => completion === 'timed'
+    // Round-scored work retains its prescription; sequence work only logs sets
+    // actually completed. Draft values alone never establish completion.
+    const roundScored = block.mode === 'amrap' || block.mode === 'emom' || isGroupedForTimeBlock(block);
+    return source.map((set, index) => {
+      const completedCount = completedSets.get(setResultKey(exercisePlanId, index + 1)) || 0;
+      if (!roundScored && !completedCount) return null;
+      const result = completion === 'timed'
       ? { set: index + 1, completion: 'timed', plannedSeconds: Number(set.seconds) || 1, actualSeconds: Number(set.seconds) || 1 }
       : (() => {
           const live = S.sessionSetResults[setResultKey(exercisePlanId, index + 1)];
           return { set: index + 1, completion: 'manual', target: setTargetDetail(set), plannedReps: targetReps(set.target),
             actualReps: live ? live.actualReps : targetReps(set.target), weight: live ? live.weight : convertedAddedWeight(set.addedWeight, set.weightUnit, S.sessionUnit) };
-        })());
+        })();
+      if (block.mode === 'for-time' && !roundScored) result.completedCount = completedCount;
+      return result;
+    }).filter(Boolean);
   }
   function buildPendingSession() {
     const plan = S.sessionPlan;
@@ -2535,25 +2549,36 @@
       : [{ id: 'workout', title: plan.name || 'Workout', mode: 'sequence', durationSeconds: 0, rounds: 1,
           items: (plan.items || []).filter(item => item.type !== 'rest').map(item => Object.assign({ completion: 'manual' }, item)) }];
     const blocks = sourceBlocks.filter(block => !S.sessionSkippedBlocks[block.id]).map(block => {
+      const blockItems = S.queue.filter(entry => entry.phase === 'work' && (entry.blockId || 'workout') === block.id);
+      const completedSets = new Map(), rounds = new Map();
+      blockItems.forEach(entry => {
+        if (entry.completed && entry.exerciseId) {
+          const key = setResultKey(entry.exerciseId, entry.set);
+          completedSets.set(key, (completedSets.get(key) || 0) + 1);
+        }
+        rounds.set(entry.round, rounds.get(entry.round) !== false && !!entry.completed);
+      });
+      const completedRounds = block.mode === 'for-time' ? [...rounds.values()].filter(Boolean).length : null;
       const progress = S.sessionBlockProgress[block.id] || {};
       const amrapResult = S.sessionAmrapResults[block.id] || {};
       return {
         id: String(block.id || 'block'), title: String(block.title || 'Workout section'), mode: String(block.mode || 'sequence'),
         elapsedSeconds: Number(S.sessionBlockTimes[block.id]) || 0,
         stoppedEarly: !!S.sessionEarlyEndedBlocks[block.id],
-        rounds: block.mode === 'amrap' ? (amrapResult.rounds == null ? Math.max(0, (Number(progress.round) || 1) - 1) : amrapResult.rounds) : null,
+        rounds: block.mode === 'amrap' ? (amrapResult.rounds == null ? Math.max(0, (Number(progress.round) || 1) - 1) : amrapResult.rounds) : completedRounds,
         extraReps: null,
         exercises: (block.items || []).filter(item => item.type !== 'rest').map(item => {
           const itemExerciseId = item.id || exerciseId(block.id || 'workout', item.label);
           return { exerciseId: itemExerciseId, label: String(item.label || 'Exercise'), tracking: item.tracking === 'weight-reps' ? 'weight-reps' : 'reps',
-            completion: String(item.completion || (item.seconds ? 'timed' : 'manual')), sets: logSets(item, itemExerciseId) };
-        })
+            completion: String(item.completion || (item.seconds ? 'timed' : 'manual')), sets: logSets(item, itemExerciseId, block, completedSets) };
+        }).filter(exercise => exercise.sets.length)
       };
-    });
+    }).filter(block => block.exercises.length);
+    const finishedMs = S.sessionFinishedMs == null ? Date.now() : S.sessionFinishedMs;
     return {
       id: sessionId(), formatVersion: 1, workoutName: String(plan.name || 'Workout'), workoutKind: plan.layout === 'blocks' ? 'structured' : 'simple',
-      startedAt: S.sessionStartedAt || new Date().toISOString(), completedAt: new Date().toISOString(),
-      durationSeconds: Math.max(0, Math.round((Date.now() - (S.sessionStartedMs || Date.now())) / 1000)),
+      startedAt: S.sessionStartedAt || new Date(finishedMs).toISOString(), completedAt: new Date(finishedMs).toISOString(),
+      durationSeconds: Math.max(0, Math.round((finishedMs - S.sessionStartedMs) / 1000)),
       unit: store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb', notes: '', blocks,
       planSnapshot: JSON.parse(JSON.stringify(plan))
     };
@@ -2609,7 +2634,7 @@
   });
   function openSessionLog() {
     S.pendingSession = buildPendingSession();
-    if (!S.pendingSession) return;
+    if (!S.pendingSession || !S.pendingSession.blocks.length) return;
     renderSessionLog();
     S.screen = 'log'; $('#done').classList.add('hidden'); $('#log').classList.remove('hidden');
   }
@@ -2634,7 +2659,7 @@
     $('#logSave').disabled = true; $('#logSave').textContent = 'Saving…';
     try {
       const normalizedSession = normalizeHistorySession(session);
-      await historyPut(session);
+      await historyPut(normalizedSession);
       S.pendingSession = normalizedSession;
       $('#log').classList.add('hidden'); $('#done').classList.remove('hidden'); S.screen = 'done';
       $('#doneLog').classList.add('hidden');
@@ -2680,6 +2705,9 @@
     const targets = sets.map(set => set.completion === 'timed'
       ? overviewDuration(set.actualSeconds || set.plannedSeconds || 0)
       : String(set.target || 'Complete set'));
+    if (sets.some(set => set.completedCount != null)) {
+      return sets.map((set, index) => (set.completedCount == null ? count : set.completedCount) + ' × ' + targets[index]).join(' / ');
+    }
     const result = targets.length === 1 ? targets[0] : '(' + targets.join(' / ') + ')';
     if (!targets.length) return count ? count + ' × completed' : 'completed';
     return (count ? count + ' × ' : '') + result;
@@ -2808,7 +2836,7 @@
         const minutes = Math.max(1, Math.round(Number(planBlock && planBlock.durationSeconds || block.elapsedSeconds || 60) / 60));
         lines.push('• ' + minutes + '-minute EMOM' + (block.stoppedEarly && block.elapsedSeconds ? ' ended early after ' + overviewClock(block.elapsedSeconds) : ' completed'));
       } else if (block.mode === 'for-time') {
-        const completed = planBlock && Number.isInteger(planBlock.rounds) ? planBlock.rounds : 0;
+        const completed = block.rounds != null ? block.rounds : planBlock && Number.isInteger(planBlock.rounds) ? planBlock.rounds : 0;
         if (completed) {
           lines.push('• ' + completed + ' ' + overviewPlural(completed, repeatUnit) + (block.elapsedSeconds ? ' in ' + overviewClock(block.elapsedSeconds) : ''));
           repeatCount = completed;
@@ -2973,15 +3001,18 @@
           const setCompletion = String(set.completion || completion).toLowerCase();
           if (setCompletion !== completion) throw new Error(title + ' / ' + label + ' set ' + (si + 1) + ' has a mismatched completion type.');
           const setNumber = historyInteger(set.set == null ? si + 1 : set.set, title + ' / ' + label + ' set number', 1, 100, false);
+          const repetitions = set.completedCount == null ? {} : {
+            completedCount: historyInteger(set.completedCount, title + ' / ' + label + ' completed count', 1, 100, false)
+          };
           if (completion === 'timed') {
             const plannedSeconds = historyInteger(set.plannedSeconds, title + ' / ' + label + ' planned seconds', 1, 3600, false);
             const actualSeconds = historyInteger(set.actualSeconds, title + ' / ' + label + ' actual seconds', 1, 3600, false);
-            return { set: setNumber, completion: 'timed', plannedSeconds, actualSeconds };
+            return { set: setNumber, completion: 'timed', plannedSeconds, actualSeconds, ...repetitions };
           }
           return { set: setNumber, completion: 'manual', target: historyText(set.target, title + ' / ' + label + ' set target', 40),
             plannedReps: historyInteger(set.plannedReps, title + ' / ' + label + ' planned reps', 0, 10000, true),
             actualReps: historyInteger(set.actualReps, title + ' / ' + label + ' actual reps', 0, 10000, true),
-            weight: historyNumber(set.weight, title + ' / ' + label + ' weight', 0, 10000, true) };
+            weight: historyNumber(set.weight, title + ' / ' + label + ' weight', 0, 10000, true), ...repetitions };
         });
         return { exerciseId, label, tracking: exercise.tracking, completion, sets };
       });
@@ -3201,6 +3232,30 @@
   function tick() {
     cancelAnimationFrame(S.raf);
     if (!S.running || S.paused) return;
+    // Reconcile deadlines before painting. Carry late callbacks through timed
+    // steps, but never synthesize a manual completion or cross a ready gate.
+    let changed = false;
+    while (S.running) {
+      const current = S.queue[S.qi];
+      if (isBlockTransition(current) || isAmrapResult(current)) break;
+      const capped = current.blockMode === 'amrap' || current.blockMode === 'emom';
+      const blockOver = capped ? blockElapsed() - current.blockDuration * 1000 : -Infinity;
+      const timed = !isManualItem(current) && current.seconds > 0;
+      const phaseOver = timed ? elapsed() - current.seconds * 1000 : -Infinity;
+      if (phaseOver >= 0 && phaseOver >= blockOver) {
+        if (current.phase === 'up') { S.doneTotal = current.seconds; return finish(phaseOver); }
+        advance(phaseOver, false);
+      } else if (blockOver >= 0) {
+        completeActiveBlock(blockOver, false);
+      } else break;
+      if (!S.running) return;
+      changed = true;
+    }
+    if (changed) {
+      const current = S.queue[S.qi];
+      beep(current.phase === 'rest' ? 520 : current.phase === 'prep' || isBlockTransition(current) || isAmrapResult(current) ? 700 : 1100, 0.16, 0.1);
+      paintPhase();
+    }
     const it = S.queue[S.qi];
     const ms = elapsed();
     const blockMs = blockElapsed();
@@ -3215,7 +3270,6 @@
       const blockLeft = Math.max(0, it.blockDuration * 1000 - blockMs);
       const whole = Math.ceil(blockLeft / 1000);
       if (whole !== S.lastBlockBeep) { S.lastBlockBeep = whole; if (whole > 0 && whole <= 3) beep(940, 0.1, 0.07); }
-      if (blockLeft <= 0) return completeActiveBlock();
     }
 
     if (isManualItem(it)) {
@@ -3228,7 +3282,6 @@
       paintTime($('#runTime'), fmtElapsed(ms / 1000));
       $('#runLeft').textContent = limit ? fmtPad(Math.max(0, (limit - ms) / 1000)) + ' LEFT' : 'NO LIMIT';
       $('#wipe').style.width = limit ? clamp((ms / limit) * 100, 0, 100) + '%' : '0%';
-      if (limit && ms >= limit) { S.doneTotal = it.seconds; return finish(); }
     } else {
       const dur = it.seconds * 1000;
       const left = Math.max(0, dur - ms);
@@ -3238,33 +3291,35 @@
       else $('#runLeft').textContent = S.variableDuration ? '' : fmtPad(left / 1000 + remainingAfter(S.qi + 1)) + ' LEFT';
       const whole = Math.ceil(left / 1000);
       if (whole !== S.lastBeep) { S.lastBeep = whole; if (whole > 0 && whole <= 3) beep(720, 0.09, 0.06); }
-      if (left <= 0) { advance(); if (!S.running) return; }
     }
     S.raf = requestAnimationFrame(tick);
   }
 
-  function moveToQueueIndex(index) {
+  function moveToQueueIndex(index, lateMs = 0, render = true) {
     resetBlockAction();
     const previousBlock = S.blockId;
     const upcoming = S.queue[index];
     const upcomingBlock = upcoming && upcoming.blockId || null;
-    if (previousBlock && upcomingBlock !== previousBlock) captureActiveBlock();
-    S.qi = index; S.accum = 0; S.from = performance.now(); S.lastBeep = null;
+    if (previousBlock && upcomingBlock !== previousBlock) captureActiveBlock(lateMs);
+    if (index === S.queue.length - 1 && isAmrapResult(upcoming)) S.sessionFinishedMs = Date.now() - lateMs;
+    const carryMs = isBlockTransition(upcoming) || isAmrapResult(upcoming) ? 0 : lateMs;
+    S.qi = index; S.accum = carryMs; S.from = performance.now(); S.lastBeep = null;
     const it = S.queue[S.qi];
     const nextBlock = it.blockId || null;
     if (nextBlock !== previousBlock) {
-      S.blockId = nextBlock; S.blockAccum = 0; S.blockFrom = performance.now(); S.lastBlockBeep = null;
+      S.blockId = nextBlock; S.blockAccum = nextBlock ? carryMs : 0; S.blockFrom = performance.now(); S.lastBlockBeep = null;
     }
+    if (!render) return;
     beep(it.phase === 'rest' ? 520 : it.phase === 'prep' || isBlockTransition(it) || isAmrapResult(it) ? 700 : 1100, 0.16, 0.1);
     paintPhase(); tick();
   }
 
-  function completeActiveBlock() {
+  function completeActiveBlock(lateMs = 0, render = true) {
     const currentBlock = S.queue[S.qi] && S.queue[S.qi].blockId;
     let next = S.qi + 1;
     while (next < S.queue.length && S.queue[next].blockId === currentBlock) next++;
-    if (next >= S.queue.length) { S.doneTotal = 0; return finish(); }
-    moveToQueueIndex(next);
+    if (next >= S.queue.length) { S.doneTotal = 0; return finish(lateMs); }
+    moveToQueueIndex(next, lateMs, render);
   }
 
   function activeStructuredBlockId() {
@@ -3332,16 +3387,17 @@
     moveToQueueIndex(next);
   }
 
-  function advance() {
+  function advance(lateMs = 0, render = true) {
     const current = S.queue[S.qi];
     const upcoming = S.queue[S.qi + 1] || null;
+    if (current && current.phase === 'work') current.completed = true;
     if (isManualItem(current)) recordManualSet(current, upcoming);
     else if (current && (current.phase === 'rest' || isBlockTransition(current))) S.restLogKey = null;
     if (S.qi >= S.queue.length - 1) {
       S.doneTotal = S.queue.reduce((a, q) => a + (q.phase === 'prep' || q.phase === 'up' || isManualItem(q) || isBlockTransition(q) || isAmrapResult(q) ? 0 : q.seconds), 0);
-      return finish();
+      return finish(lateMs);
     }
-    moveToQueueIndex(S.qi + 1);
+    moveToQueueIndex(S.qi + 1, lateMs, render);
   }
 
   function nextExerciseQueueIndex(current) {
@@ -3403,6 +3459,7 @@
       S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
       S.sessionPlan.prepSeconds = workoutStartDelay();
       S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
+      S.sessionFinishedMs = null;
       S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.sessionSkippedBlocks = {}; S.sessionEarlyEndedBlocks = {}; S.pendingSession = null; S.sessionSetResults = {}; S.sessionAmrapResults = {}; S.restLogKey = null;
       S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
       S.previousExercises = previousExerciseMap(await historyAll(), S.sessionPlan);
@@ -3451,10 +3508,11 @@
     }
   }
 
-  function finish() {
+  function finish(lateMs = 0) {
     resetBlockAction();
     hideRunTapHint();
-    captureActiveBlock();
+    captureActiveBlock(lateMs);
+    if (S.sessionPlan && S.sessionFinishedMs == null) S.sessionFinishedMs = Date.now() - lateMs;
     S.running = false; S.paused = false; cancelAnimationFrame(S.raf); unlockScreen();
     S.screen = 'done';
     beep(1100, 0.18, 0.11); setTimeout(() => beep(1320, 0.22, 0.11), 200);
@@ -3464,7 +3522,7 @@
     const rounds = S.mode === 'circuit' ? cfg.circuit.rounds : S.mode === 'intervals' ? cfg.intervals.rounds : 0;
     const canLogWorkout = S.mode === 'workout' && !!S.sessionPlan;
     $('#doneSub').textContent = canLogWorkout ? name : (rounds ? rounds + (rounds === 1 ? ' round · ' : ' rounds · ') : '') + name + (S.variableDuration ? ' · variable duration' : '');
-    $('#doneLog').classList.toggle('hidden', !canLogWorkout);
+    $('#doneLog').classList.toggle('hidden', !canLogWorkout || !buildPendingSession().blocks.length);
     $('#doneAgain').classList.toggle('hidden', canLogWorkout);
     $('#doneHome').textContent = canLogWorkout ? 'Back to workouts' : 'Done';
     $('#doneMotto').classList.toggle('hidden', !canLogWorkout);
@@ -4490,7 +4548,7 @@
         renderFields(); startIntervals();
       } else startCurrentMode();
     }
-    else if (k === 's') { if (S.running) advance(); }
+    else if (k === 's') { if (S.running && !$('#btnSkip').classList.contains('hidden')) skipCurrent(); }
     else if (k === 'r') { goHome(); }
     else if (k === 'f') { $('#fsBtn').click(); }
   });
