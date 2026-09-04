@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6WlazXiqskjMEQeUsvqf6GTx2YNaDQQidjqoJZqqsTI='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TOOiTPy23HkxSFoFT3JANNyki4J7IIdNYbjWnj17JqU='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -249,10 +249,10 @@
   .track-list{display:flex;flex-direction:column;gap:11px}
   .track-card{display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:center;gap:10px;width:100%;text-align:left;padding:19px 18px;border-radius:var(--r);background:var(--card);box-shadow:inset 3px 0 0 0 var(--line);color:var(--text)}
   .track-card:hover{box-shadow:inset 3px 0 0 0 var(--accent)}
-  .track-card>span:first-child,.track-card-name,.track-card-meta,.track-card-blurb,.day-row-name,.day-row-meta{display:block}
+  .track-card>span:first-child,.track-card-name,.track-card-meta,.day-row-name,.day-row-meta{display:block}
   .track-card-name{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1}
   .track-card-meta{margin-top:7px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
-  .track-card-blurb{margin-top:7px;font-size:14px;line-height:1.45;color:var(--muted)}
+  .track-card-meta>span{display:block;line-height:1.5}
   .track-card-chevron,.day-row-chevron{font-size:26px;color:var(--muted);line-height:1;text-align:right}
   .track-chip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:46px;padding:0 14px;border-radius:12px;background:var(--card);box-shadow:inset 3px 0 0 0 var(--accent);color:var(--text)}
   .track-chip:hover{background:var(--card2)}
@@ -265,6 +265,9 @@
   .day-row:disabled{opacity:.62;cursor:wait}
   .day-row-name{font-size:18px;font-weight:750;letter-spacing:-.01em}
   .day-row-meta{margin-top:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .day-meta-focus{display:block;margin-bottom:3px;line-height:1.4}
+  .day-meta-counts{display:flex;flex-wrap:wrap;gap:3px 14px;line-height:1.4}
+  .day-meta-counts>span{white-space:nowrap}
   .day-optional{display:flex;flex-direction:column;gap:9px}
   .day-optional-heading{color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
   .day-optional .day-list{background:none;border-radius:0;overflow:visible}
@@ -897,7 +900,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.59';
+  const APP_VERSION = '1.0.60';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3720,7 +3723,17 @@
     button.setAttribute('aria-label', 'Load ' + plan.name + (plan.summary ? '. ' + plan.summary : ''));
     const copy = document.createElement('span');
     addCatalogText(copy, 'span', 'day-row-name', plan.name);
-    if (plan.summary) addCatalogText(copy, 'span', 'day-row-meta', plan.summary);
+    if (plan.summary) {
+      const meta = document.createElement('span');
+      meta.className = 'day-row-meta';
+      const parts = plan.summary.split(' · ');
+      if (parts.length > 2) addCatalogText(meta, 'span', 'day-meta-focus', parts.shift());
+      const counts = document.createElement('span');
+      counts.className = 'day-meta-counts';
+      parts.forEach(part => addCatalogText(counts, 'span', '', part));
+      meta.appendChild(counts);
+      copy.appendChild(meta);
+    }
     button.appendChild(copy);
     const chevron = addCatalogText(button, 'span', 'day-row-chevron', '›');
     chevron.setAttribute('aria-hidden', 'true');
@@ -3752,10 +3765,11 @@
       addCatalogText(cardCopy, 'span', 'track-card-name', track.name);
       const optionalCount = catalog.optional.length;
       const dayCount = trackWorkoutPlans(track).length;
-      const meta = dayCount + ' training day' + (dayCount === 1 ? '' : 's') +
-        (optionalCount ? ' · ' + optionalCount + ' optional cardio' : '');
-      addCatalogText(cardCopy, 'span', 'track-card-meta', meta);
-      if (track.blurb) addCatalogText(cardCopy, 'span', 'track-card-blurb', track.blurb);
+      const meta = document.createElement('span');
+      meta.className = 'track-card-meta';
+      addCatalogText(meta, 'span', '', dayCount + ' training day' + (dayCount === 1 ? '' : 's'));
+      if (optionalCount) addCatalogText(meta, 'span', '', optionalCount + ' optional cardio');
+      cardCopy.appendChild(meta);
       button.appendChild(cardCopy);
       const chevron = addCatalogText(button, 'span', 'track-card-chevron', '›');
       chevron.setAttribute('aria-hidden', 'true');

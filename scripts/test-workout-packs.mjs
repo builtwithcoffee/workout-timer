@@ -80,7 +80,7 @@ assert.deepEqual(f.availableWorkoutCatalog().optional,catalog.optional,'Forge us
 let rendered=f.walk(f.elements.get('#wPlanLibrary'));
 assert.equal(rendered.filter(el=>el.className==='day-row').length,5,'Four days plus existing optional cardio');
 assert.ok(rendered.some(el=>el.id==='wPackEdition'));
-assert.deepEqual(rendered.filter(el=>el.className==='day-row-meta').map(el=>el.textContent),[...catalog.tracks[0].plans.map(p=>p.summary),catalog.optional[0].summary]);
+assert.deepEqual(rendered.filter(el=>el.className==='day-row-meta').map(el=>f.walk(el).filter(node=>node.textContent).map(node=>node.textContent).join(' · ')),[...catalog.tracks[0].plans.map(p=>p.summary),catalog.optional[0].summary]);
 assert.equal(rendered.filter(el=>el.className==='day-optional').length,1,'Only one Optional section is displayed');
 
 const push=f.trackWorkoutPlans(forge())[3];
