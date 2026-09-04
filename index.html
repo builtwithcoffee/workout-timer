@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7sl0FGQqR3YhNDg8l4MX7ONJXeZ20kfblpSERi82FtE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7RyO/twBVGSsfyafADlbWFTavn5TXfFiRG4IGk5ti+g='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -319,7 +319,9 @@
   .workout-selecting-inline .workout-primary{display:block}
   .workout-selecting #wWorkoutContext{display:none}
   .workout-selecting-inline .workout-primary h2{margin:0 0 10px;font-size:24px}
-  .workout-context{color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .workout-heading{width:min(520px,100%);min-width:0}
+  .workout-heading input.title{width:100%}
+  .workout-context{color:var(--muted);margin:0 0 8px;line-height:1.5}
   .editing-pack #wEdit{display:none}
   .pack-edit-tools{margin-bottom:18px}
   .pack-edit-tools .actions{align-items:center}
@@ -600,7 +602,10 @@
   <!-- WORKOUT -->
   <section class="panel" id="panel-workout">
     <div class="panelhead">
-      <input class="title" id="wName" maxlength="80" value="Workout" aria-label="Workout name" />
+      <div class="workout-heading">
+        <p class="mono workout-context" id="wWorkoutContext"></p>
+        <input class="title" id="wName" maxlength="80" value="Workout" aria-label="Workout name" />
+      </div>
       <div class="actions">
         <button class="start" id="wStart" type="button">Start workout</button>
         <button class="ghost hidden" id="wEdit" type="button">Edit workout</button>
@@ -608,7 +613,6 @@
     </div>
     <div class="layout">
       <div class="workout-primary">
-        <p class="mono workout-context" id="wWorkoutContext"></p>
         <div class="card pack-edit-tools hidden" id="wPackEditTools">
           <p class="note">Edits save automatically to this workout on this device.</p>
           <div class="actions">
@@ -975,7 +979,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.76';
+  const APP_VERSION = '1.0.77';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
