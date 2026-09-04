@@ -12,7 +12,7 @@ const constants = ['FORMAT', 'PLAN_VERSION', 'TRACK_KEY', 'PACK_FORMAT', 'PACKS_
   .map(name => html.match(new RegExp(`  const ${name} = [^\\n]+`))[0]).join('\n');
 const helpers = html.slice(html.indexOf('  const defaultTheme ='), html.indexOf('  function textOn('));
 const packSource = html.split('  /* ---------- imported workout packs ---------- */')[1].split('  /* ---------- end imported workout packs ---------- */')[0];
-const functions = ['validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'setTimerMode', 'closeModeMenu', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
+const functions = ['setWorkoutEditing', 'validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'setTimerMode', 'closeModeMenu', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
 
 function fixture(saved = new Map()) {
   // Use the production handlers and renderer with a minimal DOM/storage boundary.
@@ -54,8 +54,8 @@ function fixture(saved = new Map()) {
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
-    return {openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
-      get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
+    return {setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+      get editing(){return editingStructuredWorkout;},get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
       restoreCurrent:restorePlans,
@@ -382,4 +382,16 @@ assert.equal(legacy.plan.name,initial.name);assert.equal(legacy.pending,false);
 assert.equal(legacy.active,null);
 
 for(const file of await readdir(new URL('workouts/packs/',root))) if(file.endsWith('.workout-pack.json')) f.normalizeWorkoutPack(JSON.parse(await readFile(new URL('workouts/packs/'+file,root),'utf8')));
+
+// Finishing pack edits saves first; a failed write keeps the editor open.
+const editActions=fixture();editActions.setCatalog(catalog);editActions.importWorkoutPack(raw);
+await editActions.loadCatalogWorkout(editActions.trackWorkoutPlans(editActions.availableWorkoutCatalog().tracks.find(t=>t.id==='forge'))[3],button());
+editActions.setWorkoutEditing(true);
+assert.equal(editActions.editing,true);
+editActions.prepareStructuredForEditing();editActions.plan.blocks[1].items[0].setPlan[0].target='31 reps';
+editActions.setQuota(true);editActions.setWorkoutEditing(false);
+assert.equal(editActions.editing,true,'Failed save does not dismiss editing');
+editActions.setQuota(false);editActions.setWorkoutEditing(false);
+assert.equal(editActions.editing,false);
+assert.equal(editActions.packs[0].edits['push-focus'].blocks[1].items[0].setPlan[0].target,'31 reps');
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');

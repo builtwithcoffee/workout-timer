@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cY77wkvtMsMFq715AfraH93ip5d+UHOMLRt9ZpazLoE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-FCwuqDhmAs6tjur23r3I6ClSDrBhcDjpPwyd72tuQC4='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -317,7 +317,13 @@
   .workout-selecting .plan-library-body{padding:0}
   .workout-selecting #wWorkoutTools{display:none}
   .workout-context{color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .editing-pack #wEdit{display:none}
   .pack-edit-tools{margin-bottom:18px}
+  .pack-edit-tools .actions{align-items:center}
+  .pack-edit-tools .edit-done{background:var(--accent);color:var(--accent-text)}
+  .pack-edit-tools .edit-done:hover{filter:brightness(1.1)}
+  .pack-edit-tools button:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+  #wRestoreConfirm{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
   .pack-edit-tools p{margin:0 0 12px;line-height:1.5}
   .personal-library{max-width:720px;margin:24px auto 0}
   .personal-library h2{margin:0}
@@ -602,7 +608,10 @@
         <p class="mono workout-context" id="wWorkoutContext"></p>
         <div class="card pack-edit-tools hidden" id="wPackEditTools">
           <p class="note">Edits save automatically to this workout on this device.</p>
-          <button class="ghost" id="wRestoreOriginal" type="button">Restore original</button>
+          <div class="actions">
+            <button class="ghost edit-done" id="wPackDone" type="button">Done editing</button>
+            <button class="ghost" id="wRestoreOriginal" type="button">Restore original</button>
+          </div>
           <div class="hidden" id="wRestoreConfirm" role="group" aria-label="Restore original workout">
             <p>Restore this workout to the original pack version? Only this day's edits will be removed. Your History stays.</p>
             <div class="actions"><button class="ghost" id="wRestoreCancel" type="button">Cancel</button><button class="ghost" id="wRestoreApply" type="button">Restore original</button></div>
@@ -963,7 +972,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.70';
+  const APP_VERSION = '1.0.71';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3796,6 +3805,7 @@
     $('#wSave').disabled = workoutSelectionPending || owned;
     $('#wSave').classList.toggle('hidden', workoutSelectionPending || owned);
     $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));
+    $('#panel-workout').classList.toggle('editing-pack', owned && editingStructuredWorkout);
     $('#wPackEditTools').classList.toggle('hidden', !owned || !editingStructuredWorkout);
     $('#wRestoreConfirm').classList.add('hidden');
     $('#wRestoreOriginal').classList.remove('hidden');
@@ -4299,14 +4309,17 @@
   });
   $('#packFileInput').addEventListener('change', loadManagerPack);
   $('#wStart').addEventListener('click', startWorkout);
-  $('#wEdit').addEventListener('click', () => {
-    if (workoutPlan.layout !== 'blocks') return;
-    if (!persistPlans()) return;
-    editingStructuredWorkout = !editingStructuredWorkout;
+  function setWorkoutEditing(editing) {
+    if (workoutPlan.layout !== 'blocks' || !persistPlans()) return;
+    editingStructuredWorkout = editing;
     renderWorkoutExercises(); renderSummaries();
     if (!editingStructuredWorkout) renderWorkoutCatalogView();
-    setPlanMsg('workout', editingStructuredWorkout ? (activePackWorkout ? 'Edits save automatically to this workout on this device.' : 'Editing structured workout.') : 'Workout changes saved on this device.');
-  });
+    const owned = !!workoutSource(activePackWorkout);
+    setPlanMsg('workout', editingStructuredWorkout ? (owned ? '' : 'Editing structured workout.') : 'Workout changes saved on this device.');
+    focusCatalogTarget(editingStructuredWorkout && owned ? '#wPackDone' : '#wEdit');
+  }
+  $('#wEdit').addEventListener('click', () => setWorkoutEditing(!editingStructuredWorkout));
+  $('#wPackDone').addEventListener('click', () => setWorkoutEditing(false));
   $('#cStart').addEventListener('click', startCircuit);
   $('#sStart').addEventListener('click', startStopwatch);
   $('#wSave').addEventListener('click', () => savePlan('workout'));
