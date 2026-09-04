@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-reAOVXMawzfQXi+0FvvkPd5GcbeA5wFJjFP0ujd49eg='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LLmL3W4Rs0EBiT8bwd4MF24LyrGIP3iJa61b4rwhZW8='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -908,7 +908,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.62';
+  const APP_VERSION = '1.0.63';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -3807,6 +3807,25 @@
       renderWorkoutCatalogView(true);
     });
     view.appendChild(chip);
+    if (track.plans.length || track.packs.length) {
+      const field = document.createElement('label');
+      field.className = 'edit-field';
+      addCatalogText(field, 'span', '', 'Workout pack');
+      const select = document.createElement('select');
+      select.id = 'wPackEdition';
+      const selected = selectedTrackPack(track);
+      if (track.plans.length) select.add(new Option('Starter Pack', ''));
+      track.packs.slice().reverse().forEach(entry => select.add(new Option(entry.pack.edition, entry.pack.id)));
+      select.value = selected ? selected.pack.id : '';
+      select.addEventListener('change', () => {
+        selectedPackEditions[track.id] = select.value;
+        store.set(PACK_EDITIONS_KEY, selectedPackEditions);
+        renderWorkoutCatalogView();
+        focusCatalogTarget('#wPackEdition');
+      });
+      field.appendChild(select);
+      view.appendChild(field);
+    }
     const list = document.createElement('div');
     list.className = 'day-list';
     trackWorkoutPlans(track).forEach(plan => list.appendChild(makeDayRow(plan)));
@@ -3820,25 +3839,6 @@
       catalog.optional.forEach(plan => optionalList.appendChild(makeDayRow(plan)));
       optional.appendChild(optionalList);
       view.appendChild(optional);
-    }
-    if (track.packs.length) {
-      const field = document.createElement('label');
-      field.className = 'edit-field';
-      addCatalogText(field, 'span', '', 'Workout pack');
-      const select = document.createElement('select');
-      select.id = 'wPackEdition';
-      const selected = selectedTrackPack(track);
-      if (track.plans.length) select.add(new Option('Included workouts', ''));
-      track.packs.slice().reverse().forEach(entry => select.add(new Option(entry.pack.edition, entry.pack.id)));
-      select.value = selected ? selected.pack.id : '';
-      select.addEventListener('change', () => {
-        selectedPackEditions[track.id] = select.value;
-        store.set(PACK_EDITIONS_KEY, selectedPackEditions);
-        renderWorkoutCatalogView();
-        focusCatalogTarget('#wPackEdition');
-      });
-      field.appendChild(select);
-      view.appendChild(field);
     }
     const selected = selectedTrackPack(track);
     if (selected) {
@@ -3856,7 +3856,7 @@
     const catalog = availableWorkoutCatalog();
     host.innerHTML = '';
     if (!catalog.tracks.length) {
-      addCatalogText(host, 'p', 'note plan-library-status', 'Import a workout pack, or connect to load the included workouts.');
+      addCatalogText(host, 'p', 'note plan-library-status', 'Import a workout pack, or connect to load the starter packs.');
       return;
     }
     const selectedTrack = catalog.tracks.find(track => track.id === selectedTrackId);

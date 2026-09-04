@@ -58,6 +58,14 @@ const raw = JSON.parse(await readFile(new URL('workouts/packs/forge-2026-09-03.w
 const catalog = JSON.parse(await readFile(new URL('workouts/catalog.json', root), 'utf8'));
 const f = fixture();
 f.setCatalog(catalog);
+for (const track of ['momentum', 'rise']) {
+  f.selectEdition(track, '');
+  f.renderWorkoutCatalogView();
+  const nodes = f.walk(f.elements.get('#wPlanLibrary'));
+  const selector = nodes.find(el => el.id === 'wPackEdition');
+  assert.deepEqual(selector.children.map(option => option.textContent), ['Starter Pack']);
+  assert.ok(nodes.indexOf(selector) < nodes.findIndex(el => el.className === 'day-row'), 'Pack selection precedes workout days');
+}
 const initial = JSON.parse(await readFile(new URL('workouts/momentum/push-focus.workout.json', root), 'utf8'));
 const upload = async (target, value, name='pack.json') => {
   const body=JSON.stringify(value);
@@ -80,6 +88,7 @@ assert.deepEqual(f.availableWorkoutCatalog().optional,catalog.optional,'Forge us
 let rendered=f.walk(f.elements.get('#wPlanLibrary'));
 assert.equal(rendered.filter(el=>el.className==='day-row').length,5,'Four days plus existing optional cardio');
 assert.ok(rendered.some(el=>el.id==='wPackEdition'));
+assert.ok(rendered.findIndex(el=>el.id==='wPackEdition') < rendered.findIndex(el=>el.className==='day-row'));
 assert.deepEqual(rendered.filter(el=>el.className==='day-row-meta').map(el=>f.walk(el).filter(node=>node.textContent).map(node=>node.textContent).join(' · ')),[...catalog.tracks[0].plans.map(p=>p.summary),catalog.optional[0].summary]);
 assert.equal(rendered.filter(el=>el.className==='day-optional').length,1,'Only one Optional section is displayed');
 

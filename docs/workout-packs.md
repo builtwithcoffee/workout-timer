@@ -31,7 +31,7 @@ The current distribution uses the user's provisional **Cycle 4 · Week 3** desig
 
 Each contains its four existing strength workouts in Lower Body, Dip, Pull, Push order, with prescriptions unchanged. Optional Cardio remains shared by the app. Individual source workout files remain importable.
 
-The earlier `forge-2026-09-03.workout-pack.json` is retained unchanged so existing imports remain reproducible. Importing the newly named Forge pack adds a separate edition; it does not rename the older import or copy its personal edits. After saving any edits they want to keep, testers may remove the earlier **Distributed 3 Sep 2026** edition. Momentum and Rise packs similarly coexist with their built-in **Included workouts**; creating these files does not automatically import them or replace the built-in library.
+The earlier `forge-2026-09-03.workout-pack.json` is retained unchanged so existing imports remain reproducible. Importing the newly named Forge pack adds a separate edition; it does not rename the older import or copy its personal edits. After saving any edits they want to keep, testers may remove the earlier **Distributed 3 Sep 2026** edition. Momentum and Rise packs similarly coexist with their built-in **Starter Pack**; creating these files does not automatically import them or replace the built-in library.
 
 ## File format
 
@@ -59,7 +59,7 @@ The example's workout object is a placeholder; the real pack embeds every comple
 
 ## Library behavior
 
-Imported tracks join the existing track picker. If a pack targets an existing track such as Momentum, that track's selector offers both **Included workouts** and imported editions. The shared Optional Cardio entry remains supplied by the app, not duplicated in each pack.
+Imported tracks join the existing track picker. Every track shows a Workout pack dropdown above its workout days, even before additional packs are imported. If a pack targets an existing track such as Momentum, that track's selector offers both **Starter Pack** and imported editions. The shared Optional Cardio entry remains supplied by the app, not duplicated in each pack.
 
 Importing a pack selects its track and edition but does not load a day or replace the current workout. Changing tracks/editions also leaves the current workout alone. Selecting a day loads that edition's saved edit, or its original prescription when unedited. Edits persist across day changes, reloads, and offline launches. A new edition starts from its own supplied targets; edits are deliberately not copied forward across weeks.
 
