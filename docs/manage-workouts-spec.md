@@ -1,6 +1,6 @@
 # Manage packs
 
-Status: implemented in local app release 1.0.72; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.73; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -10,7 +10,7 @@ Give members one place to import, see, and remove workout packs, while keeping e
 
 - Replace the chooser's **Import workout pack** button with **Manage packs**. Show it on both the track picker and the selected track's day list, including first use.
 - Remove **Remove pack** from the everyday day list.
-- Keep the track chip and Workout pack dropdown above the days. Training still starts with track → pack → day. Change saves edits and immediately clears the displayed workout, showing the centered track picker. Track and day selection share that centered layout; History is hidden until a workout is loaded.
+- Keep the track chip and Workout pack dropdown above the days. Training still starts with track → pack → day. Change saves edits and immediately clears the displayed workout, showing the centered track picker. Track and day selection share that centered layout; History is hidden until a workout is loaded. Changing editions in the pack dropdown preserves its existing layout and updates the days beneath it. When switching from a loaded workout, an empty Choose a workout prompt replaces that workout while the sidebar stays in place. This pending layout survives reload.
 - Open one labelled management dialog, using the app's existing dialog pattern. Make it a full-height sheet on phones and a bounded, scrollable panel on larger screens.
 - Header: **Manage packs**, with a visible **Done** button. Keep the header available while scrolling. Escape/platform Back should dismiss where supported, without exiting the app or discarding a workout; restore focus to the entry button.
 - Opening or closing the manager does not load, reset, or start a workout. It is available from setup, not during an active timer or unfinished result entry.

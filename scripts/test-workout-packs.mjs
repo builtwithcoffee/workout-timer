@@ -47,6 +47,7 @@ function fixture(saved = new Map()) {
     let newWorkoutArmed='',newWorkoutTimer=0;
     let starterWorkouts=readStarterWorkouts(),workoutLoadGeneration=0;
     let importedPacks=readImportedPacks(), activePackWorkout=null, selectedPackEditions=store.get(PACK_EDITIONS_KEY,{});
+    let workoutSelectionInline=store.get('workoutTimerPickerInlineV1',false)===true;
     let workoutCatalog=null,selectedTrackId=store.get(TRACK_KEY,''),workoutSelectionPending=true,editingStructuredWorkout=false,pendingLoadKind='workout';
     let workoutPlan,workoutTheme={work:'#f04e23',rest:'#1668c4'},circuitPlan={name:'Circuit',segments:[{label:'Station',phase:'work',seconds:30}]},circuitTheme={...workoutTheme};
     const renderSwatches=()=>{},renderWorkoutExercises=()=>renderWorkoutSection(),renderCircuitTiles=()=>{},renderFields=()=>{},renderSummaries=()=>{},selectMode=()=>{},focusCatalogTarget=()=>{};
@@ -55,7 +56,7 @@ function fixture(saved = new Map()) {
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
     return {setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
-      get editing(){return editingStructuredWorkout;},get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
+      get inlinePicker(){return workoutSelectionInline;},get editing(){return editingStructuredWorkout;},get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
       restoreCurrent:restorePlans,
@@ -411,5 +412,24 @@ assert.equal(JSON.parse(changeFlow.saved.get('workoutTimerSelectionPendingV1')),
 assert.equal(JSON.parse(changeFlow.saved.get('workoutTimerTrackId')),'');
 changeFlow.walk(changeFlow.elements.get('#wPlanLibrary')).find(el=>el.className==='track-card').handlers.click();
 assert.equal(changeFlow.pending,true,'Choosing a track still waits for a workout day');
+
+// Pack dropdown preserves its current layout while clearing only the displayed workout.
+const editionFlow=fixture();editionFlow.setCatalog(catalog);editionFlow.importWorkoutPack(momentum);
+await editionFlow.loadCatalogWorkout(editionFlow.trackWorkoutPlans(editionFlow.availableWorkoutCatalog().tracks.find(t=>t.id==='momentum'))[3],button());
+editionFlow.renderWorkoutCatalogView();
+const editionSelect=editionFlow.walk(editionFlow.elements.get('#wPlanLibrary')).find(el=>el.id==='wPackEdition');
+editionSelect.value='';editionSelect.handlers.change();
+assert.equal(editionFlow.track,'momentum');assert.equal(editionFlow.pending,true);
+assert.equal(editionFlow.inlinePicker,true,'Dropdown stays in place beside the empty workout prompt');
+assert.equal(JSON.parse(editionFlow.saved.get('workoutTimerPickerInlineV1')),true);
+const editionReload=fixture(new Map(editionFlow.saved));editionReload.restoreCurrent();
+assert.equal(editionReload.inlinePicker,true);assert.equal(editionReload.pending,true);
+assert.equal(editionFlow.elements.get('#workoutManager')?.open,undefined,'Switching editions never opens management');
+assert.equal(editionFlow.walk(editionFlow.elements.get('#wPlanLibrary')).filter(el=>el.className==='day-row').length,5,'Starter days and optional cardio replace the imported list');
+editionFlow.selectWorkoutPack('momentum',momentum.id,false,true);assert.equal(editionFlow.inlinePicker,true);
+editionFlow.walk(editionFlow.elements.get('#wPlanLibrary')).find(el=>el.className==='track-chip').handlers.click();
+assert.equal(editionFlow.inlinePicker,false,'Change track still enters centered selection');
+editionFlow.selectWorkoutPack('momentum','');editionFlow.selectWorkoutPack('momentum',momentum.id,false,true);
+assert.equal(editionFlow.inlinePicker,false,'A dropdown already centered stays centered');
 
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');
