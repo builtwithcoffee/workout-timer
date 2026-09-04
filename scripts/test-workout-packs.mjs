@@ -439,7 +439,7 @@ delayedPack.workouts.forEach(item=>item.workout.prepSeconds=30);
 delays.importWorkoutPack(delayedPack);
 await delays.loadCatalogWorkout(delays.trackWorkoutPlans(delays.availableWorkoutCatalog().tracks.find(t=>t.id==='forge'))[3],button());
 assert.equal(delays.workoutStartDelay(),5);delays.renderWorkoutOwnership();
-assert.equal(delays.elements.get('#wStartDelay').classList.contains('hidden'),true);
+assert.equal(delays.elements.get('#wWorkoutTools').classList.contains('hidden'),true);
 assert.equal(delays.packs[0].pack.workouts[3].workout.prepSeconds,30,'Pack source stays unchanged');
 delays.persistPlans();const delaysReload=fixture(new Map(delays.saved));delaysReload.restoreCurrent();
 assert.equal(delaysReload.workoutStartDelay(),5);
@@ -450,6 +450,6 @@ assert.equal(delays.workoutStartDelay(),5);
 const customDelay=structuredClone(initial);customDelay.prepSeconds=15;
 await upload(delays,customDelay);delays.renderWorkoutOwnership();
 assert.equal(delays.workoutStartDelay(),15,'Custom workouts retain their chosen delay');
-assert.equal(delays.elements.get('#wStartDelay').classList.contains('hidden'),false);
+assert.equal(delays.elements.get('#wWorkoutTools').classList.contains('hidden'),false);
 
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');

@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.74';
+const APP_VERSION = '1.0.75';
 const CACHE_PREFIX = 'workout-timer-v';
 const CACHE = `${CACHE_PREFIX}${APP_VERSION}`;
 const ASSETS = [
