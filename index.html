@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-CXzjRdjocZ/p+sZDS+O0CKzc07o7i7UNDAPAU/T1Rro='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zLFCQDFtHN1bTwchFKS0/yI1rEhzjYdfcKd/fsGa3a8='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -282,22 +282,20 @@
   .workout-manager{width:min(620px,calc(100vw - 28px));max-height:calc(100dvh - 28px);padding:0}
   .manager-header{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:var(--card);border-bottom:1px solid var(--line)}
   .manager-header h2{margin:0;font-size:25px;letter-spacing:-.02em}
-  .manager-header button,.manager-actions button{min-height:44px;padding:0 14px;border-radius:10px;background:var(--card2);font-size:14px;font-weight:700}
+  .manager-header button,.manager-actions button,.manager-remove{min-height:44px;padding:0 14px;border-radius:10px;background:var(--card2);font-size:14px;font-weight:700}
   .manager-body{padding:24px}
   .manager-import{width:100%;min-height:48px;border-radius:12px;background:var(--accent);color:var(--accent-text);font-weight:750}
   .manager-intro{margin:12px 0 0;font-size:14px;line-height:1.5;color:var(--muted)}
   .manager-message:not(:empty){margin-top:14px}
-  .manager-groups{display:flex;flex-direction:column;gap:24px;margin-top:24px}
-  .manager-group h3{margin:0 0 10px;font-size:19px;letter-spacing:-.01em}
-  .manager-pack{padding:16px;border:1px solid var(--line);border-radius:14px}
-  .manager-pack+.manager-pack{margin-top:10px}
-  .manager-pack-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 12px}
-  .manager-pack-name{font-size:17px;font-weight:750;overflow-wrap:anywhere;min-width:0}
-  .manager-selected{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
-  .manager-pack-meta{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
+  .manager-groups{display:flex;flex-direction:column;gap:20px;margin-top:24px}
+  .manager-group h3{margin:0;font-size:19px;letter-spacing:-.01em}
+  .manager-pack{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .manager-pack-details{min-width:0}
+  .manager-pack-name{font-size:16px;font-weight:750;overflow-wrap:anywhere}
+  .manager-pack-meta{margin:3px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
   .manager-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .manager-actions .manager-remove{margin-left:auto;background:transparent;color:var(--muted);font-weight:500}
-  .manager-confirm{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .manager-remove{background:transparent;color:var(--muted);font-weight:500}
+  .manager-confirm{grid-column:1/-1;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .manager-confirm p{margin:0;font-size:14px;line-height:1.5}
   .manager-confirm .manager-save-hint{margin-top:8px;color:var(--muted);font-size:13px}
   .manager-actions .manager-confirm-remove{background:var(--accent);color:var(--accent-text)}
@@ -842,7 +840,7 @@
   <header class="manager-header"><h2 id="workoutManagerTitle">Manage packs</h2><button id="workoutManagerDone" type="button" autofocus>Done</button></header>
   <div class="manager-body">
     <button class="manager-import" id="wImportPack" type="button">Import workout pack</button>
-    <p class="manager-intro">Import the workout pack shared with the community. Imported workouts stay on this device and work offline.</p>
+    <p class="manager-intro">Imported packs stay on this device and work offline.</p>
     <div class="msg manager-message" id="workoutManagerMsg" role="status" aria-live="polite"></div>
     <div class="manager-groups" id="workoutManagerPacks"></div>
   </div>
@@ -964,7 +962,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.68';
+  const APP_VERSION = '1.0.69';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -4011,31 +4009,22 @@
       const heading = addCatalogText(section, 'h3', '', track.name);
       heading.id = 'manager-track-' + track.id;
       section.setAttribute('aria-labelledby', heading.id);
-      const selected = selectedTrackPack(track);
       const rows = track.packs.slice().reverse().map(entry => ({ id: entry.pack.id, name: entry.pack.edition, count: entry.pack.workouts.length }));
       if (track.plans.length) rows.unshift({ id: '', name: 'Starter Pack', count: track.plans.length });
       for (const pack of rows) {
         const row = document.createElement('div');
         row.className = 'manager-pack';
-        const title = document.createElement('div');
-        title.className = 'manager-pack-heading';
-        addCatalogText(title, 'span', 'manager-pack-name', pack.name);
-        if (track.id === selectedTrackId && pack.id === (selected ? selected.pack.id : '')) addCatalogText(title, 'span', 'manager-selected', 'Selected');
-        row.appendChild(title);
-        addCatalogText(row, 'p', 'manager-pack-meta', pack.count + ' workout day' + (pack.count === 1 ? '' : 's') + (pack.id ? '' : ' · Included with app'));
-        const actions = document.createElement('div');
-        actions.className = 'manager-actions';
-        const use = addCatalogText(actions, 'button', '', 'Use pack');
-        use.type = 'button';
-        use.setAttribute('aria-label', 'Use ' + track.name + ' · ' + pack.name);
-        use.addEventListener('click', () => selectWorkoutPack(track.id, pack.id, true));
+        const details = document.createElement('div');
+        details.className = 'manager-pack-details';
+        addCatalogText(details, 'span', 'manager-pack-name', pack.name);
+        addCatalogText(details, 'p', 'manager-pack-meta', pack.count + ' workout day' + (pack.count === 1 ? '' : 's') + (pack.id ? '' : ' · Included with app'));
+        row.appendChild(details);
         if (pack.id) {
-          const remove = addCatalogText(actions, 'button', 'manager-remove', 'Remove');
+          const remove = addCatalogText(row, 'button', 'manager-remove', 'Remove');
           remove.type = 'button';
           remove.setAttribute('aria-label', 'Remove ' + track.name + ' · ' + pack.name);
           remove.addEventListener('click', () => requestPackRemoval(pack.id));
         }
-        row.appendChild(actions);
         if (pack.id && managerRemovalId === pack.id) {
           const confirm = document.createElement('div');
           confirm.className = 'manager-confirm';

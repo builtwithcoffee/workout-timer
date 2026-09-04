@@ -1,6 +1,6 @@
 # Manage packs
 
-Status: implemented in local app release 1.0.68; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.69; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -18,20 +18,20 @@ Give members one place to import, see, and remove workout packs, while keeping e
 ## Screen contents
 
 1. A primary **Import workout pack** button.
-2. One short instruction: “Import the workout pack shared with the community. Imported workouts stay on this device and work offline.”
+2. One short instruction: “Imported packs stay on this device and work offline.”
 3. Packs grouped under track names, in the same order as the existing track picker.
-4. Each row shows the edition, number of workout days, and its actions. Use the app's current type, colours, dividers, and comfortable touch targets.
+4. Each compact row shows the edition and a small workout-day count beneath it, with Remove aligned on the right for imported packs. Use the app's current type, colours, dividers, and comfortable touch targets.
 
 Example content:
 
 | Track | Edition | Details | Actions |
 | --- | --- | --- | --- |
-| Momentum | Starter Pack | 4 workout days · Included with app | Use pack |
-| Momentum | Cycle 4 · Week 3 | 4 workout days | Use pack; Remove |
-| Forge | Cycle 4 · Week 3 | 4 workout days | Use pack; Remove |
-| Rise | Starter Pack | 4 workout days · Included with app | Use pack |
+| Momentum | Starter Pack | 4 workout days · Included with app | — |
+| Momentum | Cycle 4 · Week 3 | 4 workout days | Remove |
+| Forge | Cycle 4 · Week 3 | 4 workout days | Remove |
+| Rise | Starter Pack | 4 workout days · Included with app | — |
 
-Render these as rows inside track groups, not as a wide table on the phone. Mark the chooser's current edition **Selected**; that badge refers to the library selection, not a workout in progress. Keep **Use pack** available to return to its days.
+Render these as compact rows separated by dividers within each track group. Keep Remove alongside the pack details even on phones; long edition names wrap within the details column. Preserve 44-pixel touch targets. No Use pack action or Selected badge: selection belongs in the workout chooser. Removal confirmation expands below its row across both columns.
 
 Starter Pack comes first within its track; imported packs follow most-recently-imported first, matching the current selector. Do not infer chronology from free-text edition names. Show no dates or counts of completed workouts.
 
@@ -49,11 +49,10 @@ Optional Cardio remains shared and selectable in the normal workout chooser. It 
 - Show malformed-file, conflicting-edition, and storage errors inside the still-open manager, next to the import action. Do not hide them behind the dialog.
 - Disable repeated import actions while reading/saving a file. Do not close the manager while a write is underway.
 
-### Use pack
+### Done
 
-- Select that track and edition, close the manager, and reveal the normal day list.
-- Save pending edits first; failed saves keep the manager open and preserve the current workout.
-- Selecting a different pack clears the displayed day; it never starts a workout. Selecting the same pack retains its day. Returning from a personal workout to a pack asks for a day again.
+- Close the manager and return focus to Manage packs without changing the current selection.
+- Select tracks, editions, and workout days in the normal workout chooser.
 
 ### Remove
 
@@ -76,13 +75,13 @@ Exclude search, filters, folders, drag ordering, bulk deletion, automatic downlo
 
 ## Acceptance checks
 
-- Fresh install: Momentum and Rise starter rows appear; both Use actions work; no Remove actions are shown for starters.
+- Fresh install: Momentum and Rise starter rows appear; no Use actions or starter Remove actions are shown. Done preserves the current selection.
 - Import Forge: track and edition appear, the manager closes to its day list, the previous day is hidden, and edits/History are preserved.
 - Import another week: both editions remain available in the manager and top dropdown; edits stay with their original edition.
 - Existing imported libraries and the earlier dated Forge pack require no migration.
 - Duplicate, invalid, conflicting, cancelled, and storage-failed imports behave clearly without losing data.
 - Removing selected, unselected, last-in-track, and currently loaded source packs follows the rules above; cancellation is harmless.
-- Switching through either the manager or top dropdown agrees on the selected edition, including after reload.
+- Switching through the top dropdown selects the correct edition, including after reload.
 - After the app has cached successfully, reopening offline still allows management and loading of stored packs.
 - Check a narrow iPhone viewport, long edition names, scrolling, keyboard/screen-reader labels, focus restoration, and actual installed-iPhone file-picker return behavior.
 - Run the pack regression suite and release/CSP verification. Test the existing workout and History preservation paths where affected.
