@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cXW6vC2y+HBFGGdpaDkgItnuLY8fIPgbHWAIR15DnHg='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WdIm17iqSnJaXkF0aSAvpRPhTXhEqppjDXdQhgeN8Bs='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -43,11 +43,12 @@
   .modes{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:14px}
   .modes button{min-height:46px;padding:0 18px;border-radius:10px;font-size:15px;font-weight:600;color:var(--muted)}
   .modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-text)}
-  .mode-more{display:none;position:relative;flex:none}
+  .mode-more{display:block;position:relative;flex:none}
   .mode-more-toggle{height:54px;padding:0 12px;border-radius:14px;background:var(--card);color:var(--muted);font-size:11px;font-weight:700}
   .mode-more-toggle.active{background:var(--accent);color:var(--accent-text)}
   .mode-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:30;min-width:168px;padding:7px;border:1px solid var(--line);border-radius:13px;background:var(--card);box-shadow:0 16px 38px rgba(0,0,0,.42)}
   .mode-menu button{display:block;width:100%;min-height:44px;padding:0 12px;border-radius:9px;color:var(--text);font-size:14px;font-weight:700;text-align:left}
+  .mode-menu button[data-mode]{display:none}
   .mode-menu button:hover{background:var(--card2)}
   .mode-menu button[aria-checked="true"]{background:var(--accent);color:var(--accent-text)}
   .util{display:flex;gap:8px;margin-left:auto}
@@ -318,9 +319,10 @@
   .workout-context{color:var(--muted);margin:0 0 16px;line-height:1.5}
   .pack-edit-tools{margin-bottom:18px}
   .pack-edit-tools p{margin:0 0 12px;line-height:1.5}
-  .my-workouts-card{margin-top:18px}
-  .my-workouts-card>summary{color:var(--muted)}
-  .my-workouts-card .note{margin:0 0 14px;line-height:1.5}
+  .personal-library{max-width:720px;margin:24px auto 0}
+  .personal-library h2{margin:0}
+  .personal-library>.note{margin:18px 0}
+  .personal-library>.msg{margin-top:12px}
   .workout-history-link{margin-top:14px;width:100%}
 
   .swatches{display:flex;gap:8px;flex-wrap:wrap}
@@ -477,6 +479,7 @@
     .modes button{flex:1;min-width:0;padding:0 5px;font-size:11px;white-space:nowrap}
     .modes button[data-mode="rest"],.modes button[data-mode="stopwatch"]{display:none}
     .mode-more{display:block}
+    .mode-menu button[data-mode]{display:block}
     .util{flex:none;margin-left:0}
     #fsBtn{display:none}
     .exercise-fields,.add-row{grid-template-columns:1fr}
@@ -564,10 +567,11 @@
         <button role="tab" data-mode="intervals" aria-selected="false">Intervals</button>
       </nav>
       <div class="mode-more" id="modeMore">
-        <button class="mode-more-toggle" id="modeMoreBtn" type="button" aria-label="More timer modes" aria-haspopup="menu" aria-controls="modeMenu" aria-expanded="false">More</button>
-        <div class="mode-menu hidden" id="modeMenu" role="menu" aria-label="More timer modes">
+        <button class="mode-more-toggle" id="modeMoreBtn" type="button" aria-label="More tools" aria-haspopup="menu" aria-controls="modeMenu" aria-expanded="false">More</button>
+        <div class="mode-menu hidden" id="modeMenu" role="menu" aria-label="More tools">
           <button type="button" role="menuitemradio" data-mode="rest" aria-checked="false">Rest</button>
           <button type="button" role="menuitemradio" data-mode="stopwatch" aria-checked="false">Stopwatch</button>
+          <button type="button" role="menuitemradio" id="myWorkoutsNav" aria-checked="false">My workouts</button>
         </div>
       </div>
     </div>
@@ -650,22 +654,33 @@
             </details>
           </div>
         </details>
-        <details class="card workout-tools-card my-workouts-card" id="wMyWorkouts">
-          <summary><span class="mono">My workouts</span></summary>
-          <div class="workout-tools-body">
-            <p class="note" id="wMyWorkoutStatus">Create a basic or structured workout, or load your own file.</p>
-            <div class="plan-actions">
-              <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume my workout</button>
-              <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
-              <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
-              <button class="ghost" id="wLoad" type="button">Load workout file</button>
-              <button class="ghost" id="wSave" type="button">Save workout file</button>
-            </div>
+        <div class="card hidden" id="wPersonalActions">
+          <div class="plan-actions">
+            <button class="ghost" id="wSave" type="button">Save workout file</button>
+            <button class="ghost" id="wBackToMyWorkouts" type="button">Back to My workouts</button>
           </div>
-        </details>
+        </div>
         <button class="ghost workout-history-link" id="wHistory" type="button">History</button>
       </div>
     </div>
+  </section>
+
+  <!-- PERSONAL WORKOUTS: separate from the BuiltSimple chooser -->
+  <section class="panel personal-library hidden" id="panel-my-workouts" aria-labelledby="myWorkoutsTitle">
+    <div class="panelhead">
+      <h2 class="title" id="myWorkoutsTitle" tabindex="-1">My workouts</h2>
+      <button class="ghost" id="myWorkoutsBack" type="button">Back to BuiltSimple workouts</button>
+    </div>
+    <p class="note">Create and load your own workouts here. For a BuiltSimple weekly pack, use Manage workouts in the Workout section.</p>
+    <div class="card">
+      <div class="plan-actions">
+        <button class="ghost hidden" id="wResumeMyWorkout" type="button">Resume my workout</button>
+        <button class="ghost" id="wNewBasic" type="button">New basic workout</button>
+        <button class="ghost" id="wNewStructured" type="button">New structured workout</button>
+        <button class="ghost" id="wLoad" type="button">Load workout file</button>
+      </div>
+    </div>
+    <div class="msg" id="myWorkoutsMsg" role="status" aria-live="polite"></div>
   </section>
 
   <!-- HISTORY -->
@@ -952,7 +967,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.65';
+  const APP_VERSION = '1.0.66';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -1401,6 +1416,7 @@
   let activePackWorkout = null;
   let starterWorkouts = readStarterWorkouts();
   let workoutLoadGeneration = 0;
+  let myWorkoutsOpen = false;
   let selectedPackEditions = store.get(PACK_EDITIONS_KEY, {});
   if (!selectedPackEditions || typeof selectedPackEditions !== 'object' || Array.isArray(selectedPackEditions)) selectedPackEditions = {};
   let workoutPlan = defaultWorkout(), circuitPlan = defaultCircuit();
@@ -2054,14 +2070,19 @@
     const secondaryMode = kind === 'rest' || kind === 'stopwatch';
     const more = $('#modeMoreBtn');
     more.classList.toggle('active', secondaryMode);
-    more.setAttribute('aria-label', secondaryMode ? 'More timer modes, ' + (kind === 'rest' ? 'Rest' : 'Stopwatch') + ' selected' : 'More timer modes');
+    more.setAttribute('aria-label', secondaryMode ? 'More tools, ' + (kind === 'rest' ? 'Rest' : 'Stopwatch') + ' selected' : 'More tools');
     ['workout', 'circuit', 'rest', 'stopwatch', 'intervals'].forEach(m => $('#panel-' + m).classList.toggle('hidden', m !== S.mode));
+    if (kind !== 'workout') myWorkoutsOpen = false;
+    renderWorkoutSection();
     closeModeMenu();
   }
 
   $('#modes').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-mode]');
-    if (b) setTimerMode(b.dataset.mode);
+    if (b) {
+      if (b.dataset.mode === 'workout') openBuiltSimpleWorkouts();
+      else setTimerMode(b.dataset.mode);
+    }
   });
 
   $('#modeMoreBtn').addEventListener('click', () => {
@@ -2070,8 +2091,9 @@
     menu.classList.toggle('hidden', !opening);
     $('#modeMoreBtn').setAttribute('aria-expanded', String(opening));
     if (opening) {
-      const selected = menu.querySelector('[aria-checked="true"]');
-      (selected || menu.querySelector('button')).focus();
+      const choices = [...menu.querySelectorAll('button')].filter(button => button.getClientRects().length);
+      const selected = choices.find(button => button.getAttribute('aria-checked') === 'true');
+      (selected || choices[0])?.focus();
     }
   });
 
@@ -3341,6 +3363,7 @@
   }
 
   async function startWorkout() {
+    if (myWorkoutsOpen) return;
     if (workoutSelectionPending) return setPlanMsg('workout', 'Choose or create a workout before starting.', true);
     try {
       assertWorkoutQueueBudget(workoutPlan, cfg.workout.prep);
@@ -3468,13 +3491,13 @@
         if (raw.kind === 'workout') {
           const plan = normalizeWorkout(raw);
           saveCurrentWorkout(); workoutLoadGeneration++; activePackWorkout = null;
-          setWorkoutPlan(plan); workoutSelectionPending = false; loaded.push('workout');
+          myWorkoutsOpen = false; setWorkoutPlan(plan); workoutSelectionPending = false; loaded.push('workout');
         } else if (raw.kind === 'circuit') {
           const p = normalizeCircuit(raw); circuitPlan = { name: p.name, segments: p.segments }; cfg.circuit.prep = p.prep; cfg.circuit.rounds = p.rounds; if (p.theme) circuitTheme = p.theme; loaded.push('circuit');
         }
       } else {
         const split = splitLegacy(raw);
-        if (split.workout) { saveCurrentWorkout(); workoutLoadGeneration++; activePackWorkout = null; setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
+        if (split.workout) { saveCurrentWorkout(); workoutLoadGeneration++; activePackWorkout = null; myWorkoutsOpen = false; setWorkoutPlan(Object.assign({ layout: 'simple' }, split.workout)); workoutSelectionPending = false; loaded.push('workout'); }
         if (split.circuit) { circuitPlan = { name: split.circuit.name, segments: split.circuit.segments }; cfg.circuit.prep = split.circuit.prep; cfg.circuit.rounds = split.circuit.rounds; if (split.circuit.theme) circuitTheme = split.circuit.theme; loaded.push('circuit'); }
       }
       if (!loaded.length) throw new Error('No usable exercises or timed circuit stations were found.');
@@ -3489,7 +3512,8 @@
       const message = err.message || 'Could not load that file.';
       setPlanMsg(pendingLoadKind, message, true);
       setCatalogMsg(message, true);
-      $('#wPlanLibraryCard').open = true;
+      if (myWorkoutsOpen) setMyWorkoutsMsg(message, true);
+      else $('#wPlanLibraryCard').open = true;
     }
   }
 
@@ -3514,8 +3538,9 @@
       newWorkoutTimer = setTimeout(disarmNewWorkout, 3000);
       return;
     }
-    try { saveCurrentWorkout(); } catch (err) { setPlanMsg('workout', err.message, true); return; }
+    try { saveCurrentWorkout(); } catch (err) { setMyWorkoutsMsg(err.message, true); return; }
     disarmNewWorkout();
+    myWorkoutsOpen = false;
     workoutLoadGeneration++;
     activePackWorkout = null;
     if (structured) setWorkoutPlan(defaultStructuredWorkout());
@@ -3533,6 +3558,7 @@
     saveCurrentWorkout();
     workoutLoadGeneration++;
     activePackWorkout = source;
+    myWorkoutsOpen = false;
     setWorkoutPlan(plan);
     workoutSelectionPending = false;
     editingStructuredWorkout = false;
@@ -3716,15 +3742,61 @@
       const raw = store.get(MY_WORKOUT_KEY, null);
       if (!raw) return;
       applyBuiltInWorkout(normalizeWorkout(raw));
-      $('#wMyWorkouts').open = true;
       focusCatalogTarget('#wName');
-    } catch (err) { setCatalogMsg(err.message, true); }
+    } catch (err) { setMyWorkoutsMsg(err.message, true); }
+  }
+
+  function setMyWorkoutsMsg(message, isError = false) {
+    $('#myWorkoutsMsg').textContent = message;
+    $('#myWorkoutsMsg').classList.toggle('err', isError);
+  }
+
+  function renderWorkoutSection() {
+    const personal = myWorkoutsOpen || (!workoutSelectionPending && !workoutSource(activePackWorkout));
+    $('#panel-my-workouts').classList.toggle('hidden', S.mode !== 'workout' || !myWorkoutsOpen);
+    $('#panel-workout').classList.toggle('hidden', S.mode !== 'workout' || myWorkoutsOpen);
+    $('#wPlanLibraryCard').classList.toggle('hidden', personal);
+    $('#wPersonalActions').classList.toggle('hidden', !personal || myWorkoutsOpen || workoutSelectionPending);
+    $('#myWorkoutsNav').setAttribute('aria-checked', String(S.mode === 'workout' && personal));
+    $('#modes button[data-mode="workout"]').setAttribute('aria-selected', String(S.mode === 'workout' && !personal));
+    if (S.mode === 'workout') {
+      $('#modeMoreBtn').classList.toggle('active', personal);
+      $('#modeMoreBtn').setAttribute('aria-label', personal ? 'More tools, My workouts selected' : 'More tools');
+    }
+  }
+
+  function openMyWorkouts() {
+    if (S.screen !== 'home') return;
+    try {
+      saveCurrentWorkout();
+      workoutLoadGeneration++;
+      myWorkoutsOpen = true;
+      setTimerMode('workout');
+      setMyWorkoutsMsg('');
+      $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));
+      focusCatalogTarget('#myWorkoutsTitle');
+    } catch (err) { setPlanMsg('workout', err.message, true); }
+  }
+
+  function openBuiltSimpleWorkouts() {
+    try {
+      saveCurrentWorkout();
+      myWorkoutsOpen = false;
+      if (!workoutSelectionPending && !workoutSource(activePackWorkout)) clearWorkoutSelection();
+      setTimerMode('workout');
+      renderWorkoutExercises();
+      renderWorkoutCatalogView();
+      focusCatalogTarget(workoutSelectionPending ? '#wManageWorkouts' : '#wStart');
+    } catch (err) {
+      if (myWorkoutsOpen) setMyWorkoutsMsg(err.message, true);
+      else setPlanMsg('workout', err.message, true);
+    }
   }
 
   function renderWorkoutOwnership() {
     const source = workoutSource(activePackWorkout);
     const owned = !!source && !workoutSelectionPending;
-    if (owned) $('#wMyWorkouts').open = false;
+    renderWorkoutSection();
     $('#wSave').disabled = workoutSelectionPending || owned;
     $('#wSave').classList.toggle('hidden', workoutSelectionPending || owned);
     $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));
@@ -3739,7 +3811,6 @@
       context = (track ? track.name : source.starter.trackId) + ' · ' + (source.starter.workoutId === 'optional-cardio-burpees' ? 'Optional cardio' : 'Starter Pack');
     }
     $('#wWorkoutContext').textContent = context;
-    $('#wMyWorkoutStatus').textContent = owned ? 'Create or load your own workout here. Track workout edits save automatically to their pack.' : 'Create a basic or structured workout, or load your own file.';
   }
 
   function importWorkoutPack(raw) {
@@ -3752,6 +3823,8 @@
     if (!existing) writeImportedPacks([...importedPacks, { pack, edits: {} }]);
     const changed = selectedTrackId !== pack.track.id || selectedPackEditions[pack.track.id] !== pack.id || (!workoutSelectionPending && !workoutSource(activePackWorkout));
     if (changed) clearWorkoutSelection();
+    myWorkoutsOpen = false;
+    renderWorkoutSection();
     selectedTrackId = pack.track.id;
     selectedPackEditions[pack.track.id] = pack.id;
     store.set(TRACK_KEY, selectedTrackId);
@@ -3875,6 +3948,8 @@
       const previousTrack = availableWorkoutCatalog().tracks.find(item => item.id === selectedTrackId);
       const previousPack = previousTrack && selectedTrackPack(previousTrack);
       if (selectedTrackId !== trackId || (previousPack ? previousPack.pack.id : '') !== packId || (!workoutSelectionPending && !workoutSource(activePackWorkout))) clearWorkoutSelection();
+      myWorkoutsOpen = false;
+      renderWorkoutSection();
       selectedTrackId = trackId;
       selectedPackEditions[trackId] = packId;
       store.set(TRACK_KEY, selectedTrackId);
@@ -4252,6 +4327,9 @@
   $('#wNewBasic').addEventListener('click', () => createWorkout('basic'));
   $('#wNewStructured').addEventListener('click', () => createWorkout('structured'));
   $('#wResumeMyWorkout').addEventListener('click', resumeMyWorkout);
+  $('#myWorkoutsNav').addEventListener('click', openMyWorkouts);
+  $('#wBackToMyWorkouts').addEventListener('click', openMyWorkouts);
+  $('#myWorkoutsBack').addEventListener('click', openBuiltSimpleWorkouts);
   $('#wRestoreOriginal').addEventListener('click', () => {
     $('#wRestoreConfirm').classList.remove('hidden');
     $('#wRestoreOriginal').classList.add('hidden');

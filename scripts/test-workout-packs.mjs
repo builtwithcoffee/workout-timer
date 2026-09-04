@@ -12,7 +12,7 @@ const constants = ['FORMAT', 'PLAN_VERSION', 'TRACK_KEY', 'PACK_FORMAT', 'PACKS_
   .map(name => html.match(new RegExp(`  const ${name} = [^\\n]+`))[0]).join('\n');
 const helpers = html.slice(html.indexOf('  const defaultTheme ='), html.indexOf('  function textOn('));
 const packSource = html.split('  /* ---------- imported workout packs ---------- */')[1].split('  /* ---------- end imported workout packs ---------- */')[0];
-const functions = ['validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
+const functions = ['validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'setTimerMode', 'closeModeMenu', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
 
 function fixture(saved = new Map()) {
   // Use the production handlers and renderer with a minimal DOM/storage boundary.
@@ -20,7 +20,7 @@ function fixture(saved = new Map()) {
     const WORK_SWATCHES=['#f04e23'], REST_SWATCHES=['#1668c4'];
     const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
     class Element {
-      constructor(tag='div') { this.tag=tag; this.children=[]; this.handlers={}; this.classList={add(){},remove(){},toggle(){}}; }
+      constructor(tag='div') { this.tag=tag; this.children=[]; this.handlers={}; const classes=new Set();this.classList={add(name){classes.add(name);},remove(name){classes.delete(name);},contains(name){return classes.has(name);},toggle(name,on){const active=on===undefined?!classes.has(name):on;if(active)classes.add(name);else classes.delete(name);return active;}}; }
       appendChild(child) { this.children.push(child); return child; }
       setAttribute(name,value) { this[name]=value; }
       removeAttribute(name) { delete this[name]; }
@@ -35,25 +35,27 @@ function fixture(saved = new Map()) {
     }
     const elements=new Map(), $=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
     const document={createElement:tag=>new Element(tag),body:new Element('body')};
-    const S={screen:'home'};
+    const S={screen:'home',mode:'workout'};
+    const $$=()=>[];
     const Option=function(text,value){this.textContent=text;this.value=value;};
     let quotaFailure=false, fetchFailure=false, confirms=true, fetches=0, fetchHandler=null;
     const localStorage={setItem(k,v){if(quotaFailure)throw new Error('QuotaExceeded');saved.set(k,v);}};
     const store={get(k,f){try{return saved.has(k)?JSON.parse(saved.get(k)):f;}catch{return f;}},set(k,v){localStorage.setItem(k,JSON.stringify(v));},remove(k){saved.delete(k);}};
     const window={matchMedia:()=>({matches:false}),scrollTo(){},confirm:()=>confirms};
     const cfg={workout:{prep:5},circuit:{prep:5,rounds:1}};
+    let myWorkoutsOpen=false;
     let newWorkoutArmed='',newWorkoutTimer=0;
     let starterWorkouts=readStarterWorkouts(),workoutLoadGeneration=0;
     let importedPacks=readImportedPacks(), activePackWorkout=null, selectedPackEditions=store.get(PACK_EDITIONS_KEY,{});
     let workoutCatalog=null,selectedTrackId=store.get(TRACK_KEY,''),workoutSelectionPending=true,editingStructuredWorkout=false,pendingLoadKind='workout';
     let workoutPlan,workoutTheme={work:'#f04e23',rest:'#1668c4'},circuitPlan={name:'Circuit',segments:[{label:'Station',phase:'work',seconds:30}]},circuitTheme={...workoutTheme};
-    const renderSwatches=()=>{},renderWorkoutExercises=()=>{},renderCircuitTiles=()=>{},renderFields=()=>{},renderSummaries=()=>{},selectMode=()=>{},focusCatalogTarget=()=>{};
+    const renderSwatches=()=>{},renderWorkoutExercises=()=>renderWorkoutSection(),renderCircuitTiles=()=>{},renderFields=()=>{},renderSummaries=()=>{},selectMode=()=>{},focusCatalogTarget=()=>{};
     const messages=[];
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
-    return {createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
-      get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
+    return {openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+      get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
       restoreCurrent:restorePlans,
@@ -315,6 +317,43 @@ await cardio.loadCatalogWorkout(catalog.optional[0],button());assert.equal(cardi
 cardio.selectWorkoutPack('momentum','');cardio.setOffline();
 await cardio.loadCatalogWorkout(catalog.optional[0],button());assert.equal(cardio.plan.name,'My optional cardio');
 cardio.restoreOriginalWorkout();assert.equal(cardio.plan.name,fileMap.get(catalog.optional[0].file).name);
+
+// Personal management is a separate screen, and personal editing never shows the pack chooser.
+const screens=fixture();screens.setCatalog(catalog);screens.importWorkoutPack(raw);
+const screenTrack=()=>screens.availableWorkoutCatalog().tracks.find(t=>t.id==='forge');
+await screens.loadCatalogWorkout(screens.trackWorkoutPlans(screenTrack())[3],button());
+screens.plan.name='My edited Forge day';screens.persistPlans();
+screens.openMyWorkouts();
+assert.equal(screens.personalScreen,true);
+assert.equal(screens.elements.get('#panel-workout').classList.contains('hidden'),true);
+assert.equal(screens.elements.get('#panel-my-workouts').classList.contains('hidden'),false);
+assert.equal(screens.elements.get('#wPlanLibraryCard').classList.contains('hidden'),true);
+screens.openBuiltSimpleWorkouts();
+assert.equal(screens.pending,false,'Opening personal management and returning preserves the pack day');
+assert.equal(screens.plan.name,'My edited Forge day');
+assert.equal(screens.elements.get('#panel-my-workouts').classList.contains('hidden'),true);
+assert.equal(screens.elements.get('#wPlanLibraryCard').classList.contains('hidden'),false);
+screens.openMyWorkouts();screens.createWorkout('structured');screens.createWorkout('structured');
+assert.equal(screens.personalScreen,false);
+assert.equal(screens.elements.get('#wPlanLibraryCard').classList.contains('hidden'),true);
+assert.equal(screens.elements.get('#wPersonalActions').classList.contains('hidden'),false);
+screens.openBuiltSimpleWorkouts();
+assert.equal(screens.pending,true,'Returning from a personal workout asks for a BuiltSimple day');
+assert.equal(screens.elements.get('#wPersonalActions').classList.contains('hidden'),true);
+screens.openMyWorkouts();screens.resumeMyWorkout();assert.equal(screens.plan.name,'Structured Workout');
+screens.openMyWorkouts();screens.setTimerMode('circuit');
+assert.equal(screens.elements.get('#panel-my-workouts').classList.contains('hidden'),true);
+assert.equal(screens.elements.get('#panel-workout').classList.contains('hidden'),true);
+screens.openBuiltSimpleWorkouts();screens.openMyWorkouts();
+await upload(screens,next);
+assert.equal(screens.personalScreen,false,'A pack selected through the personal picker routes to BuiltSimple');
+assert.equal(screens.elements.get('#wPlanLibraryCard').classList.contains('hidden'),false);
+screens.openMyWorkouts();
+await screens.loadPlanFile({target:{files:[{name:'bad.json',size:4,text:async()=>'{bad'}]}});
+assert.ok(screens.elements.get('#myWorkoutsMsg').textContent,'Personal import errors appear on the personal screen');
+assert.equal(screens.personalScreen,true);
+const workoutMarkup=html.split('<section class="panel" id="panel-workout">')[1].split('<!-- PERSONAL WORKOUTS')[0];
+assert.doesNotMatch(workoutMarkup,/id="(?:wLoad|wNewBasic|wNewStructured|wResumeMyWorkout)"/,'Personal management controls are outside the BuiltSimple panel');
 
 // A slow starter download cannot load a day after a track switch.
 const racing=fixture();racing.setCatalog(catalog);racing.selectWorkoutPack('momentum','');

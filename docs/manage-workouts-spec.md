@@ -1,6 +1,6 @@
 # Manage workouts
 
-Status: implemented in local app release 1.0.65; actual installed-iPhone smoke test remains before community rollout.
+Status: implemented in local app release 1.0.66; actual installed-iPhone smoke test remains before community rollout.
 
 ## Outcome
 
@@ -93,4 +93,4 @@ Recommended next step: try importing and removing a second test week on the inst
 
 BuiltSimple remains the primary workflow. Day edits save automatically to their original track/week. Edit workout exposes a confirmed Restore original action that replaces only that day’s edited copy. Starter days use the same behavior with a retained local original after first load. Opening and dismissing management alone does not clear the day. The workout preview identifies its track and pack.
 
-My workouts is a quiet, separate disclosure containing the existing basic/structured creation and individual-file controls, plus Resume my workout for the last personal draft. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
+My workouts is a separate screen reached through More → My workouts, containing the existing basic/structured creation and individual-file loading, plus Resume my workout for the last personal draft. Personal editing hides the BuiltSimple track/day chooser and exposes Save workout file and Back to My workouts. The Workout tab and Back to BuiltSimple workouts return to the primary flow. No personal creation/loading controls appear beside Manage workouts. Do not build a personal library or duplicate pack days into it. Existing unassociated saved workouts remain accessible as personal drafts. Colours and start delay remain under Workout options; History is independently accessible.
