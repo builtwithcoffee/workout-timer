@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0sNR8THeWYX+J8wHreWxV0j2wwIumY1rKbrjjROLz+c='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MEdtDfsqDFprbemGifNxBC5ksW0zuffk5z/nrqT69sE='; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Workout Timer</title>
@@ -635,7 +635,7 @@
         <details class="card workout-tools-card" id="wWorkoutTools">
           <summary><span class="mono">Workout options</span></summary>
           <div class="workout-tools-body">
-            <div class="card custom-workout-card workout-setup-card">
+            <div class="card custom-workout-card workout-setup-card" id="wStartDelay">
               <div class="field">
                 <span class="mono">Workout start delay</span>
                 <div class="chips" data-field="workout.prep" data-fmt="sec">
@@ -975,7 +975,7 @@
   const MODE_WORK = WORK_SWATCHES[0];
   const MODE_REST = REST_SWATCHES[0];
   const PREP_BG = '#15181a';
-  const APP_VERSION = '1.0.73';
+  const APP_VERSION = '1.0.74';
   const FORMAT = 'workout-timer-plan';
   const PLAN_VERSION = 7;
   const TRACK_KEY = 'workoutTimerTrackId';
@@ -2179,9 +2179,14 @@
     return items;
   }
 
+  function workoutStartDelay() {
+    return workoutSource(activePackWorkout) ? 5 : cfg.workout.prep;
+  }
+
   function buildWorkout() {
     const items = [];
-    if (cfg.workout.prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: cfg.workout.prep, meta: 'STARTING',
+    const prep = workoutStartDelay();
+    if (prep > 0) items.push({ label: 'Get ready', phase: 'prep', seconds: prep, meta: 'STARTING',
       blockIndex: workoutPlan.layout === 'blocks' ? 1 : 0, blockCount: workoutPlan.layout === 'blocks' ? workoutPlan.blocks.length : 0 });
     if (workoutPlan.layout === 'blocks') {
       const addExerciseSet = (block, blockIndex, exercise, set, sets, round, rounds, targetOrSeconds, restSeconds, addedWeight, weightUnit, minute, minutes) => {
@@ -3383,9 +3388,10 @@
     if (myWorkoutsOpen) return;
     if (workoutSelectionPending) return setPlanMsg('workout', 'Choose or create a workout before starting.', true);
     try {
-      assertWorkoutQueueBudget(workoutPlan, cfg.workout.prep);
+      assertWorkoutQueueBudget(workoutPlan, workoutStartDelay());
       primeAudio();
       S.sessionPlan = JSON.parse(JSON.stringify(workoutFile()));
+      S.sessionPlan.prepSeconds = workoutStartDelay();
       S.sessionStartedAt = new Date().toISOString(); S.sessionStartedMs = Date.now();
       S.sessionBlockTimes = {}; S.sessionBlockProgress = {}; S.sessionSkippedBlocks = {}; S.sessionEarlyEndedBlocks = {}; S.pendingSession = null; S.sessionSetResults = {}; S.sessionAmrapResults = {}; S.restLogKey = null;
       S.sessionUnit = store.get('workoutTimerWeightUnit', 'lb') === 'kg' ? 'kg' : 'lb';
@@ -3816,6 +3822,7 @@
     const source = workoutSource(activePackWorkout);
     const owned = !!source && !workoutSelectionPending;
     renderWorkoutSection();
+    $('#wStartDelay').classList.toggle('hidden', owned);
     $('#wSave').disabled = workoutSelectionPending || owned;
     $('#wSave').classList.toggle('hidden', workoutSelectionPending || owned);
     $('#wResumeMyWorkout').classList.toggle('hidden', !store.get(MY_WORKOUT_KEY, null));

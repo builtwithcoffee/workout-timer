@@ -12,7 +12,7 @@ const constants = ['FORMAT', 'PLAN_VERSION', 'TRACK_KEY', 'PACK_FORMAT', 'PACKS_
   .map(name => html.match(new RegExp(`  const ${name} = [^\\n]+`))[0]).join('\n');
 const helpers = html.slice(html.indexOf('  const defaultTheme ='), html.indexOf('  function textOn('));
 const packSource = html.split('  /* ---------- imported workout packs ---------- */')[1].split('  /* ---------- end imported workout packs ---------- */')[0];
-const functions = ['setWorkoutEditing', 'validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'setTimerMode', 'closeModeMenu', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
+const functions = ['workoutStartDelay', 'setWorkoutEditing', 'validateBasics', 'estimateWorkoutQueue', 'assertWorkoutQueueBudget', 'normalizeWorkout', 'normalizeCircuit', 'splitLegacy', 'setWorkoutPlan', 'workoutFile', 'circuitFile', 'persistPlans', 'restorePlans', 'createWorkout', 'disarmNewWorkout', 'defaultWorkout', 'defaultStructuredWorkout', 'setTimerMode', 'closeModeMenu', 'prepareStructuredForEditing', 'loadPlanFile', 'applyBuiltInWorkout', 'normalizeWorkoutCatalog', 'loadCatalogWorkout', 'addCatalogText', 'makeDayRow', 'renderTrackChooser', 'renderTrackDays', 'renderWorkoutCatalogView', 'renderWorkoutCatalog'].map(extract).join('\n');
 
 function fixture(saved = new Map()) {
   // Use the production handlers and renderer with a minimal DOM/storage boundary.
@@ -55,7 +55,7 @@ function fixture(saved = new Map()) {
     const setPlanMsg=(kind,text,error)=>messages.push({text,error});
     const setCatalogMsg=(text,error)=>messages.push({text,error});
     const fetchSmallJson=async file=>{fetches++;if(fetchFailure)throw new Error('offline');if(fetchHandler)return fetchHandler(file);throw new Error('Unexpected network request');};
-    return {setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
+    return {workoutStartDelay,setWorkoutEditing,openMyWorkouts,openBuiltSimpleWorkouts,renderWorkoutSection,setTimerMode,createWorkout,restoreOriginalWorkout,resumeMyWorkout,renderWorkoutOwnership,clearWorkoutSelection,saveCurrentWorkout,openWorkoutManager,closeWorkoutManager,renderWorkoutManager,selectWorkoutPack,loadManagerPack,requestPackRemoval,cancelPackRemoval,setManagerBusy,normalizeWorkoutPack,importWorkoutPack,readImportedPacks,availableWorkoutCatalog,trackWorkoutPlans,selectedTrackPack,removeImportedPack,loadPlanFile,loadCatalogWorkout,renderWorkoutCatalog,renderWorkoutCatalogView,applyBuiltInWorkout,prepareStructuredForEditing,persistPlans,workoutFile,saved,elements,messages,
       get inlinePicker(){return workoutSelectionInline;},get editing(){return editingStructuredWorkout;},get personalScreen(){return myWorkoutsOpen;},get pending(){return workoutSelectionPending;},get starters(){return starterWorkouts;},get packs(){return importedPacks;},get plan(){return workoutPlan;},get active(){return activePackWorkout;},get track(){return selectedTrackId;},get fetches(){return fetches;},
       setFetch(fn){fetchHandler=fn;},setEditing(value){editingStructuredWorkout=value;},setCatalog(raw){workoutCatalog=normalizeWorkoutCatalog(raw);},setQuota(value){quotaFailure=value;},setOffline(){fetchFailure=true;},setConfirm(value){confirms=value;},
       selectEdition(track,id){selectedTrackId=track;selectedPackEditions[track]=id;},
@@ -431,5 +431,25 @@ editionFlow.walk(editionFlow.elements.get('#wPlanLibrary')).find(el=>el.classNam
 assert.equal(editionFlow.inlinePicker,false,'Change track still enters centered selection');
 editionFlow.selectWorkoutPack('momentum','');editionFlow.selectWorkoutPack('momentum',momentum.id,false,true);
 assert.equal(editionFlow.inlinePicker,false,'A dropdown already centered stays centered');
+
+// Pack/starter countdowns ignore supplied or previously saved delay settings.
+const delays=fixture();delays.setCatalog(catalog);
+const delayedPack=structuredClone(raw);delayedPack.id='delay-check';
+delayedPack.workouts.forEach(item=>item.workout.prepSeconds=30);
+delays.importWorkoutPack(delayedPack);
+await delays.loadCatalogWorkout(delays.trackWorkoutPlans(delays.availableWorkoutCatalog().tracks.find(t=>t.id==='forge'))[3],button());
+assert.equal(delays.workoutStartDelay(),5);delays.renderWorkoutOwnership();
+assert.equal(delays.elements.get('#wStartDelay').classList.contains('hidden'),true);
+assert.equal(delays.packs[0].pack.workouts[3].workout.prepSeconds,30,'Pack source stays unchanged');
+delays.persistPlans();const delaysReload=fixture(new Map(delays.saved));delaysReload.restoreCurrent();
+assert.equal(delaysReload.workoutStartDelay(),5);
+const noDelayStarter=structuredClone(initial);noDelayStarter.prepSeconds=0;
+delays.setFetch(async()=>noDelayStarter);delays.selectWorkoutPack('momentum','');
+await delays.loadCatalogWorkout(catalog.tracks[0].plans[0],button());
+assert.equal(delays.workoutStartDelay(),5);
+const customDelay=structuredClone(initial);customDelay.prepSeconds=15;
+await upload(delays,customDelay);delays.renderWorkoutOwnership();
+assert.equal(delays.workoutStartDelay(),15,'Custom workouts retain their chosen delay');
+assert.equal(delays.elements.get('#wStartDelay').classList.contains('hidden'),false);
 
 console.log('Verified pack management, track/week selection clearing, starter/imported edit persistence and restore, personal drafts/creation, optional cardio, offline/reload behavior, loading races, validation and failed-write protection.');
